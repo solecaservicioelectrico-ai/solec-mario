@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SOLEC · Registro de Trabajo</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --negro: #0d0d0d;
+    --rojo: #cc1a1a;
+    --amarillo: #f5c800;
+    --bg: #f2f1ee;
+    --surface: #ffffff;
+    --surface2: #f7f6f3;
+    --border: #e0ddd6;
+    --text: #1a1a1a;
+    --text2: #777068;
+    --ok: #1a7a3c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--negro);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+  }
+
+  .logo-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--rojo);
+    border: 3px solid var(--negro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 0 0 2px var(--amarillo);
+  }
+
+  .logo-bolt {
+    font-size: 22px;
+    filter: drop-shadow(0 0 4px rgba(245,200,0,0.6));
+  }
+
+  .logo-text h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+
+  .logo-text h1 span { color: var(--amarillo); }
+
+  .logo-text p {
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--rojo) 0%, var(--amarillo) 100%);
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    background: var(--negro);
+    padding: 0 16px 12px;
+  }
+
+  .progress-steps {
+    display: flex;
+    gap: 4px;
+  }
+
+  .progress-step {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+
+  .progress-step.done { background: var(--amarillo); }
+  .progress-step.active { background: var(--rojo); }
+
+  /* FORM BODY */
+  .form-body {
+    padding: 16px;
+    max-width: 520px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* SECTION */
+  .section {
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: visible;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .section-header {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .section-header {
+    background: var(--negro);
+    padding: 11px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-num {
+    width: 24px;
+    height: 24px;
+    background: var(--amarillo);
+    border-radius: 50%;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--negro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .section-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* LABELS */
+  label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* INPUTS */
+  input[type=text], input[type=date], input[type=time], select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--rojo);
+    background: white;
+  }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* EDIFICIO BUSCADOR */
+  .search-wrap { position: relative; }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  .search-wrap input { padding-left: 42px; }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: white;
+    border: 2px solid var(--rojo);
+    border-radius: 10px;
+    z-index: 100;
+    max-height: 240px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .search-results.show { display: block; }
+
+  .sr-item {
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  .sr-item:hover { background: #fff8f0; }
+  .sr-item:last-child { border-bottom: none; }
+
+  .sr-item strong { font-size: 14px; font-weight: 600; display: block; }
+  .sr-item span { font-size: 11px; color: var(--text2); }
+
+  .edificio-selected {
+    background: #fff8e6;
+    border: 2px solid var(--amarillo);
+    border-radius: 8px;
+    padding: 11px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    cursor: pointer;
+  }
+
+  .edificio-selected strong { font-size: 15px; font-weight: 700; display: block; }
+  .edificio-selected span { font-size: 11px; color: var(--text2); }
+
+  .cambiar-btn {
+    background: none;
+    border: none;
+    color: var(--rojo);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Barlow', sans-serif;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 2px 0 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* TIPO DE VISITA */
+  .tipo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .tipo-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    color: var(--text2);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    line-height: 1.3;
+  }
+
+  .tipo-btn .tipo-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+
+  .tipo-btn.active {
+    border-color: var(--rojo);
+    color: var(--rojo);
+    background: #fff2f2;
+  }
+
+  /* ITEMS */
+  .items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .item-name { flex: 1; font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .item-unit { font-size: 11px; color: var(--text2); font-weight: 600; min-width: 28px; text-align: center; }
+
+  .qty-ctrl { display: flex; align-items: center; gap: 6px; }
+
+  .qty-btn {
+    width: 30px; height: 30px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow', sans-serif;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+    transition: border-color 0.1s;
+  }
+
+  .qty-btn:active { border-color: var(--rojo); }
+
+  .qty-val {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--rojo);
+    min-width: 26px;
+    text-align: center;
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 2px 2px;
+    line-height: 1;
+    transition: color 0.1s;
+  }
+
+  .remove-btn:active { color: var(--rojo); }
+
+  .empty-msg {
+    text-align: center;
+    color: var(--text2);
+    font-size: 13px;
+    padding: 12px 0 4px;
+    font-style: italic;
+  }
+
+  /* ADD ITEM SEARCH */
+  .add-wrap { position: relative; }
+  .add-wrap input { padding-left: 42px; font-size: 15px; }
+
+  .add-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: white;
+    border: 2px solid #4a90d9;
+    border-radius: 10px;
+    z-index: 100;
+    max-height: 220px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .add-results.show { display: block; }
+
+  .ar-item {
+    padding: 11px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.1s;
+  }
+
+  .ar-item:hover { background: #f0f6ff; }
+  .ar-item:last-child { border-bottom: none; }
+  .ar-item span { font-size: 11px; color: #4a90d9; font-weight: 700; text-transform: uppercase; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); }
+
+  /* LIBRE TOGGLE */
+  .libre-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 4px 0;
+    user-select: none;
+  }
+
+  .toggle-sw {
+    width: 40px; height: 22px;
+    background: var(--border);
+    border-radius: 11px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle-sw.on { background: var(--rojo); }
+
+  .toggle-knob {
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px; left: 2px;
+    transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .toggle-sw.on .toggle-knob { left: 20px; }
+
+  .libre-label { font-size: 13px; color: var(--text2); font-weight: 500; }
+
+  textarea {
+    resize: none;
+    height: 90px;
+    font-size: 15px;
+  }
+
+  /* ARCHIVOS */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 22px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--surface2);
+  }
+
+  .upload-zone:active { border-color: var(--rojo); background: #fff2f2; }
+
+  .upload-zone .up-icon { font-size: 36px; }
+  .upload-zone p { color: var(--text2); font-size: 13px; margin-top: 6px; font-weight: 500; }
+
+  .file-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .file-chip {
+    background: #e8f4fd;
+    border: 1px solid #b3d9f5;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a5a8a;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* SUBMIT */
+  .submit-btn {
+    width: 100%;
+    background: var(--rojo);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    box-shadow: 0 4px 16px rgba(204,26,26,0.3);
+  }
+
+  .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+  .section-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .badge-struct { background: rgba(74,144,217,0.2); color: #4a90d9; }
+  .badge-libre { background: rgba(245,200,0,0.2); color: var(--amarillo); border: 1px solid var(--amarillo); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-mark">
+      <span class="logo-bolt">⚡</span>
+    </div>
+    <div class="logo-text">
+      <h1>SOL<span>EC</span>®</h1>
+      <p>Soluciones Eléctricas · Registro de trabajo</p>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-steps">
+      <div class="progress-step active" id="ps1"></div>
+      <div class="progress-step" id="ps2"></div>
+      <div class="progress-step" id="ps3"></div>
+      <div class="progress-step" id="ps4"></div>
+      <div class="progress-step" id="ps5"></div>
+      <div class="progress-step" id="ps6"></div>
+    </div>
+  </div>
+  <div class="header-bar"></div>
+</div>
+
+<div class="form-body">
+
+  <!-- 1. FECHA Y HORA -->
+  <div class="section" id="sec1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">Fecha y Horario</div>
+    </div>
+    <div class="section-body">
+      <div>
+        <label>Fecha del trabajo</label>
+        <input type="date" id="fecha" onchange="updateProgress()" />
+      </div>
+      <div class="row2">
+        <div>
+          <label>Hora inicio</label>
+          <input type="time" id="hora-inicio" onchange="updateProgress()" />
+        </div>
+        <div>
+          <label>Hora fin</label>
+          <input type="time" id="hora-fin" onchange="updateProgress()" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. EDIFICIO -->
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">Edificio</div>
+    </div>
+    <div class="section-body">
+      <div id="edificio-search-wrap">
+        <label>Buscar por nombre o dirección</label>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="edificio-input" placeholder="Ej: Iridio, Jujuy, Belgrano..." autocomplete="off" oninput="searchEdificio()" />
+          <div class="search-results" id="edificio-results"></div>
+        </div>
+      </div>
+      <div id="edificio-chosen" style="display:none">
+        <label>Edificio seleccionado</label>
+        <div class="edificio-selected" onclick="clearEdificio()">
+          <div>
+            <strong id="ed-name"></strong>
+            <span id="ed-info"></span>
+          </div>
+          <button class="cambiar-btn">✕ Cambiar</button>
+        </div>
+        <button onclick="abrirMaps()" style="margin-top:10px;width:100%;background:#1a73e8;color:white;border:none;border-radius:8px;padding:12px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">🗺️ Navegar hasta el edificio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TIPO DE VISITA -->
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Tipo de Visita</div>
+    </div>
+    <div class="section-body">
+      <div class="tipo-grid">
+        <button class="tipo-btn" id="tipo-prev" onclick="selectTipo(this,'Preventivo/Abono')">
+          <span class="tipo-icon">📋</span>Preventivo · Abono
+        </button>
+        <button class="tipo-btn" id="tipo-service" onclick="selectTipo(this,'Service')">
+          <span class="tipo-icon">🔧</span>Service
+        </button>
+        <button class="tipo-btn" id="tipo-urgencia" onclick="selectTipo(this,'Urgencia')">
+          <span class="tipo-icon">🚨</span>Urgencia
+        </button>
+        <button class="tipo-btn" id="tipo-otro" onclick="selectTipo(this,'Otro')">
+          <span class="tipo-icon">📝</span>Otro
+        </button>
+        <button class="tipo-btn" id="tipo-extras" onclick="selectTipo(this,'Horas Extra')">
+          <span class="tipo-icon">⏱️</span>Horas Extra
+        </button>
+      </div>
+      <div id="otro-wrap" style="display:none;margin-top:8px">
+        <input type="text" id="otro-desc" placeholder="Describí el tipo de visita o motivo..." />
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. TRABAJOS -->
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="preventivo-module" style="display:none">
+
+    <!-- CAT 1: ILUMINACIÓN -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">💡</div>
+        <div class="section-title">Tomas e Iluminación</div>
+        <div class="section-badge badge-struct" style="margin-left:auto;font-size:10px">SOLO LO QUE FALLA</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Lámparas quemadas, plafones rotos, tubos, dicroicas, tiras LED, paneles, tortugas. Tomacorrientes rotos o sin tensión. Solo lo que falla.</p>
+        <div class="items-list" id="ilum-list"><div class="empty-msg">Sin novedades en iluminación</div></div>
+        <div class="add-wrap">
+          <span class="search-icon">＋</span>
+          <input type="text" id="ilum-search" placeholder="Ej: lámpara quemada piso 3, tomacorriente roto hall..." autocomplete="off" oninput="searchPrev('ilum')" />
+          <div class="add-results" id="ilum-results"></div>
+        </div>
+        <textarea id="ilum-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('ilum-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de iluminación</p>
+          <input type="file" id="ilum-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'ilum-chips')" />
+        </div>
+        <div class="file-chips" id="ilum-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT 2: CONTROL DE LUZ -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">🔌</div>
+        <div class="section-title">Sistemas de Control de Luz</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Pulsadores, automáticos de escalera/pasillo, temporizadores, fotocélulas. Solo lo que falló.</p>
+        <div class="items-list" id="ctrl-list"><div class="empty-msg">Sin novedades en control de luz</div></div>
+        <div class="add-wrap">
+          <span class="search-icon">＋</span>
+          <input type="text" id="ctrl-search" placeholder="Ej: pulsador roto piso 5, fotocélula sin respuesta..." autocomplete="off" oninput="searchPrev('ctrl')" />
+          <div class="add-results" id="ctrl-results"></div>
+        </div>
+        <textarea id="ctrl-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('ctrl-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de control de luz</p>
+          <input type="file" id="ctrl-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'ctrl-chips')" />
+        </div>
+        <div class="file-chips" id="ctrl-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT 3: LUCES DE EMERGENCIA -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">🚨</div>
+        <div class="section-title">Luces de Emergencia</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Solo las que no arrancaron o se apagaron antes de 35-40 min. Si todas funcionaron dejá vacío.</p>
+        <div class="items-list" id="emerg-list"><div class="empty-msg">Todas las luces de emergencia OK</div></div>
+        <div class="add-wrap">
+          <span class="search-icon">＋</span>
+          <input type="text" id="emerg-search" placeholder="Ej: no arrancó piso 7, duró 20 min piso 2..." autocomplete="off" oninput="searchPrev('emerg')" />
+          <div class="add-results" id="emerg-results"></div>
+        </div>
+        <textarea id="emerg-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('emerg-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de emergencias</p>
+          <input type="file" id="emerg-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'emerg-chips')" />
+        </div>
+        <div class="file-chips" id="emerg-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT 4: BOMBAS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">⚙️</div>
+        <div class="section-title">Bombas</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Consumos trifásicos. Dejá vacío si el edificio no tiene bomba.</p>
+        <!-- BOMBA ANTERIOR -->
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <strong style="font-size:14px;color:var(--text2)">🔴 Bomba ANTERIOR — la que estaba al llegar</strong>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center">
+            <span style="font-size:13px;font-weight:600">¿Cuál era?</span>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700">
+              <input type="radio" name="bomba-anterior" value="1" id="ant1" style="width:18px;height:18px;accent-color:var(--rojo)" onchange="syncBombas()" />
+              Bomba 1
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700">
+              <input type="radio" name="bomba-anterior" value="2" id="ant2" style="width:18px;height:18px;accent-color:var(--rojo)" onchange="syncBombas()" />
+              Bomba 2
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div><label>Fase R (A)</label><input type="text" id="b_ant_r" placeholder="ej: 4.2" inputmode="decimal" /></div>
+            <div><label>Fase S (A)</label><input type="text" id="b_ant_s" placeholder="ej: 4.1" inputmode="decimal" /></div>
+            <div><label>Fase T (A)</label><input type="text" id="b_ant_t" placeholder="ej: 4.3" inputmode="decimal" /></div>
+          </div>
+          <input type="text" id="b_ant_obs" placeholder="Observación (ej: no funciona, ruido raro, falta fase...)" style="margin-top:8px" />
+        </div>
+
+        <!-- BOMBA SIGUIENTE -->
+        <div style="background:#f0fff6;border:1.5px solid var(--ok);border-radius:10px;padding:14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <strong style="font-size:14px;color:var(--ok)">🟢 Bomba SIGUIENTE — la que queda funcionando</strong>
+            <span id="sig-label" style="background:var(--ok);color:white;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:700;display:none"></span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div><label>Fase R (A)</label><input type="text" id="b_sig_r" placeholder="ej: 4.0" inputmode="decimal" /></div>
+            <div><label>Fase S (A)</label><input type="text" id="b_sig_s" placeholder="ej: 4.2" inputmode="decimal" /></div>
+            <div><label>Fase T (A)</label><input type="text" id="b_sig_t" placeholder="ej: 4.1" inputmode="decimal" /></div>
+          </div>
+          <input type="text" id="b_sig_obs" placeholder="Observación (ej: bomba 2 no funciona, quedó en bomba 1...)" style="margin-top:8px" />
+        </div>
+        <textarea id="bomba-obs" placeholder="Observaciones: baja tensión, falta de fase, válvula de retención, ruidos, nivel de cisterna, etc." style="margin-top:10px"></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('bomba-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de bomba</p>
+          <input type="file" id="bomba-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'bomba-chips')" />
+        </div>
+        <div class="file-chips" id="bomba-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT: CANALIZACIÓN -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">🏗️</div>
+        <div class="section-title">Canalización</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Cable, canaleta, caño, bandeja portacable, tapa ciega, caja de pase, gabinete. Solo lo que está roto, suelto o requiere atención.</p>
+        <div class="items-list" id="canal-list"><div class="empty-msg">Sin novedades en canalización</div></div>
+        <div class="add-wrap">
+          <span class="search-icon">＋</span>
+          <input type="text" id="canal-search" placeholder="Ej: canaleta suelta piso 4, caja de pase abierta..." autocomplete="off" oninput="searchPrev('canal')" />
+          <div class="add-results" id="canal-results"></div>
+        </div>
+        <textarea id="canal-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('canal-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de canalización</p>
+          <input type="file" id="canal-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'canal-chips')" />
+        </div>
+        <div class="file-chips" id="canal-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT 5: PORTERO ELÉCTRICO -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">🔔</div>
+        <div class="section-title">Portero Eléctrico</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema. Si no hay novedad dejá vacío.</p>
+        <textarea id="portero-obs" placeholder="Describí el problema reportado..."></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('portero-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de portero eléctrico</p>
+          <input type="file" id="portero-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'portero-chips')" />
+        </div>
+        <div class="file-chips" id="portero-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT 6: ANTENA COMUNITARIA -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">📡</div>
+        <div class="section-title">Antena Comunitaria</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema.</p>
+        <textarea id="antena-obs" placeholder="Describí el problema reportado..."></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('antena-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de antena comunitaria</p>
+          <input type="file" id="antena-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'antena-chips')" />
+        </div>
+        <div class="file-chips" id="antena-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT 7: CÁMARAS / CCTV -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">📷</div>
+        <div class="section-title">Cámaras / CCTV</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema.</p>
+        <textarea id="camaras-obs" placeholder="Describí el problema reportado..."></textarea>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('camaras-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de cámaras CCTV</p>
+          <input type="file" id="camaras-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'camaras-chips')" />
+        </div>
+        <div class="file-chips" id="camaras-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT 8: OBSERVACIONES GENERALES -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--rojo)">📝</div>
+        <div class="section-title">Observaciones Generales</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Cualquier anomalía, pedido del encargado, trabajo que quedó pendiente, o lo que no entró en ninguna categoría anterior.</p>
+        <textarea id="obs-generales" placeholder="Escribí libremente cualquier observación del edificio..."></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 6. ARCHIVOS -->
+  <div class="section" id="sec6">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">Fotos · Videos · Audios</div>
+    </div>
+    <div class="section-body">
+      <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="up-icon">📎</div>
+        <p>Tocá para agregar archivos<br><strong>Fotos, videos o audios</strong></p>
+        <input type="file" id="file-input" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFiles(this)" />
+      </div>
+      <div class="file-chips" id="file-chips"></div>
+    </div>
+  </div>
+
+
+  <!-- URGENCIA FUERA DE HORARIO (solo cuando tipo = Urgencia) -->
+  <div id="urgencia-horario" style="display:none">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--rojo)">🚨</div>
+        <div class="section-title">Horario de la Urgencia</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic;margin-bottom:12px">Esto define si la urgencia se cobra como ítem adicional.</p>
+        <div class="tipo-grid">
+          <button class="tipo-btn" id="urg-dentro" onclick="selectHorario(this,'dentro')">
+            <span class="tipo-icon">✅</span>Dentro del horario
+          </button>
+          <button class="tipo-btn" id="urg-fuera" onclick="selectHorario(this,'fuera')">
+            <span class="tipo-icon">🌙</span>Fuera del horario
+          </button>
+        </div>
+        <div id="urg-fuera-msg" style="display:none;margin-top:10px;background:#fce4ec;border:1px solid var(--rojo);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--rojo);font-weight:600">
+          ⚠ Urgencia fuera de horario — se cobra como ítem adicional
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HORAS EXTRA (solo cuando tipo = Horas Extra) -->
+  <div id="horas-extra-module" style="display:none">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo);color:var(--negro)">⏱️</div>
+        <div class="section-title">Horas Extra</div>
+      </div>
+      <div class="section-body">
+        <div>
+          <label>¿Dónde hiciste las horas extra?</label>
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="extra-lugar-input" placeholder="Edificio, obra o particular..." autocomplete="off" oninput="searchExtraLugar()" />
+            <div class="search-results" id="extra-lugar-results"></div>
+          </div>
+          <div id="extra-lugar-chosen" style="display:none;margin-top:8px">
+            <div style="background:#fff8e6;border:2px solid var(--amarillo);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+              <strong id="extra-lugar-name"></strong>
+              <button onclick="clearExtraLugar()" style="background:none;border:none;color:var(--rojo);font-weight:700;font-size:12px;cursor:pointer;text-transform:uppercase">✕ Cambiar</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label>Cantidad de horas extra</label>
+          <div class="tipo-grid" style="grid-template-columns:repeat(4,1fr)">
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'0.5')"><span class="tipo-icon" style="font-size:16px">½h</span></button>
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'1')"><span class="tipo-icon" style="font-size:16px">1h</span></button>
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'1.5')"><span class="tipo-icon" style="font-size:16px">1½h</span></button>
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'2')"><span class="tipo-icon" style="font-size:16px">2h</span></button>
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'2.5')"><span class="tipo-icon" style="font-size:16px">2½h</span></button>
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'3')"><span class="tipo-icon" style="font-size:16px">3h</span></button>
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'3.5')"><span class="tipo-icon" style="font-size:16px">3½h</span></button>
+            <button class="tipo-btn" onclick="selectHorasExtra(this,'4')"><span class="tipo-icon" style="font-size:16px">4h</span></button>
+          </div>
+        </div>
+        <div>
+          <label>Descripción del trabajo extra (opcional)</label>
+          <textarea id="extra-desc" placeholder="Ej: preventivo Iridio III fuera de horario, lámparas quemadas urgente..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENVIAR -->
+  <button class="submit-btn" onclick="enviar()">⚡ Enviar Registro</button>
+
+</div>
+
+<script>
+// ============================================================
+// DATOS — EDIFICIOS REALES SOLEC
+// ============================================================
+const edificios = [
+  // RAMÍREZ (amarillo) = admin: "Ramírez"
+  {id:1, nombre:"Iridio III", dir:"Jujuy 1368", cuit:"30-63543942-0", admin:"Ramírez Fuentes"},
+  {id:2, nombre:"Las Artes", dir:"Alberti 1637", cuit:"30-67961263-4", admin:"Ramírez Fuentes"},
+  {id:3, nombre:"Nobile", dir:"Belgrano 2568", cuit:"30-63543171-3", admin:"Ramírez Fuentes"},
+  {id:4, nombre:"Marpla", dir:"William Morris 1058", cuit:"30-63543201-9", admin:"Ramírez Fuentes"},
+  {id:5, nombre:"Santa Maria", dir:"Av. Colón 2986", cuit:"30-54541249-3", admin:"Ramírez Fuentes"},
+  {id:6, nombre:"Argos I", dir:"Córdoba 2039", cuit:"30-51884994-4", admin:"Ramírez Fuentes"},
+  {id:7, nombre:"Ameztoy", dir:"Alt. Brown 782", cuit:"30-54235409-3", admin:"Ramírez Fuentes"},
+  {id:8, nombre:"Solar", dir:"Garay 2533", cuit:"30-68563291-4", admin:"Ramírez Fuentes"},
+  {id:9, nombre:"Iguazú", dir:"San Luis 1986", cuit:"30-62162272-9", admin:"Ramírez Fuentes"},
+  {id:10, nombre:"Torre del Centro", dir:"Córdoba 1792", cuit:"30-56460300-3", admin:"Ramírez Fuentes"},
+  {id:11, nombre:"Moreno 2487", dir:"Moreno 2487", cuit:"30-54059485-2", admin:"Ramírez Fuentes"},
+  {id:12, nombre:"Mitre V", dir:"Falucho 2682", cuit:"30-62743367-7", admin:"Ramírez Fuentes"},
+  {id:13, nombre:"Modena", dir:"Alt. Brown 2543", cuit:"33-63119444-9", admin:"Ramírez Fuentes"},
+  {id:14, nombre:"Torre del Sol", dir:"H. Irigoyen 1880", cuit:"30-67682656-0", admin:"Ramírez Fuentes"},
+  {id:15, nombre:"Monumental", dir:"Mitre 1715", cuit:"30-53608817-9", admin:"Ramírez Fuentes"},
+  {id:16, nombre:"Calamayor", dir:"Bul. Marit. P.P. Ramos 4137", cuit:"30-63543188-8", admin:"Ramírez Fuentes"},
+  {id:17, nombre:"Eiffel XXV", dir:"Bolívar 2588", cuit:"30-59957296-8", admin:"Ramírez Fuentes"},
+  {id:18, nombre:"Tamar V", dir:"Córdoba 2153", cuit:"30-67677872-8", admin:"Ramírez Fuentes"},
+  {id:19, nombre:"Norma VII", dir:"Córdoba 2064", cuit:"30-63003202-0", admin:"Ramírez Fuentes"},
+  {id:20, nombre:"Ancla", dir:"Córdoba 2186", cuit:"30-54789647-1", admin:"Ramírez Fuentes"},
+  {id:21, nombre:"Vermida IV", dir:"Santa Fe 1888", cuit:"30-53904892-5", admin:"Ramírez Fuentes"},
+  {id:23, nombre:"Palacio Árabe", dir:"Córdoba 1681", cuit:"30-58015881-8", admin:"Ramírez Fuentes"},
+  {id:25, nombre:"Varadero Perla", dir:"Balcarce 2919", cuit:"30-71283450-8", admin:"Ramírez Fuentes"},
+  {id:26, nombre:"Akros II Galería", dir:"Belgrano 2451 Galería", cuit:"30-56217036-3", admin:"Ramírez Fuentes"},
+  {id:27, nombre:"Akros II", dir:"Belgrano 2451", cuit:"30-56217036-3", admin:"Ramírez Fuentes"},
+  {id:29, nombre:"Olazabal 2556", dir:"Olazabal 2556", cuit:"30-70730820-2", admin:"Ramírez Fuentes"},
+  {id:30, nombre:"Lincoln Center", dir:"Santa Fe 1791", cuit:"33-58706455-9", admin:"Ramírez Fuentes"},
+  {id:31, nombre:"Gulfi VIII", dir:"Gascon 1809", cuit:"30-56214488-5", admin:"Ramírez Fuentes"},
+  {id:32, nombre:"Apolo XIII", dir:"Aristóbulo del Valle 3105", cuit:"30-55079080-3", admin:"Ramírez Fuentes"},
+  {id:33, nombre:"Falucho 1364", dir:"Falucho 1364", cuit:"30-69259975-2", admin:"Ramírez Fuentes"},
+  {id:34, nombre:"Catedral", dir:"Rivadavia 2742", cuit:"30-55090016-1", admin:"Ramírez Fuentes"},
+  {id:35, nombre:"La Rioja 1577", dir:"La Rioja 1577", cuit:"30-70913278-0", admin:"Ramírez Fuentes"},
+  {id:36, nombre:"Marino V", dir:"11 de Septiembre 2724", cuit:"30-60658405-5", admin:"Ramírez Fuentes"},
+  {id:37, nombre:"Alca I", dir:"Gascon 1994", cuit:"30-62682200-9", admin:"Ramírez Fuentes"},
+  {id:38, nombre:"Argos VI", dir:"España 1693", cuit:"30-54789661-7", admin:"Ramírez Fuentes"},
+  {id:39, nombre:"Saavedra 65", dir:"Saavedra 65", cuit:"30-53627601-3", admin:"Ramírez Fuentes"},
+  {id:40, nombre:"Antibes", dir:"Alsina 2261", cuit:"30-54095876-5", admin:"Ramírez Fuentes"},
+  {id:41, nombre:"Teramo Piazza", dir:"Córdoba 2647", cuit:"33-71141436-9", admin:"Ramírez Fuentes"},
+  {id:42, nombre:"Pigeon", dir:"Bul. Marítimo 3155", cuit:"30-53149611-2", admin:"Ramírez Fuentes"},
+  {id:43, nombre:"Promenade", dir:"Alt. Brown 1641", cuit:"30-63543706-1", admin:"Ramírez Fuentes"},
+  {id:44, nombre:"Torre Gulfi I", dir:"Gascon 2011", cuit:"30-56214471-0", admin:"Ramírez Fuentes"},
+  {id:45, nombre:"Akros I", dir:"Belgrano 2463", cuit:"33-51982841-9", admin:"Ramírez Fuentes"},
+  {id:46, nombre:"Atenas VIII", dir:"Alt. Brown 2376", cuit:"30-59050292-4", admin:"Ramírez Fuentes"},
+  {id:47, nombre:"Colón 3064", dir:"Av. Colón 3064", cuit:"30-61438941-5", admin:"Ramírez Fuentes"},
+  {id:48, nombre:"Davisu I", dir:"Santiago del Estero 2043", cuit:"30-54233823-3", admin:"Ramírez Fuentes"},
+  {id:49, nombre:"Salta 1370", dir:"Salta 1370", cuit:"30-71180793-0", admin:"Ramírez Fuentes"},
+  {id:50, nombre:"Satélite", dir:"Av. Colón 3818", cuit:"30-63544143-3", admin:"Ramírez Fuentes"},
+  {id:51, nombre:"Atenas IX", dir:"Alt. Brown 2358", cuit:"30-57112354-8", admin:"Ramírez Fuentes"},
+  {id:52, nombre:"Mitre II", dir:"San Luis 2406", cuit:"30-52176104-7", admin:"Ramírez Fuentes"},
+  {id:53, nombre:"Aruba", dir:"Av. de los Trabajadores 3673", cuit:"30-63469273-4", admin:"Ramírez Fuentes"},
+  {id:54, nombre:"Pino", dir:"Av. Colón 2579", cuit:"30-53901602-0", admin:"Ramírez Fuentes"},
+  {id:55, nombre:"Maral XLIV", dir:"Lavalle 2281", cuit:"30-63797639-3", admin:"Ramírez Fuentes"},
+  {id:56, nombre:"Neptuno XXII", dir:"Sarmiento 2762", cuit:"30-61050842-8", admin:"Ramírez Fuentes"},
+  {id:57, nombre:"El Pato", dir:"Av. Colón 3366", cuit:"30-64615835-0", admin:"Ramírez Fuentes"},
+  // FUENTE (blanco)
+  {id:58, nombre:"Alfil I", dir:"Chacabuco 3242", cuit:"30-70064283-2", admin:"Ramírez Fuentes"},
+  {id:59, nombre:"Palacio Santiago", dir:"Santiago del Estero 1943", cuit:"30-56943364-5", admin:"Ramírez Fuentes"},
+  {id:60, nombre:"Salamo", dir:"España 1696", cuit:"30-61597286-6", admin:"Ramírez Fuentes"},
+  {id:61, nombre:"Dormar III", dir:"Corrientes 1999", cuit:"30-53797674-4", admin:"Ramírez Fuentes"},
+  {id:62, nombre:"Vermida VIII", dir:"Av. Colón 1735", cuit:"30-54239227-0", admin:"Ramírez Fuentes"},
+  {id:63, nombre:"Atenas XVIII", dir:"3 de Febrero 2835", cuit:"30-67682359-6", admin:"Ramírez Fuentes"},
+  {id:64, nombre:"Bella Vista X", dir:"Alt. Brown 2351", cuit:"30-63383393-8", admin:"Ramírez Fuentes"},
+  {id:65, nombre:"Neptuno III", dir:"Bolívar 2272", cuit:"30-54233793-8", admin:"Ramírez Fuentes"},
+  {id:66, nombre:"Santiago", dir:"Santiago del Estero 2883", cuit:"30-55283483-2", admin:"Ramírez Fuentes"},
+  {id:67, nombre:"Residencia Espacio", dir:"Bul. Marítimo 1685", cuit:"30-60520616-2", admin:"Ramírez Fuentes"},
+  {id:68, nombre:"Aquarium", dir:"Av. Colón 1049", cuit:"30-56994003-2", admin:"Ramírez Fuentes"},
+  {id:69, nombre:"Rawnson 2689", dir:"Rawson 2689", cuit:"33-71672703-9", admin:"Ramírez Fuentes"},
+  {id:70, nombre:"Atuel I", dir:"Bolívar 2630", cuit:"30-52174269-7", admin:"Ramírez Fuentes"},
+  {id:71, nombre:"Vista Plaza", dir:"Entre Ríos 3352", cuit:"Sin CUIT", admin:"Ramírez Fuentes"},
+  {id:72, nombre:"Riviera Varese", dir:"Gral. Rivas 2357", cuit:"Sin CUIT", admin:"Ramírez Fuentes"},
+  {id:74, nombre:"Manilu II", dir:"Falucho 1960", cuit:"30-71615150-2", admin:"Ramírez Fuentes"},
+  {id:75, nombre:"Varo I", dir:"Gascon 535", cuit:"30-65717653-9", admin:"Ramírez Fuentes"},
+  {id:76, nombre:"Marbella I", dir:"Bolívar 2879", cuit:"30-71518880-1", admin:"Ramírez Fuentes"},
+  {id:77, nombre:"Inamoro", dir:"Gascon 2667", cuit:"Sin CUIT", admin:"Ramírez Fuentes"},
+  {id:78, nombre:"Aljumi", dir:"Bolívar 4592", cuit:"33-70958875-9", admin:"Ramírez Fuentes"},
+  {id:79, nombre:"Villa Regina", dir:"Formosa 155", cuit:"30-61340088-1", admin:"Ramírez Fuentes"},
+  {id:80, nombre:"Berquil VIII", dir:"Falucho 759", cuit:"30-62168591-7", admin:"Ramírez Fuentes"},
+  {id:81, nombre:"Neuquén", dir:"San Luis 2330", cuit:"30-62168690-5", admin:"Ramírez Fuentes"},
+  {id:82, nombre:"Norma II", dir:"Las Heras 2471", cuit:"30-59414281-7", admin:"Ramírez Fuentes"},
+  {id:83, nombre:"Consur IV", dir:"Las Heras 2468", cuit:"30-55771993-4", admin:"Ramírez Fuentes"},
+  {id:84, nombre:"Montevideo", dir:"San Martín 2524", cuit:"30-66618085-9", admin:"Ramírez Fuentes"},
+  {id:85, nombre:"Cronos", dir:"Av. Independencia 1118", cuit:"30-68142250-8", admin:"Ramírez Fuentes"},
+  {id:86, nombre:"Edna", dir:"San Luis 1936", cuit:"30-54233618-4", admin:"Ramírez Fuentes"},
+  {id:87, nombre:"San Martín 4077", dir:"San Martín 4077", cuit:"30-71652464-3", admin:"Ramírez Fuentes"},
+  {id:88, nombre:"Coga II", dir:"Nasser 2470", cuit:"30-70153644-0", admin:"Ramírez Fuentes"},
+  {id:89, nombre:"Bella Vista IV", dir:"Falucho 2555", cuit:"30-60554697-4", admin:"Ramírez Fuentes"},
+  {id:90, nombre:"Bolívar 2985", dir:"Bolívar 2985", cuit:"30-71529636-1", admin:"Ramírez Fuentes"},
+  {id:91, nombre:"Bahia X", dir:"Av. Libertad 3241", cuit:"30-71850386-4", admin:"Ramírez Fuentes"},
+  {id:92, nombre:"Ituzaingo 3679", dir:"Ituzaingo 3679", cuit:"Sin CUIT", admin:"Ramírez Fuentes"},
+  {id:93, nombre:"La Rioja 2314", dir:"La Rioja 2314", cuit:"30-67954100-1", admin:"Ramírez Fuentes"},
+  {id:94, nombre:"San Mar III", dir:"Belgrano 2818", cuit:"30-54239968-2", admin:"Ramírez Fuentes"},
+  {id:95, nombre:"Costanera", dir:"Av. de los Trabajadores 1869", cuit:"30-69254024-3", admin:"Ramírez Fuentes"},
+  {id:96, nombre:"Fiamma I y II", dir:"Falucho 2210 / Entre Ríos 2439", cuit:"30-71050931-6", admin:"Ramírez Fuentes"},
+  {id:97, nombre:"Santiago 1928", dir:"Santiago del Estero 1928", cuit:"30-53909682-2", admin:"Ramírez Fuentes"},
+  {id:98, nombre:"San Juan III", dir:"Gascon 2888", cuit:"30-68555746-7", admin:"Ramírez Fuentes"},
+  {id:100, nombre:"Zena", dir:"Av. Colón 4040", cuit:"30-71718101-4", admin:"Ramírez Fuentes"},
+];
+
+// CATÁLOGOS
+const trabajosCat = [
+  {id:1, nombre:"Reemplazo de lámpara común", unidad:"u"},
+  {id:2, nombre:"Reemplazo de lámpara de emergencia", unidad:"u"},
+  {id:3, nombre:"Reemplazo de lámpara en hueco/ascensor", unidad:"u"},
+  {id:4, nombre:"Cambio de térmica unipolar", unidad:"u"},
+  {id:5, nombre:"Cambio de térmica bipolar", unidad:"u"},
+  {id:6, nombre:"Cambio de térmica tripolar", unidad:"u"},
+  {id:7, nombre:"Canalización con caño PVC", unidad:"m"},
+  {id:8, nombre:"Canalización con canaleta plástica", unidad:"m"},
+  {id:9, nombre:"Tendido de cable", unidad:"m"},
+  {id:10, nombre:"Ajuste y apriete de bornes en tablero", unidad:"tablero"},
+  {id:11, nombre:"Revisión de tablero eléctrico", unidad:"tablero"},
+  {id:12, nombre:"Reparación de tomacorriente", unidad:"u"},
+  {id:13, nombre:"Instalación de tomacorriente nuevo", unidad:"u"},
+  {id:14, nombre:"Reparación de interruptor", unidad:"u"},
+  {id:15, nombre:"Instalación de interruptor nuevo", unidad:"u"},
+  {id:16, nombre:"Conexión de luminaria nueva", unidad:"u"},
+  {id:17, nombre:"Revisión y prueba de bomba de incendio", unidad:"u"},
+  {id:18, nombre:"Revisión de instalación general", unidad:"visita"},
+  {id:19, nombre:"Reparación de llave térmica", unidad:"u"},
+  {id:20, nombre:"Cambio de llave de luz", unidad:"u"},
+  {id:21, nombre:"Instalación de disyuntor diferencial", unidad:"u"},
+  {id:22, nombre:"Revisión de puesta a tierra", unidad:"visita"},
+  {id:23, nombre:"Cableado en bandeja portacable", unidad:"m"},
+  {id:24, nombre:"Instalación de tablero nuevo", unidad:"u"},
+];
+
+const materialesCat = [
+  {id:1, nombre:"Lámpara LED 9W", unidad:"u"},
+  {id:2, nombre:"Lámpara LED 15W", unidad:"u"},
+  {id:3, nombre:"Lámpara LED 20W", unidad:"u"},
+  {id:4, nombre:"Lámpara de emergencia 10W", unidad:"u"},
+  {id:5, nombre:"Lámpara de emergencia 30W", unidad:"u"},
+  {id:6, nombre:"Térmica 10A unipolar", unidad:"u"},
+  {id:7, nombre:"Térmica 16A unipolar", unidad:"u"},
+  {id:8, nombre:"Térmica 20A unipolar", unidad:"u"},
+  {id:9, nombre:"Térmica 10A bipolar", unidad:"u"},
+  {id:10, nombre:"Térmica 20A bipolar", unidad:"u"},
+  {id:11, nombre:"Térmica 32A bipolar", unidad:"u"},
+  {id:12, nombre:"Disyuntor diferencial 25A", unidad:"u"},
+  {id:13, nombre:"Disyuntor diferencial 40A", unidad:"u"},
+  {id:14, nombre:"Caño PVC 20mm", unidad:"m"},
+  {id:15, nombre:"Caño PVC 32mm", unidad:"m"},
+  {id:16, nombre:"Caño PVC 40mm", unidad:"m"},
+  {id:17, nombre:"Canaleta 20x10mm", unidad:"m"},
+  {id:18, nombre:"Canaleta 40x25mm", unidad:"m"},
+  {id:19, nombre:"Cable unipolar 2.5mm", unidad:"m"},
+  {id:20, nombre:"Cable unipolar 4mm", unidad:"m"},
+  {id:21, nombre:"Cable unipolar 6mm", unidad:"m"},
+  {id:22, nombre:"Cinta aisladora", unidad:"u"},
+  {id:23, nombre:"Tomacorriente doble", unidad:"u"},
+  {id:24, nombre:"Tomacorriente triple", unidad:"u"},
+  {id:25, nombre:"Interruptor simple", unidad:"u"},
+  {id:26, nombre:"Interruptor doble", unidad:"u"},
+  {id:27, nombre:"Bornera de conexión", unidad:"u"},
+  {id:28, nombre:"Caja rectangular embutir", unidad:"u"},
+  {id:29, nombre:"Caja cuadrada embutir", unidad:"u"},
+  {id:30, nombre:"Prensa cable", unidad:"u"},
+];
+
+
+// SYNC BOMBAS
+function syncBombas() {
+  const ant = document.querySelector('input[name="bomba-anterior"]:checked');
+  if (!ant) return;
+  const antVal = ant.value;
+  const sigVal = antVal === '1' ? '2' : '1';
+  const label = document.getElementById('sig-label');
+  label.textContent = 'Bomba ' + sigVal;
+  label.style.display = 'inline-block';
+}
+
+// CATÁLOGOS PREVENTIVO (editables desde Sheet en versión final)
+const ilumCat = [
+  {id:1, nombre:"Lámpara quemada", unidad:"piso/sector"},
+  {id:2, nombre:"Tubo fluorescente quemado", unidad:"piso/sector"},
+  {id:3, nombre:"Dicroica quemada", unidad:"piso/sector"},
+  {id:4, nombre:"Panel LED roto", unidad:"piso/sector"},
+  {id:5, nombre:"Plafón roto o sucio", unidad:"piso/sector"},
+  {id:6, nombre:"Tira LED sin funcionar", unidad:"piso/sector"},
+  {id:7, nombre:"Lámpara de alta potencia quemada", unidad:"piso/sector"},
+  {id:8, nombre:"Tortuga quemada", unidad:"piso/sector"},
+  {id:9, nombre:"Tomacorriente roto", unidad:"piso/sector"},
+  {id:10, nombre:"Tomacorriente sin tensión", unidad:"piso/sector"},
+  {id:11, nombre:"Tomacorriente quemado", unidad:"piso/sector"},
+];
+
+const ctrlCat = [
+  {id:1, nombre:"Pulsador luminoso roto", unidad:"piso/sector"},
+  {id:2, nombre:"Automático de escalera sin respuesta", unidad:"piso/sector"},
+  {id:3, nombre:"Automático de pasillo sin respuesta", unidad:"piso/sector"},
+  {id:4, nombre:"Temporizador sin respuesta", unidad:"piso/sector"},
+  {id:5, nombre:"Fotocélula sin respuesta", unidad:"piso/sector"},
+  {id:6, nombre:"Sensor de movimiento sin respuesta", unidad:"piso/sector"},
+];
+
+const canalCat = [
+  {id:1, nombre:"Canaleta suelta o rota", unidad:"piso/sector"},
+  {id:2, nombre:"Caño PVC roto o suelto", unidad:"piso/sector"},
+  {id:3, nombre:"Cable expuesto sin canalizar", unidad:"piso/sector"},
+  {id:4, nombre:"Bandeja portacable dañada", unidad:"piso/sector"},
+  {id:5, nombre:"Tapa ciega faltante o rota", unidad:"piso/sector"},
+  {id:6, nombre:"Caja de pase abierta o sin tapa", unidad:"piso/sector"},
+  {id:7, nombre:"Gabinete con puerta rota o sin llave", unidad:"piso/sector"},
+  {id:8, nombre:"Gabinete sin cierre", unidad:"piso/sector"},
+];
+
+const emergCat = [
+  {id:1, nombre:"No arrancó al desconectar", unidad:"piso/sector"},
+  {id:2, nombre:"Se apagó antes de 35 min", unidad:"piso/sector"},
+  {id:3, nombre:"Batería agotada", unidad:"piso/sector"},
+  {id:4, nombre:"Lámpara de emergencia quemada", unidad:"piso/sector"},
+];
+
+// Estado preventivo
+let prevItems = { ilum: [], ctrl: [], emerg: [], canal: [] };
+
+function searchPrev(tipo) {
+  const cats = { ilum: ilumCat, ctrl: ctrlCat, emerg: emergCat, canal: canalCat };
+  const cat = cats[tipo];
+  const q = document.getElementById(tipo + '-search').value.toLowerCase().trim();
+  const res = document.getElementById(tipo + '-results');
+  if (q.length < 1) { res.classList.remove('show'); return; }
+  const added = prevItems[tipo].map(i => i.id);
+  const norm = q.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const hits = cat.filter(i => i.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(norm) && !added.includes(i.id)).slice(0, 8);
+  // Always show free-text option
+  let html = hits.map(i => `<div class="ar-item" onclick="addPrevItem(${i.id},'${tipo}')">${i.nombre}<span>${i.unidad}</span></div>`).join('');
+  if (q.length > 2) {
+    html += `<div class="ar-item" style="color:var(--rojo);font-weight:600" onclick="addPrevFree('${tipo}','${q}')">+ Agregar: "${q}"</div>`;
+  }
+  if (!html) { res.classList.remove('show'); return; }
+  res.innerHTML = html;
+  res.classList.add('show');
+}
+
+function addPrevItem(id, tipo) {
+  const cats = { ilum: ilumCat, ctrl: ctrlCat, emerg: emergCat, canal: canalCat };
+  const item = cats[tipo].find(i => i.id === id);
+  const nota = prompt('Piso y sector (ej: Piso 5 pasillo sur):') || '';
+  prevItems[tipo].push({...item, nota, qty:1, libre:false});
+  document.getElementById(tipo + '-search').value = '';
+  document.getElementById(tipo + '-results').classList.remove('show');
+  renderPrevItems(tipo);
+}
+
+function addPrevFree(tipo, texto) {
+  const nota = prompt('Piso y sector (ej: Piso 5 pasillo sur):') || '';
+  prevItems[tipo].push({id: Date.now(), nombre: texto, nota, qty:1, libre:true});
+  document.getElementById(tipo + '-search').value = '';
+  document.getElementById(tipo + '-results').classList.remove('show');
+  renderPrevItems(tipo);
+}
+
+function removePrevItem(id, tipo) {
+  prevItems[tipo] = prevItems[tipo].filter(i => i.id !== id);
+  renderPrevItems(tipo);
+}
+
+function renderPrevItems(tipo) {
+  const arr = prevItems[tipo];
+  const labels = { ilum:'iluminación', ctrl:'control de luz', emerg:'emergencia' };
+  const cont = document.getElementById(tipo + '-list');
+  if (!arr.length) {
+    const msgs = { ilum:'Sin novedades en tomas e iluminación', ctrl:'Sin novedades en control de luz', emerg:'Todas las luces de emergencia OK', canal:'Sin novedades en canalización' };
+    cont.innerHTML = `<div class="empty-msg">${msgs[tipo]}</div>`;
+    return;
+  }
+  cont.innerHTML = arr.map(i => `
+    <div class="item-row">
+      <div style="flex:1">
+        <div class="item-name">${i.nombre}</div>
+        ${i.nota ? `<div style="font-size:11px;color:var(--text2);margin-top:2px">📍 ${i.nota}</div>` : ''}
+      </div>
+      <button class="remove-btn" onclick="removePrevItem(${i.id},'${tipo}')">×</button>
+    </div>`).join('');
+}
+
+// ESTADO
+let edificioSel = null;
+let tipoSel = null;
+let trabajos = [];
+let materiales = [];
+
+// INIT
+window.onload = () => {
+  const today = new Date();
+  document.getElementById('fecha').valueAsDate = today;
+  document.getElementById('hora-inicio').value = today.toTimeString().slice(0,5);
+};
+
+// PROGRESO
+function updateProgress() {
+  const steps = [
+    document.getElementById('fecha').value !== '',
+    edificioSel !== null,
+    tipoSel !== null,
+    trabajos.length > 0 || document.getElementById('t-libre').value !== '',
+    true, // materiales opcionales
+    true
+  ];
+  steps.forEach((done, i) => {
+    const el = document.getElementById('ps' + (i+1));
+    el.className = 'progress-step' + (done ? ' done' : (i === steps.findIndex(s => !s) ? ' active' : ''));
+  });
+}
+
+// EDIFICIO
+function searchEdificio() {
+  const q = document.getElementById('edificio-input').value.toLowerCase().trim();
+  const res = document.getElementById('edificio-results');
+  if (q.length < 1) { res.classList.remove('show'); return; }
+  const hits = edificios.filter(e =>
+    e.nombre.toLowerCase().includes(q) ||
+    e.dir.toLowerCase().includes(q) ||
+    e.admin.toLowerCase().includes(q)
+  ).slice(0, 12);
+  if (!hits.length) { res.classList.remove('show'); return; }
+  res.innerHTML = hits.map(e => `
+    <div class="sr-item" onclick="selectEdificio(${e.id})">
+      <strong>${e.nombre}</strong>
+      <span>${e.dir} · ${e.admin}</span>
+    </div>`).join('');
+  res.classList.add('show');
+}
+
+function selectEdificio(id) {
+  edificioSel = edificios.find(e => e.id === id);
+  document.getElementById('edificio-results').classList.remove('show');
+  document.getElementById('edificio-search-wrap').style.display = 'none';
+  document.getElementById('ed-name').textContent = edificioSel.nombre;
+  document.getElementById('ed-info').textContent = `${edificioSel.dir} · Adm. ${edificioSel.admin} · CUIT: ${edificioSel.cuit}`;
+  document.getElementById('edificio-chosen').style.display = 'block';
+  autoSelectTipo(edificioSel);
+  updateProgress();
+}
+
+function abrirMaps() {
+  if (!edificioSel) return;
+  const dir = encodeURIComponent(edificioSel.dir + ', Mar del Plata, Argentina');
+  window.open('https://www.google.com/maps/dir/?api=1&destination=' + dir, '_blank');
+}
+
+function clearEdificio() {
+  edificioSel = null;
+  document.getElementById('edificio-input').value = '';
+  document.getElementById('edificio-search-wrap').style.display = 'block';
+  document.getElementById('edificio-chosen').style.display = 'none';
+  updateProgress();
+}
+
+// TIPO
+function selectTipo(btn, tipo) {
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  tipoSel = tipo;
+
+  const isPrev = tipo === 'Preventivo/Abono';
+  const isUrgencia = tipo === 'Urgencia';
+  const isExtra = tipo === 'Horas Extra';
+  const isNormal = !isPrev && !isExtra;
+
+  // Otro
+  document.getElementById('otro-wrap').style.display = tipo === 'Otro' ? 'block' : 'none';
+  // Preventivo module
+  document.getElementById('preventivo-module').style.display = isPrev ? 'flex' : 'none';
+  if (isPrev) {
+    document.getElementById('preventivo-module').style.flexDirection = 'column';
+    document.getElementById('preventivo-module').style.gap = '16px';
+  }
+  // Trabajos y materiales — ocultar en preventivo y horas extra
+  document.getElementById('sec4').style.display = (isPrev || isExtra) ? 'none' : 'block';
+  document.getElementById('sec5').style.display = (isPrev || isExtra) ? 'none' : 'block';
+  // Archivos — siempre visible
+  // Urgencia fuera de horario
+  document.getElementById('urgencia-horario').style.display = isUrgencia ? 'block' : 'none';
+  // Horas extra module
+  document.getElementById('horas-extra-module').style.display = isExtra ? 'block' : 'none';
+
+  updateProgress();
+}
+
+let horarioUrgencia = null;
+let horasExtraSel = null;
+
+function selectHorario(btn, tipo) {
+  document.querySelectorAll('#urgencia-horario .tipo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  horarioUrgencia = tipo;
+  document.getElementById('urg-fuera-msg').style.display = tipo === 'fuera' ? 'block' : 'none';
+}
+
+function selectHorasExtra(btn, horas) {
+  document.querySelectorAll('#horas-extra-module .tipo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  horasExtraSel = horas;
+}
+
+function searchExtraLugar() {
+  const q = document.getElementById('extra-lugar-input').value.toLowerCase().trim();
+  const res = document.getElementById('extra-lugar-results');
+  if (q.length < 1) { res.classList.remove('show'); return; }
+  const hits = edificios.filter(e => e.nombre.toLowerCase().includes(q) || e.dir.toLowerCase().includes(q)).slice(0, 8);
+  let html = hits.map(e => `<div class="sr-item" onclick="selectExtraLugar('${e.nombre}')"><strong>${e.nombre}</strong><span>${e.dir}</span></div>`).join('');
+  if (q.length > 2) html += `<div class="sr-item" onclick="selectExtraLugar('${q}')"><strong>+ Otro: "${q}"</strong><span>Obra, particular u otro</span></div>`;
+  res.innerHTML = html;
+  res.classList.add('show');
+}
+
+function selectExtraLugar(nombre) {
+  document.getElementById('extra-lugar-input').value = nombre;
+  document.getElementById('extra-lugar-results').classList.remove('show');
+  document.getElementById('extra-lugar-name').textContent = nombre;
+  document.getElementById('extra-lugar-chosen').style.display = 'block';
+  document.getElementById('extra-lugar-input').closest('.search-wrap').style.display = 'none';
+}
+
+function clearExtraLugar() {
+  document.getElementById('extra-lugar-input').value = '';
+  document.getElementById('extra-lugar-chosen').style.display = 'none';
+  document.getElementById('extra-lugar-input').closest('.search-wrap').style.display = 'block';
+}
+
+function autoSelectTipo(edificio) {
+  // Lista de IDs de edificios abonados (se carga desde Sheet en versión final)
+  const abonados = [1,5,7,10,14,16,20,23,29,31,34,36,39,42,44,46,50,53,55,57,
+                    59,62,64,67,70,74,76,79,82,85,88,91,94,97]; // ejemplo - editable
+  if (abonados.includes(edificio.id)) {
+    const btn = document.getElementById('tipo-prev');
+    if (btn) selectTipo(btn, 'Preventivo/Abono');
+  }
+}
+
+// ITEMS
+function searchItem(tipo) {
+  const inputId = tipo + '-search';
+  const resId = tipo + '-results';
+  const cat = tipo === 't' ? trabajosCat : materialesCat;
+  const arr = tipo === 't' ? trabajos : materiales;
+  const q = document.getElementById(inputId).value.toLowerCase().trim();
+  const res = document.getElementById(resId);
+  if (q.length < 1) { res.classList.remove('show'); return; }
+  const added = arr.map(i => i.id);
+  const hits = cat.filter(i => i.nombre.toLowerCase().includes(q) && !added.includes(i.id)).slice(0, 10);
+  if (!hits.length) { res.classList.remove('show'); return; }
+  res.innerHTML = hits.map(i => `
+    <div class="ar-item" onclick="addItem(${i.id},'${tipo}')">
+      ${i.nombre}<span>${i.unidad}</span>
+    </div>`).join('');
+  res.classList.add('show');
+}
+
+function addItem(id, tipo) {
+  const cat = tipo === 't' ? trabajosCat : materialesCat;
+  const arr = tipo === 't' ? trabajos : materiales;
+  const item = cat.find(i => i.id === id);
+  arr.push({...item, qty: 1});
+  document.getElementById(tipo + '-search').value = '';
+  document.getElementById(tipo + '-results').classList.remove('show');
+  renderItems(tipo);
+  updateProgress();
+}
+
+function changeQty(id, tipo, d) {
+  const arr = tipo === 't' ? trabajos : materiales;
+  const item = arr.find(i => i.id === id);
+  if (item) { item.qty = Math.max(1, item.qty + d); renderItems(tipo); }
+}
+
+function removeItem(id, tipo) {
+  if (tipo === 't') trabajos = trabajos.filter(i => i.id !== id);
+  else materiales = materiales.filter(i => i.id !== id);
+  renderItems(tipo);
+  updateProgress();
+}
+
+function renderItems(tipo) {
+  const arr = tipo === 't' ? trabajos : materiales;
+  const listId = tipo === 't' ? 'trabajos-list' : 'materiales-list';
+  const cont = document.getElementById(listId);
+  if (!arr.length) {
+    cont.innerHTML = `<div class="empty-msg">Buscá y agregá ${tipo === 't' ? 'los trabajos realizados' : 'los materiales usados'}</div>`;
+    return;
+  }
+  cont.innerHTML = arr.map(i => `
+    <div class="item-row">
+      <div class="item-name">${i.nombre}</div>
+      <div class="item-unit">${i.unidad}</div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${i.id},'${tipo}',-1)">−</button>
+        <div class="qty-val">${i.qty}</div>
+        <button class="qty-btn" onclick="changeQty(${i.id},'${tipo}',1)">+</button>
+      </div>
+      <button class="remove-btn" onclick="removeItem(${i.id},'${tipo}')">×</button>
+    </div>`).join('');
+}
+
+// TOGGLE LIBRE
+function toggleLibre(tipo) {
+  const sw = document.getElementById(tipo + '-toggle');
+  const wrap = document.getElementById(tipo + '-libre-wrap');
+  const badge = document.getElementById(tipo === 't' ? 't-badge' : 'm-badge');
+  const on = sw.classList.toggle('on');
+  wrap.style.display = on ? 'block' : 'none';
+  if (on) {
+    badge.textContent = 'LIBRE ACTIVO';
+    badge.className = 'section-badge badge-libre';
+  } else {
+    badge.textContent = 'ESTRUCTURADO';
+    badge.className = 'section-badge badge-struct';
+  }
+}
+
+// ARCHIVOS
+function handleFilesPreventivo(input, chipsId) {
+  const chips = document.getElementById(chipsId);
+  Array.from(input.files).forEach(f => {
+    const chip = document.createElement('div');
+    chip.className = 'file-chip';
+    const icon = f.type.startsWith('image') ? '📷' : f.type.startsWith('video') ? '🎥' : '🎙️';
+    chip.textContent = icon + ' ' + (f.name.length > 18 ? f.name.slice(0,18)+'…' : f.name);
+    chips.appendChild(chip);
+  });
+}
+
+function handleFiles(input) {
+  const chips = document.getElementById('file-chips');
+  Array.from(input.files).forEach(f => {
+    const chip = document.createElement('div');
+    chip.className = 'file-chip';
+    const icon = f.type.startsWith('image') ? '📷' : f.type.startsWith('video') ? '🎥' : '🎙️';
+    chip.textContent = icon + ' ' + (f.name.length > 18 ? f.name.slice(0,18)+'…' : f.name);
+    chips.appendChild(chip);
+  });
+}
+
+// CERRAR RESULTADOS
+document.addEventListener('click', e => {
+  ['ilum','ctrl','emerg','canal'].forEach(t => {
+    if (!e.target.closest('#' + t + '-search') && !e.target.closest('#' + t + '-results'))
+      document.getElementById(t + '-results').classList.remove('show');
+  });
+  if (!e.target.closest('#extra-lugar-input') && !e.target.closest('#extra-lugar-results'))
+    document.getElementById('extra-lugar-results').classList.remove('show');
+  if (!e.target.closest('#edificio-input') && !e.target.closest('#edificio-results'))
+    document.getElementById('edificio-results').classList.remove('show');
+  if (!e.target.closest('#t-search') && !e.target.closest('#t-results'))
+    document.getElementById('t-results').classList.remove('show');
+  if (!e.target.closest('#m-search') && !e.target.closest('#m-results'))
+    document.getElementById('m-results').classList.remove('show');
+});
+
+// SCRIPT URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVVInNzv48_fG1Ycux-KWd-am_3i6APw0jQvmfzvwZu3RT8H_OfPJk77K6Po06r3XH/exec";
+
+// ENVIAR
+function enviar() {
+  const edNombre = edificioSel ? edificioSel.nombre : '(sin edificio)';
+  const tipoStr = tipoSel || '(sin tipo)';
+  const confirm1 = confirm(`¿Confirmar envío?\n\n🏢 ${edNombre}\n📋 ${tipoStr}\n\nUna vez enviado queda registrado.`);
+  if (!confirm1) return;
+
+  // Armar objeto de datos
+  const trabajosStr = trabajos.map(t => t.nombre + ' x' + t.qty).join(', ');
+  const materialesStr = materiales.map(m => m.nombre + ' x' + m.qty).join(', ');
+  
+  const datos = {
+    fecha: document.getElementById('fecha').value,
+    horaInicio: document.getElementById('hora-inicio').value,
+    horaFin: document.getElementById('hora-fin').value,
+    edificio: edificioSel ? edificioSel.nombre + ' · ' + edificioSel.dir : '',
+    tipo: tipoSel,
+    trabajos: trabajosStr,
+    trabajoLibre: document.getElementById('t-libre') ? document.getElementById('t-libre').value : '',
+    materiales: materialesStr,
+    materialLibre: document.getElementById('m-libre') ? document.getElementById('m-libre').value : '',
+    archivos: '',
+    descuentoAbono: edificioSel ? edificioSel.abonado : false,
+    urgenciaFueraHorario: horarioUrgencia === 'fuera',
+    horasExtra: horasExtraSel || '',
+  };
+
+  // Mostrar spinner
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent = '⏳ Enviando...';
+  btn.disabled = true;
+
+  const payload = {
+    data: {
+      "ID": String(Date.now()),
+      "Fecha": datos.fecha || '',
+      "Hora Inicio": datos.horaInicio || '',
+      "Hora Fin": datos.horaFin || '',
+      "Edificio": datos.edificio || '',
+      "Tipo de Visita": datos.tipo || '',
+      "Trabajos Estructurados": datos.trabajos || '',
+      "Trabajos Libres": datos.trabajoLibre || '',
+      "Materiales Estructurados": datos.materiales || '',
+      "Materiales Libres": datos.materialLibre || '',
+      "Archivos": '',
+      "Estado": 'Pendiente',
+      "Descuento Abono": datos.descuentoAbono ? 'Sí' : 'No',
+      "Urgencia Fuera Horario": datos.urgenciaFueraHorario ? 'Sí' : 'No',
+      "Horas Extra": datos.horasExtra || '',
+      "Timestamp": new Date().toISOString()
+    }
+  };
+
+  fetch('https://sheetdb.io/api/v1/pqo4oljkpi6dj?sheet=Registros', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    btn.textContent = '✅ Registro enviado';
+    btn.style.background = 'var(--ok)';
+    setTimeout(() => {
+      btn.textContent = '⚡ Enviar Registro';
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 3000);
+  })
+  .catch(err => {
+    btn.textContent = '⚡ Enviar Registro';
+    btn.disabled = false;
+    alert('Error al enviar. Verificá tu conexión.');
+  });
+
+  // Materiales son opcionales - no se validan
+
+  const resumen = `✅ REGISTRO ENVIADO\n\n` +
+    `📅 ${document.getElementById('fecha').value}  ${document.getElementById('hora-inicio').value} → ${document.getElementById('hora-fin').value}\n` +
+    `🏢 ${edificioSel.nombre} · ${edificioSel.dir}\n` +
+    `🏛️ Adm. ${edificioSel.admin}\n` +
+    `🔧 Tipo: ${tipoSel}\n` +
+    `📋 Trabajos: ${trabajos.length} estructurado(s)${document.getElementById('t-libre').value ? ' + descripción libre' : ''}\n` +
+    `📦 Materiales: ${materiales.length} estructurado(s)${document.getElementById('m-libre').value ? ' + descripción libre' : ''}`;
+
+  alert(resumen);
+}
+</script>
+</body>
+</html>
