@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+<!DOC
+YPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -635,6 +636,23 @@
           <span class="tipo-icon">⏱️</span>Horas Extra
         </button>
       </div>
+    <!-- URGENCIA INLINE -->
+    <div id="urgencia-horario-inline" style="display:none;margin-top:12px">
+      <div style="background:#e6394611;border:1px solid #e6394644;border-radius:10px;padding:14px">
+        <p style="font-size:13px;font-weight:600;color:#e63946;margin-bottom:10px">🚨 ¿La urgencia es dentro o fuera del horario laboral?</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="tipo-btn" id="urg-dentro" onclick="selectHorario(this,'dentro')" style="font-size:13px;padding:10px">
+            ✅ Dentro del horario
+          </button>
+          <button class="tipo-btn" id="urg-fuera" onclick="selectHorario(this,'fuera')" style="font-size:13px;padding:10px">
+            🌙 Fuera del horario
+          </button>
+        </div>
+        <div id="urg-fuera-msg" style="display:none;margin-top:8px;font-size:12px;color:#f4a261;font-style:italic">
+          ⚠ Se suma el adicional por urgencia fuera de horario
+        </div>
+      </div>
+    </div>T
       <div id="otro-wrap" style="display:none;margin-top:8px">
         <input type="text" id="otro-desc" placeholder="Describí el tipo de visita o motivo..." />
       </div>
@@ -715,6 +733,10 @@
           <div class="add-results" id="ilum-results"></div>
         </div>
         <textarea id="ilum-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="ilum-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('ilum-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de iluminación</p>
@@ -739,6 +761,10 @@
           <div class="add-results" id="ctrl-results"></div>
         </div>
         <textarea id="ctrl-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="ctrl-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('ctrl-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de control de luz</p>
@@ -763,6 +789,10 @@
           <div class="add-results" id="emerg-results"></div>
         </div>
         <textarea id="emerg-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="emerg-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('emerg-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de emergencias</p>
@@ -818,6 +848,10 @@
           <input type="text" id="b_sig_obs" placeholder="Observación (ej: bomba 2 no funciona, quedó en bomba 1...)" style="margin-top:8px" />
         </div>
         <textarea id="bomba-obs" placeholder="Observaciones: baja tensión, falta de fase, válvula de retención, ruidos, nivel de cisterna, etc." style="margin-top:10px"></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="bomba-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('bomba-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de bomba</p>
@@ -842,6 +876,10 @@
           <div class="add-results" id="canal-results"></div>
         </div>
         <textarea id="canal-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="canal-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('canal-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de canalización</p>
@@ -860,6 +898,10 @@
       <div class="section-body">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema. Si no hay novedad dejá vacío.</p>
         <textarea id="portero-obs" placeholder="Describí el problema reportado..."></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="portero-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('portero-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de portero eléctrico</p>
@@ -878,6 +920,10 @@
       <div class="section-body">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema.</p>
         <textarea id="antena-obs" placeholder="Describí el problema reportado..."></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="antena-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('antena-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de antena comunitaria</p>
@@ -896,6 +942,10 @@
       <div class="section-body">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema.</p>
         <textarea id="camaras-obs" placeholder="Describí el problema reportado..."></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="camaras-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+        </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('camaras-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
           <p>Fotos · Videos · Audios de cámaras CCTV</p>
@@ -937,28 +987,7 @@
 
 
   <!-- URGENCIA FUERA DE HORARIO (solo cuando tipo = Urgencia) -->
-  <div id="urgencia-horario" style="display:none">
-    <div class="section">
-      <div class="section-header">
-        <div class="section-num" style="background:var(--rojo)">🚨</div>
-        <div class="section-title">Horario de la Urgencia</div>
-      </div>
-      <div class="section-body">
-        <p style="font-size:12px;color:var(--text2);font-style:italic;margin-bottom:12px">Esto define si la urgencia se cobra como ítem adicional.</p>
-        <div class="tipo-grid">
-          <button class="tipo-btn" id="urg-dentro" onclick="selectHorario(this,'dentro')">
-            <span class="tipo-icon">✅</span>Dentro del horario
-          </button>
-          <button class="tipo-btn" id="urg-fuera" onclick="selectHorario(this,'fuera')">
-            <span class="tipo-icon">🌙</span>Fuera del horario
-          </button>
-        </div>
-        <div id="urg-fuera-msg" style="display:none;margin-top:10px;background:#fce4ec;border:1px solid var(--rojo);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--rojo);font-weight:600">
-          ⚠ Urgencia fuera de horario — se cobra como ítem adicional
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
   <!-- HORAS EXTRA (solo cuando tipo = Horas Extra) -->
   <div id="horas-extra-module" style="display:none">
@@ -1388,7 +1417,7 @@ function selectTipo(btn, tipo) {
   document.getElementById('sec5').style.display = (isPrev || isExtra) ? 'none' : 'block';
   // Archivos — siempre visible
   // Urgencia fuera de horario
-  document.getElementById('urgencia-horario').style.display = isUrgencia ? 'block' : 'none';
+  document.getElementById('urgencia-horario-inline').style.display = isUrgencia ? 'block' : 'none';
   // Horas extra module
   document.getElementById('horas-extra-module').style.display = isExtra ? 'block' : 'none';
 
@@ -1399,7 +1428,7 @@ let horarioUrgencia = null;
 let horasExtraSel = null;
 
 function selectHorario(btn, tipo) {
-  document.querySelectorAll('#urgencia-horario .tipo-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#urgencia-horario-inline .tipo-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   horarioUrgencia = tipo;
   document.getElementById('urg-fuera-msg').style.display = tipo === 'fuera' ? 'block' : 'none';
@@ -1593,6 +1622,16 @@ function enviar() {
     descuentoAbono: edificioSel ? edificioSel.abonado : false,
     urgenciaFueraHorario: horarioUrgencia === 'fuera',
     horasExtra: horasExtraSel || '',
+    materialesPrev: [
+      document.getElementById('ilum-materiales') ? document.getElementById('ilum-materiales').value : '',
+      document.getElementById('ctrl-materiales') ? document.getElementById('ctrl-materiales').value : '',
+      document.getElementById('emerg-materiales') ? document.getElementById('emerg-materiales').value : '',
+      document.getElementById('canal-materiales') ? document.getElementById('canal-materiales').value : '',
+      document.getElementById('bomba-materiales') ? document.getElementById('bomba-materiales').value : '',
+      document.getElementById('portero-materiales') ? document.getElementById('portero-materiales').value : '',
+      document.getElementById('antena-materiales') ? document.getElementById('antena-materiales').value : '',
+      document.getElementById('camaras-materiales') ? document.getElementById('camaras-materiales').value : '',
+    ].filter(Boolean).join(' | '),
   };
 
   // Mostrar spinner
@@ -1612,6 +1651,7 @@ function enviar() {
       "Trabajos Libres": datos.trabajoLibre || '',
       "Materiales Estructurados": datos.materiales || '',
       "Materiales Libres": datos.materialLibre || '',
+      "Materiales Preventivo": datos.materialesPrev || '',
       "Archivos": '',
       "Estado": 'Pendiente',
       "Descuento Abono": datos.descuentoAbono ? 'Sí' : 'No',
