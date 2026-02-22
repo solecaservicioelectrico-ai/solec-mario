@@ -530,6 +530,14 @@ YPE html>
 
   .badge-struct { background: rgba(74,144,217,0.2); color: #4a90d9; }
   .badge-libre { background: rgba(245,200,0,0.2); color: var(--amarillo); border: 1px solid var(--amarillo); }
+
+  /* Collapsible categories */
+  .cat-header { cursor: pointer; user-select: none; }
+  .cat-header:hover { opacity: 0.85; }
+  .cat-toggle { margin-left: auto; font-size: 18px; transition: transform 0.2s; }
+  .cat-body { overflow: hidden; transition: max-height 0.3s ease; }
+  .cat-body.collapsed { display: none; }
+  .section.collapsed .cat-toggle { transform: rotate(-90deg); }
 </style>
 </head>
 <body>
@@ -715,16 +723,1721 @@ YPE html>
 
 
   <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
+  <div id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Trabajos Realizados</div>
+      <div class="section-badge badge-struct" id="t-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="trabajos-list">
+        <div class="empty-msg">Buscá y agregá los trabajos realizados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="t-search" placeholder="Buscar trabajo... ej: lámpara, térmica, cable" autocomplete="off" oninput="searchItem('t')" />
+        <div class="add-results" id="t-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('t')">
+        <div class="toggle-sw" id="t-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar descripción libre o aclaración</div>
+      </div>
+      <div id="t-libre-wrap" style="display:none">
+        <textarea id="t-libre" placeholder="Describí el trabajo especial, situación inusual o aclaración que no entra en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MATERIALES -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Materiales Utilizados</div>
+      <div class="section-badge badge-struct" id="m-badge">ESTRUCTURADO</div>
+    </div>
+    <div class="section-body">
+      <div class="items-list" id="materiales-list">
+        <div class="empty-msg">Buscá y agregá los materiales usados</div>
+      </div>
+      <div class="add-wrap">
+        <span class="search-icon">＋</span>
+        <input type="text" id="m-search" placeholder="Buscar material... ej: lámpara LED, térmica, caño" autocomplete="off" oninput="searchItem('m')" />
+        <div class="add-results" id="m-results"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="libre-toggle" onclick="toggleLibre('m')">
+        <div class="toggle-sw" id="m-toggle"><div class="toggle-knob"></div></div>
+        <div class="libre-label">Agregar material que no está en la lista</div>
+      </div>
+      <div id="m-libre-wrap" style="display:none">
+        <textarea id="m-libre" placeholder="Describí el material o insumo que no encontraste en la lista..."></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PREVENTIVO MODULE (visible solo cuando tipo = Preventivo o Abono) -->
   <div id="preventivo-module" style="display:none">
 
     <!-- CAT 1: ILUMINACIÓN -->
     <div class="section" id="bomba-siguiente-section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">💡</div>
-        <div class="section-title">Tomas e Iluminación</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Tomas e Iluminación</div>
         <div class="section-badge badge-struct" style="margin-left:auto;font-size:10px">SOLO LO QUE FALLA</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Lámparas quemadas, plafones rotos, tubos, dicroicas, tiras LED, paneles, tortugas. Tomacorrientes rotos o sin tensión. Solo lo que falla.</p>
         <div class="items-list" id="ilum-list"><div class="empty-msg">Sin novedades en iluminación</div></div>
         <div class="add-wrap">
@@ -748,11 +2461,11 @@ YPE html>
 
     <!-- CAT 2: CONTROL DE LUZ -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">🔌</div>
-        <div class="section-title">Sistemas de Control de Luz</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Sistemas de Control de Luz</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Pulsadores, automáticos de escalera/pasillo, temporizadores, fotocélulas. Solo lo que falló.</p>
         <div class="items-list" id="ctrl-list"><div class="empty-msg">Sin novedades en control de luz</div></div>
         <div class="add-wrap">
@@ -776,11 +2489,11 @@ YPE html>
 
     <!-- CAT 3: LUCES DE EMERGENCIA -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">🚨</div>
-        <div class="section-title">Luces de Emergencia</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Luces de Emergencia</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Solo las que no arrancaron o se apagaron antes de 35-40 min. Si todas funcionaron dejá vacío.</p>
         <div class="items-list" id="emerg-list"><div class="empty-msg">Todas las luces de emergencia OK</div></div>
         <div class="add-wrap">
@@ -804,35 +2517,44 @@ YPE html>
 
     <!-- CAT 4: BOMBAS -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">⚙️</div>
-        <div class="section-title">Bombas</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Bombas</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Consumos trifásicos. Dejá vacío si el edificio no tiene bomba.</p>
         <!-- BOMBA ANTERIOR -->
         <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
             <strong style="font-size:14px;color:var(--text2)">🔴 Bomba ANTERIOR — la que estaba al llegar</strong>
           </div>
-          <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center">
-            <span style="font-size:13px;font-weight:600">¿Cuál era?</span>
-            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700">
-              <input type="radio" name="bomba-anterior" value="1" id="ant1" style="width:18px;height:18px;accent-color:var(--rojo)" onchange="syncBombas()" />
-              Bomba 1
-            </label>
-            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700">
-              <input type="radio" name="bomba-anterior" value="2" id="ant2" style="width:18px;height:18px;accent-color:var(--rojo)" onchange="syncBombas()" />
-              Bomba 2
-            </label>
-            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700;color:#2a9d8f">
-              <input type="radio" name="bomba-anterior" value="se-rota" id="ant-rota" style="width:18px;height:18px;accent-color:#2a9d8f" onchange="syncBombas()" />
-              Se Rota
-            </label>
-            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700;color:#457b9d">
-              <input type="radio" name="bomba-anterior" value="continua" id="ant-continua" style="width:18px;height:18px;accent-color:#457b9d" onchange="syncBombas()" />
-              Continúa
-            </label>
+          <!-- Pregunta 1: cuál estaba al llegar -->
+          <div style="margin-bottom:14px">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">¿Cuál estaba al llegar?</div>
+            <div style="display:flex;gap:10px">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:700;background:#1c2030;border:2px solid var(--border);border-radius:8px;padding:8px 16px">
+                <input type="radio" name="bomba-cual" value="1" id="cual1" style="width:16px;height:16px;accent-color:var(--rojo)" onchange="syncBombas()" />
+                Bomba 1
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:700;background:#1c2030;border:2px solid var(--border);border-radius:8px;padding:8px 16px">
+                <input type="radio" name="bomba-cual" value="2" id="cual2" style="width:16px;height:16px;accent-color:var(--rojo)" onchange="syncBombas()" />
+                Bomba 2
+              </label>
+            </div>
+          </div>
+          <!-- Pregunta 2: qué pasa con ella -->
+          <div style="margin-bottom:14px">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">¿Qué pasa con esa bomba?</div>
+            <div style="display:flex;gap:10px">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:700;background:#1c2030;border:2px solid #e6394466;border-radius:8px;padding:8px 16px;color:#e63946">
+                <input type="radio" name="bomba-estado" value="se-rota" id="ant-rota" style="width:16px;height:16px;accent-color:#e63946" onchange="syncBombas()" />
+                Se Rota
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:700;background:#1c2030;border:2px solid #2a9d8f66;border-radius:8px;padding:8px 16px;color:#2a9d8f">
+                <input type="radio" name="bomba-estado" value="continua" id="ant-continua" style="width:16px;height:16px;accent-color:#2a9d8f" onchange="syncBombas()" />
+                Continúa
+              </label>
+            </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             <div><label>Fase R (A)</label><input type="text" id="b_ant_r" placeholder="ej: 4.2" inputmode="decimal" /></div>
@@ -871,11 +2593,11 @@ YPE html>
 
     <!-- CAT: CANALIZACIÓN -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">🏗️</div>
-        <div class="section-title">Canalización</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Canalización</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Cable, canaleta, caño, bandeja portacable, tapa ciega, caja de pase, gabinete. Solo lo que está roto, suelto o requiere atención.</p>
         <div class="items-list" id="canal-list"><div class="empty-msg">Sin novedades en canalización</div></div>
         <div class="add-wrap">
@@ -899,12 +2621,12 @@ YPE html>
 
     <!-- CAT TABLEROS: TABLEROS Y MONTANTES -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">⚡</div>
-        <div class="section-title">Tableros y Montantes</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Tableros y Montantes</div>
         <div class="section-badge badge-struct" style="margin-left:auto;font-size:10px">SOLO LO QUE FALLA</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Tablero general, seccional, montante, llaves térmicas, diferenciales, fusibles. Solo lo que falla.</p>
         <div class="items-list" id="tablero-list"><div class="empty-msg">Sin novedades en tableros</div></div>
         <div class="add-wrap">
@@ -928,11 +2650,11 @@ YPE html>
 
     <!-- CAT 5: PORTERO ELÉCTRICO -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">🔔</div>
-        <div class="section-title">Portero Eléctrico</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Portero Eléctrico</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema. Si no hay novedad dejá vacío.</p>
         <textarea id="portero-obs" placeholder="Describí el problema reportado..."></textarea>
         <div style="margin-top:10px">
@@ -950,11 +2672,11 @@ YPE html>
 
     <!-- CAT 6: ANTENA COMUNITARIA -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">📡</div>
-        <div class="section-title">Antena Comunitaria</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Antena Comunitaria</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema.</p>
         <textarea id="antena-obs" placeholder="Describí el problema reportado..."></textarea>
         <div style="margin-top:10px">
@@ -972,11 +2694,11 @@ YPE html>
 
     <!-- CAT 7: CÁMARAS / CCTV -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo)">📷</div>
-        <div class="section-title">Cámaras / CCTV</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Cámaras / CCTV</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Solo si avisaron un problema.</p>
         <textarea id="camaras-obs" placeholder="Describí el problema reportado..."></textarea>
         <div style="margin-top:10px">
@@ -994,11 +2716,11 @@ YPE html>
 
     <!-- CAT 8: OBSERVACIONES GENERALES -->
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--rojo)">📝</div>
-        <div class="section-title">Observaciones Generales</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Observaciones Generales</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
         <p style="font-size:12px;color:var(--text2);font-style:italic">Cualquier anomalía, pedido del encargado, trabajo que quedó pendiente, o lo que no entró en ninguna categoría anterior.</p>
         <textarea id="obs-generales" placeholder="Escribí libremente cualquier observación del edificio..."></textarea>
       </div>
@@ -1010,7 +2732,7 @@ YPE html>
   <div class="section" id="sec6">
     <div class="section-header">
       <div class="section-num">6</div>
-      <div class="section-title">Fotos · Videos · Audios</div>
+      <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Fotos · Videos · Audios</div>
     </div>
     <div class="section-body">
       <div class="upload-zone" onclick="document.getElementById('file-input').click()">
@@ -1029,11 +2751,11 @@ YPE html>
   <!-- HORAS EXTRA (solo cuando tipo = Horas Extra) -->
   <div id="horas-extra-module" style="display:none">
     <div class="section">
-      <div class="section-header">
+      <div class="section-header" onclick="toggleCat(this)" style="cursor:pointer">
         <div class="section-num" style="background:var(--amarillo);color:var(--negro)">⏱️</div>
-        <div class="section-title">Horas Extra</div>
+        <div class="section-title"><span class="cat-arrow" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>Horas Extra</div>
       </div>
-      <div class="section-body">
+      <div class="section-body" style="display:none">
 
         <div>
           <label>Cantidad de horas extra</label>
@@ -1229,21 +2951,27 @@ const materialesCat = [
 
 // SYNC BOMBAS
 function syncBombas() {
-  const ant = document.querySelector('input[name="bomba-anterior"]:checked');
-  if (!ant) return;
-  const antVal = ant.value;
+  const cual = document.querySelector('input[name="bomba-cual"]:checked');
+  const estado = document.querySelector('input[name="bomba-estado"]:checked');
   const bombaSigSection = document.getElementById('bomba-siguiente-section');
-  if (antVal === 'continua') {
-    // Si continúa la misma, no hace falta bomba siguiente
+  
+  // Si eligió Continúa, ocultar bomba siguiente
+  if (estado && estado.value === 'continua') {
     if (bombaSigSection) bombaSigSection.style.display = 'none';
     return;
   }
+  
+  // Mostrar bomba siguiente
   if (bombaSigSection) bombaSigSection.style.display = 'block';
-  const sigVal = antVal === '1' ? '2' : '1';
-  const label = document.getElementById('sig-label');
-  if (label) {
-    label.textContent = 'Bomba ' + sigVal;
-    label.style.display = 'inline-block';
+  
+  // Auto-seleccionar cuál es la siguiente
+  if (cual) {
+    const sigVal = cual.value === '1' ? '2' : '1';
+    const label = document.getElementById('sig-label');
+    if (label) {
+      label.textContent = 'Bomba ' + sigVal;
+      label.style.display = 'inline-block';
+    }
   }
 }
 
@@ -1427,6 +3155,23 @@ function clearEdificio() {
 }
 
 // TIPO
+function toggleCat(header) {
+  var body = header.nextElementSibling;
+  if (!body) return;
+  var isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  header.querySelector('.cat-arrow').textContent = isHidden ? '▼' : '▶';
+}
+
+
+function toggleCat(header) {
+  var body = header.parentElement.querySelector('.section-body');
+  if (!body) return;
+  var isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? '' : 'none';
+  var arrow = header.querySelector('.cat-arrow');
+  if (arrow) arrow.style.transform = isHidden ? 'rotate(90deg)' : '';
+}
 function selectTipo(btn, tipo) {
   document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1709,4 +3454,12 @@ function enviar() {
 }
 </script>
 </body>
-</html>
+</html>function toggleCat(header) {
+  const section = header.closest('.section');
+  const body = section.querySelector('.section-body');
+  if (!body) return;
+  body.classList.toggle('collapsed');
+  section.classList.toggle('collapsed');
+}
+
+
