@@ -718,7 +718,7 @@ YPE html>
   <div id="preventivo-module" style="display:none">
 
     <!-- CAT 1: ILUMINACIÓN -->
-    <div class="section">
+    <div class="section" id="bomba-siguiente-section">
       <div class="section-header">
         <div class="section-num" style="background:var(--amarillo)">💡</div>
         <div class="section-title">Tomas e Iluminación</div>
@@ -735,7 +735,7 @@ YPE html>
         <textarea id="ilum-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="ilum-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="ilum-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('ilum-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -763,7 +763,7 @@ YPE html>
         <textarea id="ctrl-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="ctrl-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="ctrl-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('ctrl-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -791,7 +791,7 @@ YPE html>
         <textarea id="emerg-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="emerg-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="emerg-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('emerg-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -825,6 +825,14 @@ YPE html>
               <input type="radio" name="bomba-anterior" value="2" id="ant2" style="width:18px;height:18px;accent-color:var(--rojo)" onchange="syncBombas()" />
               Bomba 2
             </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700;color:#2a9d8f">
+              <input type="radio" name="bomba-anterior" value="se-rota" id="ant-rota" style="width:18px;height:18px;accent-color:#2a9d8f" onchange="syncBombas()" />
+              Se Rota
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:700;color:#457b9d">
+              <input type="radio" name="bomba-anterior" value="continua" id="ant-continua" style="width:18px;height:18px;accent-color:#457b9d" onchange="syncBombas()" />
+              Continúa
+            </label>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             <div><label>Fase R (A)</label><input type="text" id="b_ant_r" placeholder="ej: 4.2" inputmode="decimal" /></div>
@@ -850,7 +858,7 @@ YPE html>
         <textarea id="bomba-obs" placeholder="Observaciones: baja tensión, falta de fase, válvula de retención, ruidos, nivel de cisterna, etc." style="margin-top:10px"></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="bomba-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="bomba-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('bomba-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -878,7 +886,7 @@ YPE html>
         <textarea id="canal-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="canal-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="canal-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('canal-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -886,6 +894,35 @@ YPE html>
           <input type="file" id="canal-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'canal-chips')" />
         </div>
         <div class="file-chips" id="canal-chips"></div>
+      </div>
+    </div>
+
+    <!-- CAT TABLEROS: TABLEROS Y MONTANTES -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num" style="background:var(--amarillo)">⚡</div>
+        <div class="section-title">Tableros y Montantes</div>
+        <div class="section-badge badge-struct" style="margin-left:auto;font-size:10px">SOLO LO QUE FALLA</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--text2);font-style:italic">Tablero general, seccional, montante, llaves térmicas, diferenciales, fusibles. Solo lo que falla.</p>
+        <div class="items-list" id="tablero-list"><div class="empty-msg">Sin novedades en tableros</div></div>
+        <div class="add-wrap">
+          <span class="search-icon">＋</span>
+          <input type="text" id="tablero-search" placeholder="Ej: térmica quemada, diferencial saltando, fusible..." autocomplete="off" oninput="searchPrev('tablero')" />
+          <div class="add-results" id="tablero-results"></div>
+        </div>
+        <textarea id="tablero-libre" placeholder="Observación libre (opcional)..." style="margin-top:10px"></textarea>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
+          <textarea id="tablero-materiales" placeholder="Ej: térmica 2x16 Siemens, diferencial 25A, fusible diazed..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
+        </div>
+        <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('tablero-files').click()">
+          <div class="up-icon" style="font-size:24px">📎</div>
+          <p>Fotos · Videos · Audios de tableros</p>
+          <input type="file" id="tablero-files" multiple accept="image/*,video/*,audio/*" style="display:none" onchange="handleFilesPreventivo(this,'tablero-chips')" />
+        </div>
+        <div class="file-chips" id="tablero-chips"></div>
       </div>
     </div>
 
@@ -900,7 +937,7 @@ YPE html>
         <textarea id="portero-obs" placeholder="Describí el problema reportado..."></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="portero-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="portero-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('portero-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -922,7 +959,7 @@ YPE html>
         <textarea id="antena-obs" placeholder="Describí el problema reportado..."></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="antena-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="antena-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('antena-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -944,7 +981,7 @@ YPE html>
         <textarea id="camaras-obs" placeholder="Describí el problema reportado..."></textarea>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px">📦 Materiales usados en esta categoría</div>
-          <textarea id="camaras-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:var(--bg2,#1a1d23);border:1px solid #f4a26144;color:var(--text)" rows="2"></textarea>
+          <textarea id="camaras-materiales" placeholder="Ej: 2 lámparas LED 9w, 1 plafón, cinta aisladora..." style="margin-top:0;background:#2a2d3a;border:1px solid #f4a261;color:#ffffff;border-radius:8px;padding:8px;width:100%;font-size:13px" rows="2"></textarea>
         </div>
         <div class="upload-zone" style="margin-top:10px" onclick="document.getElementById('camaras-files').click()">
           <div class="up-icon" style="font-size:24px">📎</div>
@@ -997,20 +1034,7 @@ YPE html>
         <div class="section-title">Horas Extra</div>
       </div>
       <div class="section-body">
-        <div>
-          <label>¿Dónde hiciste las horas extra?</label>
-          <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="extra-lugar-input" placeholder="Edificio, obra o particular..." autocomplete="off" oninput="searchExtraLugar()" />
-            <div class="search-results" id="extra-lugar-results"></div>
-          </div>
-          <div id="extra-lugar-chosen" style="display:none;margin-top:8px">
-            <div style="background:#fff8e6;border:2px solid var(--amarillo);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
-              <strong id="extra-lugar-name"></strong>
-              <button onclick="clearExtraLugar()" style="background:none;border:none;color:var(--rojo);font-weight:700;font-size:12px;cursor:pointer;text-transform:uppercase">✕ Cambiar</button>
-            </div>
-          </div>
-        </div>
+
         <div>
           <label>Cantidad de horas extra</label>
           <div class="tipo-grid" style="grid-template-columns:repeat(4,1fr)">
@@ -1208,10 +1232,19 @@ function syncBombas() {
   const ant = document.querySelector('input[name="bomba-anterior"]:checked');
   if (!ant) return;
   const antVal = ant.value;
+  const bombaSigSection = document.getElementById('bomba-siguiente-section');
+  if (antVal === 'continua') {
+    // Si continúa la misma, no hace falta bomba siguiente
+    if (bombaSigSection) bombaSigSection.style.display = 'none';
+    return;
+  }
+  if (bombaSigSection) bombaSigSection.style.display = 'block';
   const sigVal = antVal === '1' ? '2' : '1';
   const label = document.getElementById('sig-label');
-  label.textContent = 'Bomba ' + sigVal;
-  label.style.display = 'inline-block';
+  if (label) {
+    label.textContent = 'Bomba ' + sigVal;
+    label.style.display = 'inline-block';
+  }
 }
 
 // CATÁLOGOS PREVENTIVO (editables desde Sheet en versión final)
@@ -1406,15 +1439,16 @@ function selectTipo(btn, tipo) {
 
   // Otro
   document.getElementById('otro-wrap').style.display = tipo === 'Otro' ? 'block' : 'none';
-  // Preventivo module
-  document.getElementById('preventivo-module').style.display = isPrev ? 'flex' : 'none';
-  if (isPrev) {
+  // Preventivo/Service/Urgencia usan el mismo módulo de categorías
+  const usaModuloPrev = isPrev || tipo === 'Service' || isUrgencia;
+  document.getElementById('preventivo-module').style.display = usaModuloPrev ? 'flex' : 'none';
+  if (usaModuloPrev) {
     document.getElementById('preventivo-module').style.flexDirection = 'column';
     document.getElementById('preventivo-module').style.gap = '16px';
   }
-  // Trabajos y materiales — ocultar en preventivo y horas extra
-  document.getElementById('sec4').style.display = (isPrev || isExtra) ? 'none' : 'block';
-  document.getElementById('sec5').style.display = (isPrev || isExtra) ? 'none' : 'block';
+  // Trabajos y materiales libres — solo para tipos que no usan el módulo
+  document.getElementById('sec4').style.display = (usaModuloPrev || isExtra) ? 'none' : 'block';
+  document.getElementById('sec5').style.display = (usaModuloPrev || isExtra) ? 'none' : 'block';
   // Archivos — siempre visible
   // Urgencia fuera de horario
   document.getElementById('urgencia-horario-inline').style.display = isUrgencia ? 'block' : 'none';
@@ -1440,30 +1474,9 @@ function selectHorasExtra(btn, horas) {
   horasExtraSel = horas;
 }
 
-function searchExtraLugar() {
-  const q = document.getElementById('extra-lugar-input').value.toLowerCase().trim();
-  const res = document.getElementById('extra-lugar-results');
-  if (q.length < 1) { res.classList.remove('show'); return; }
-  const hits = edificios.filter(e => e.nombre.toLowerCase().includes(q) || e.dir.toLowerCase().includes(q)).slice(0, 8);
-  let html = hits.map(e => `<div class="sr-item" onclick="selectExtraLugar('${e.nombre}')"><strong>${e.nombre}</strong><span>${e.dir}</span></div>`).join('');
-  if (q.length > 2) html += `<div class="sr-item" onclick="selectExtraLugar('${q}')"><strong>+ Otro: "${q}"</strong><span>Obra, particular u otro</span></div>`;
-  res.innerHTML = html;
-  res.classList.add('show');
-}
 
-function selectExtraLugar(nombre) {
-  document.getElementById('extra-lugar-input').value = nombre;
-  document.getElementById('extra-lugar-results').classList.remove('show');
-  document.getElementById('extra-lugar-name').textContent = nombre;
-  document.getElementById('extra-lugar-chosen').style.display = 'block';
-  document.getElementById('extra-lugar-input').closest('.search-wrap').style.display = 'none';
-}
 
-function clearExtraLugar() {
-  document.getElementById('extra-lugar-input').value = '';
-  document.getElementById('extra-lugar-chosen').style.display = 'none';
-  document.getElementById('extra-lugar-input').closest('.search-wrap').style.display = 'block';
-}
+
 
 function autoSelectTipo(edificio) {
   // Lista de IDs de edificios abonados (se carga desde Sheet en versión final)
@@ -1631,6 +1644,7 @@ function enviar() {
       document.getElementById('portero-materiales') ? document.getElementById('portero-materiales').value : '',
       document.getElementById('antena-materiales') ? document.getElementById('antena-materiales').value : '',
       document.getElementById('camaras-materiales') ? document.getElementById('camaras-materiales').value : '',
+      document.getElementById('tablero-materiales') ? document.getElementById('tablero-materiales').value : '',
     ].filter(Boolean).join(' | '),
   };
 
