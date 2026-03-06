@@ -575,7 +575,30 @@ function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.c
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ---------- LOAD ----------
+// Cache con TTL — datos estáticos duran 6 horas, registros no se cachean
+var CACHE_TTL = 6 * 60 * 60 * 1000; // 6 horas en ms
+
+function cSetTTL(key, val){
+  try{localStorage.setItem('solec_'+key, JSON.stringify({data:val, ts:Date.now()}));}catch(e){}
+}
+function cGetTTL(key){
+  try{
+    var raw=localStorage.getItem('solec_'+key);
+    if(!raw)return null;
+    var obj=JSON.parse(raw);
+    if(Date.now()-obj.ts > CACHE_TTL)return null; // expirado
+    return obj.data;
+  }catch(e){return null;}
+}
+
 async function loadEdif(){
+  // Cache de 6 horas para edificios
+  var cached=cGetTTL('edif');
+  if(cached&&Array.isArray(cached)&&cached.length){
+    edificios=cached;
+    mostrarAlertas();
+    return;
+  }
   try{
     var r=await fetch(SHEETDB+'?sheet=Edificios&limit=2000');
     var j=await r.json();
@@ -584,26 +607,51 @@ async function loadEdif(){
       return{id:e.ID||e.id,nombre:e.Nombre||e.nombre||'',dir:e['Dirección']||e.Direccion||e.direccion||'',admin:e['Administración']||e.Administracion||'',abonado:(e.Abonado||'').toLowerCase(),socio:e['Socio Interno']||e.socio_interno||''};
     }).sort(function(a,b){return a.nombre.localeCompare(b.nombre);});
     cSet('edif',edificios);
-    showToast('✅ '+edificios.length+' edificios cargados');
+    cSetTTL('edif',edificios);
   }catch(e){
     var c=cGet('edif');
-    if(c&&Array.isArray(c)&&c.length){edificios=c;showToast('⚠️ Usando datos sin conexión');}
+    if(c&&Array.isArray(c)&&c.length){edificios=c;}
     else{showToast('❌ Sin conexión — reiniciá el panel');}
   }
   mostrarAlertas();
 }
 async function loadPrecios(){
+  var cached=cGetTTL('precios');
+  if(cached&&Array.isArray(cached)&&cached.length){preciosConf=cached;return;}
   var c=cGet('pr');if(c)preciosConf=c;
-  try{var r=await fetch(SHEETDB+'?sheet=Config_Precios&limit=200');preciosConf=await r.json();cSet('pr',preciosConf);}catch(e){}
+  try{
+    var r=await fetch(SHEETDB+'?sheet=Config_Precios&limit=200');
+    preciosConf=await r.json();
+    cSet('pr',preciosConf);
+    cSetTTL('precios',preciosConf);
+  }catch(e){}
 }
 async function loadCat(){
-  try{var r=await fetch(SHEETDB+'?sheet=Catalogo_Materiales&limit=2000');var j=await r.json();if(Array.isArray(j)&&j.length)catalogoMats=j;}catch(e){}
+  var cached=cGetTTL('cat');
+  if(cached&&Array.isArray(cached)&&cached.length){catalogoMats=cached;return;}
+  try{
+    var r=await fetch(SHEETDB+'?sheet=Catalogo_Materiales&limit=2000');
+    var j=await r.json();
+    if(Array.isArray(j)&&j.length){catalogoMats=j;cSetTTL('cat',j);}
+  }catch(e){}
 }
 async function loadComp(){
-  try{var r=await fetch(SHEETDB+'?sheet=Componentes&limit=500');var j=await r.json();if(Array.isArray(j)&&j.length)catalogoComp=j;}catch(e){}
+  var cached=cGetTTL('comp');
+  if(cached&&Array.isArray(cached)&&cached.length){catalogoComp=cached;return;}
+  try{
+    var r=await fetch(SHEETDB+'?sheet=Componentes&limit=500');
+    var j=await r.json();
+    if(Array.isArray(j)&&j.length){catalogoComp=j;cSetTTL('comp',j);}
+  }catch(e){}
 }
 async function loadMods(){
-  try{var r=await fetch(SHEETDB+'?sheet=Modificadores&limit=200');var j=await r.json();if(Array.isArray(j)&&j.length)catalogoMods=j;}catch(e){}
+  var cached=cGetTTL('mods');
+  if(cached&&Array.isArray(cached)&&cached.length){catalogoMods=cached;return;}
+  try{
+    var r=await fetch(SHEETDB+'?sheet=Modificadores&limit=200');
+    var j=await r.json();
+    if(Array.isArray(j)&&j.length){catalogoMods=j;cSetTTL('mods',j);}
+  }catch(e){}
 }
 async function loadRegs(){
   var cont=document.getElementById('histLista');
@@ -1152,7 +1200,24 @@ window.onload=function(){
   document.getElementById('hora').value=n.toTimeString().slice(0,5);
   document.getElementById('lsearch').addEventListener('input',onLugar);
   document.getElementById('lsearch').addEventListener('focus',onLugar);
-  loadEdif().then(function(){mostrarAlertas();});loadPrecios();loadCat();loadComp();loadMods();cargarObrasEnCurso().then(function(){mostrarPillObras();});cargarOrdenes();
+  // Cargar en secuencia con pausa para no saturar SheetDB (evitar 429)
+  async function initCarga(){
+    var pausa=function(ms){return new Promise(function(r){setTimeout(r,ms);});};
+    await loadEdif(); mostrarAlertas();
+    await pausa(400);
+    await loadPrecios();
+    await pausa(400);
+    await loadCat();
+    await pausa(400);
+    await loadComp();
+    await pausa(300);
+    await loadMods();
+    await pausa(300);
+    await cargarObrasEnCurso(); mostrarPillObras();
+    await pausa(300);
+    await cargarOrdenes();
+  }
+  initCarga();
 };
 function tick(){
   var n=new Date();
