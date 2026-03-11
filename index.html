@@ -1646,6 +1646,24 @@ function limpiarCacheVieja(){
 window.onload=function(){
   limpiarCacheVieja();
   tick();setInterval(tick,1000);
+  // Pre-autenticar Drive silencioso al cargar — evita interrupciones al enviar
+  setTimeout(function(){
+    var hint=localStorage.getItem('driveHint')||'';
+    if(hint&&typeof google!=='undefined'&&google.accounts){
+      var c=google.accounts.oauth2.initTokenClient({
+        client_id:DRIVE_CLIENT_ID,
+        scope:'https://www.googleapis.com/auth/drive.file',
+        hint:hint,
+        callback:function(resp){
+          if(!resp.error){
+            driveToken=resp.access_token;
+            driveTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
+          }
+        }
+      });
+      c.requestAccessToken({prompt:''});
+    }
+  },2000);
   var n=new Date();
   document.getElementById('fecha').value=n.toISOString().split('T')[0];
   document.getElementById('hora').value=n.toTimeString().slice(0,5);
@@ -2703,6 +2721,10 @@ function prevF(id){
   if(!archivosIv[id])archivosIv[id]=[];
   var nuevos=Array.from(inp.files);
   inp.value=''; // reset input para poder volver a seleccionar
+  // Pre-autenticar Drive al agregar fotos — evita interrupciones al enviar
+  if(nuevos.length>0&&!driveToken){
+    setTimeout(function(){getTokenDrive(function(){});},500);
+  }
   nuevos.forEach(function(f){
     if(f.type.startsWith('image/')){
       comprimirFoto(f,function(blob,dataUrl){
@@ -2769,18 +2791,40 @@ function renderPrevF(id){
 function getTokenDrive(cb){
   // Si token vigente, reusar
   if(driveToken&&Date.now()<driveTokenExpiry){cb(driveToken);return;}
-  // Pedir nuevo token
+  // Recordar cuenta elegida para no preguntar de nuevo
+  var hint=localStorage.getItem('driveHint')||'';
   var client=google.accounts.oauth2.initTokenClient({
     client_id:DRIVE_CLIENT_ID,
     scope:'https://www.googleapis.com/auth/drive.file',
+    hint:hint,
     callback:function(resp){
-      if(resp.error){showToast('Error Google: '+resp.error);return;}
+      if(resp.error){
+        // Si falla silencioso, intentar con selector de cuenta
+        if(resp.error==='interaction_required'||resp.error==='login_required'){
+          var c2=google.accounts.oauth2.initTokenClient({
+            client_id:DRIVE_CLIENT_ID,
+            scope:'https://www.googleapis.com/auth/drive.file',
+            callback:function(r2){
+              if(r2.error){showToast('Error Google: '+r2.error);return;}
+              if(r2.login_hint)localStorage.setItem('driveHint',r2.login_hint);
+              driveToken=r2.access_token;
+              driveTokenExpiry=Date.now()+(r2.expires_in-60)*1000;
+              cb(driveToken);
+            }
+          });
+          c2.requestAccessToken({prompt:'select_account'});
+          return;
+        }
+        showToast('Error Google: '+resp.error);return;
+      }
+      if(resp.login_hint)localStorage.setItem('driveHint',resp.login_hint);
       driveToken=resp.access_token;
       driveTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
       cb(driveToken);
     }
   });
-  client.requestAccessToken();
+  // Si tenemos hint, intentar silencioso primero
+  client.requestAccessToken({prompt: hint ? '' : 'select_account'});
 }
 
 async function crearCarpetaDrive(nombre,parentId,token){
@@ -3181,6 +3225,9 @@ function prevFGlobal(){
   var inp=document.getElementById('foGlobalInp');
   if(!inp)return;
   var nuevos=Array.from(inp.files);inp.value='';
+  if(nuevos.length>0&&!driveToken){
+    setTimeout(function(){getTokenDrive(function(){});},500);
+  }
   nuevos.forEach(function(f){
     if(f.type.startsWith('image/')){
       comprimirFoto(f,function(blob,dataUrl){
@@ -3727,7 +3774,15 @@ async function enviar(finalizar){
       tipoVisita:tipoVisita
     };
   });
-  var payload={data:[{Codigo:regCode,'Codigo Obra':obraCode,Fecha:fecha,Hora:hora,'Hora Fin':hfin,'Duración':dur,Edificio:lnom,'Detalle Ubicación':det,'Tipo de Visita':tipoVisita,Intervenciones:res,Observaciones:obs,Estado:estado,Timestamp:new Date().toISOString(),Componente:compTexto,Modificadores:modsTexto,MO_Data:JSON.stringify(moData)}]};
+  // Congelar todos los datos ANTES de cualquier operación asíncrona (OAuth puede limpiar el DOM)
+  var datosReg={
+    Codigo:regCode,'Codigo Obra':obraCode,Fecha:fecha,Hora:hora,'Hora Fin':hfin,
+    'Duración':dur,Edificio:lnom,'Detalle Ubicación':det,'Tipo de Visita':tipoVisita,
+    Intervenciones:res,Observaciones:obs,Estado:estado,
+    Timestamp:new Date().toISOString(),Componente:compTexto,
+    Modificadores:modsTexto,MO_Data:JSON.stringify(moData)
+  };
+  var payload={data:[datosReg]};
   var btn=document.getElementById('benv');btn.disabled=true;btn.textContent='⏳ Enviando...';
 
   // Subir fotos/videos a Drive si hay archivos
@@ -3736,7 +3791,7 @@ async function enviar(finalizar){
   if(hayArchivos){
     btn.textContent='📤 Subiendo fotos...';
     try{
-      await new Promise(function(resolve){
+      await new Promise(function(resolve,reject){
         getTokenDrive(async function(token){
           for(var i=0;i<ivList.length;i++){
             var iv=ivList[i];
