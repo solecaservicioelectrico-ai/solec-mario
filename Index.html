@@ -417,7 +417,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .btn-ver-archivos{display:flex;align-items:center;gap:8px;background:rgba(245,197,24,.1);border:1.5px solid rgba(245,197,24,.3);color:var(--am);border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;justify-content:center;}
 .btn-ver-archivos:active{background:rgba(245,197,24,.2);}
 </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- GSI desactivado temporalmente -->
 </head>
 <body>
 
@@ -1655,24 +1655,7 @@ function limpiarCacheVieja(){
 window.onload=function(){
   limpiarCacheVieja();
   tick();setInterval(tick,1000);
-  // Pre-autenticar Drive silencioso al cargar — evita interrupciones al enviar
-  setTimeout(function(){
-    var hint=localStorage.getItem('driveHint')||'';
-    if(hint&&typeof google!=='undefined'&&google.accounts){
-      var c=google.accounts.oauth2.initTokenClient({
-        client_id:DRIVE_CLIENT_ID,
-        scope:'https://www.googleapis.com/auth/drive.file',
-        hint:hint,
-        callback:function(resp){
-          if(!resp.error){
-            driveToken=resp.access_token;
-            driveTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
-          }
-        }
-      });
-      c.requestAccessToken({prompt:''});
-    }
-  },2000);
+  // Drive OAuth desactivado temporalmente
   var n=new Date();
   document.getElementById('fecha').value=n.toISOString().split('T')[0];
   document.getElementById('hora').value=n.toTimeString().slice(0,5);
@@ -3787,15 +3770,9 @@ async function enviar(finalizar){
   var driveLinks={};
   var hayArchivos=ivList.some(function(iv){return (archivosIv[iv.id]||[]).length>0;})||archivosGlobal.length>0;
   if(hayArchivos){
-    // Verificar token antes de intentar subir
-    if(!driveToken||Date.now()>=driveTokenExpiry){
-      btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
-      showToast('⚠️ Conectá Google Drive primero', true);
-      actualizarEstadoDrive();
-      dbg('ERROR: sin token Drive','err');
-      return;
-    }
-    dbg('Token Drive OK, subiendo fotos...','info');
+    dbg('Fotos desactivadas temporalmente — enviando sin Drive','info');
+    showToast('⚠️ Fotos desactivadas temporalmente');
+    if(false){ // BLOQUE DRIVE DESACTIVADO
     btn.textContent='📤 Subiendo fotos...';
     try{
       await new Promise(function(resolve,reject){
@@ -3833,6 +3810,7 @@ async function enviar(finalizar){
     }
   }
 
+  } // FIN BLOQUE DRIVE DESACTIVADO
   // Agregar links de Drive al payload
   if(Object.keys(driveLinks).length>0){
     var allLinks=[];
