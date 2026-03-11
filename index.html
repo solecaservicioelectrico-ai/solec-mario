@@ -594,6 +594,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     </div>
     <button class="btn-cancelar-obra" id="btnCancelarObra" onclick="cancelarVistaObra()" style="display:none">✕ Salir sin guardar</button>
     <button class="btn-finalizar" id="btnFinalizar" onclick="finalizarObra()">🏁 OBRA FINALIZADA</button>
+    <div id="driveStatus" onclick="conectarDrive()" style="display:none;cursor:pointer;text-align:center;font-size:12px;padding:6px 10px;border-radius:8px;margin-bottom:6px;font-weight:700;"></div>
     <button class="benv" id="benv" onclick="confirmarEnvio()">⚡ ENVIAR REGISTRO</button>
   </div>
 
@@ -2722,8 +2723,11 @@ function prevF(id){
   var nuevos=Array.from(inp.files);
   inp.value=''; // reset input para poder volver a seleccionar
   // Pre-autenticar Drive al agregar fotos — evita interrupciones al enviar
-  if(nuevos.length>0&&!driveToken){
-    setTimeout(function(){getTokenDrive(function(){});},500);
+  if(nuevos.length>0){
+    setTimeout(function(){
+      if(!driveToken)getTokenDrive(function(){actualizarEstadoDrive();});
+      else actualizarEstadoDrive();
+    },300);
   }
   nuevos.forEach(function(f){
     if(f.type.startsWith('image/')){
@@ -2789,8 +2793,19 @@ function renderPrevF(id){
 // ---------- GOOGLE DRIVE ----------
 
 function getTokenDrive(cb){
-  // Si token vigente, reusar
+  // Si token vigente en memoria, reusar
   if(driveToken&&Date.now()<driveTokenExpiry){cb(driveToken);return;}
+  // Intentar restaurar desde localStorage
+  try{
+    var saved=localStorage.getItem('driveTokenData');
+    if(saved){
+      var td=JSON.parse(saved);
+      if(td.token&&td.expiry&&Date.now()<td.expiry){
+        driveToken=td.token;driveTokenExpiry=td.expiry;
+        cb(driveToken);return;
+      }
+    }
+  }catch(e){}
   // Recordar cuenta elegida para no preguntar de nuevo
   var hint=localStorage.getItem('driveHint')||'';
   var client=google.accounts.oauth2.initTokenClient({
@@ -2809,6 +2824,7 @@ function getTokenDrive(cb){
               if(r2.login_hint)localStorage.setItem('driveHint',r2.login_hint);
               driveToken=r2.access_token;
               driveTokenExpiry=Date.now()+(r2.expires_in-60)*1000;
+              try{localStorage.setItem('driveTokenData',JSON.stringify({token:driveToken,expiry:driveTokenExpiry}));}catch(e){}
               cb(driveToken);
             }
           });
@@ -2820,6 +2836,7 @@ function getTokenDrive(cb){
       if(resp.login_hint)localStorage.setItem('driveHint',resp.login_hint);
       driveToken=resp.access_token;
       driveTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
+      try{localStorage.setItem('driveTokenData',JSON.stringify({token:driveToken,expiry:driveTokenExpiry}));}catch(e){}
       cb(driveToken);
     }
   });
@@ -2861,15 +2878,13 @@ async function subirArchivosDrive(ivId,edificio,regCod,token){
   var fEdif=await crearCarpetaDrive(edificio||'Sin edificio',DRIVE_FOLDER_ROOT,token);
   var fReg=await crearCarpetaDrive(regCod||'SIN-CODIGO',fEdif,token);
   var fIv=await crearCarpetaDrive(ivId,fReg,token);
-  var links=[];
-  for(var i=0;i<archivos.length;i++){
-    var a=archivos[i];
-    var ext=a.type==='image'?'.jpg':a.name.split('.').pop()||'.mp4';
+  // Subir todas en paralelo
+  var promesas=archivos.map(function(a,i){
     var nombre=(i+1)+'_'+a.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-    var res=await subirArchivoDrive(a.blob,nombre,fIv,token);
-    if(res.webViewLink)links.push(res.webViewLink);
-  }
-  return links;
+    return subirArchivoDrive(a.blob,nombre,fIv,token);
+  });
+  var resultados=await Promise.all(promesas);
+  return resultados.filter(function(r){return r&&r.webViewLink;}).map(function(r){return r.webViewLink;});
 }
 
 // ---------- UBICACIONES ----------
@@ -3225,8 +3240,11 @@ function prevFGlobal(){
   var inp=document.getElementById('foGlobalInp');
   if(!inp)return;
   var nuevos=Array.from(inp.files);inp.value='';
-  if(nuevos.length>0&&!driveToken){
-    setTimeout(function(){getTokenDrive(function(){});},500);
+  if(nuevos.length>0){
+    setTimeout(function(){
+      if(!driveToken)getTokenDrive(function(){actualizarEstadoDrive();});
+      else actualizarEstadoDrive();
+    },300);
   }
   nuevos.forEach(function(f){
     if(f.type.startsWith('image/')){
@@ -3789,6 +3807,13 @@ async function enviar(finalizar){
   var driveLinks={};
   var hayArchivos=ivList.some(function(iv){return (archivosIv[iv.id]||[]).length>0;})||archivosGlobal.length>0;
   if(hayArchivos){
+    // Verificar token antes de intentar subir
+    if(!driveToken||Date.now()>=driveTokenExpiry){
+      btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
+      showToast('⚠️ Conectá Google Drive primero', true);
+      actualizarEstadoDrive();
+      return;
+    }
     btn.textContent='📤 Subiendo fotos...';
     try{
       await new Promise(function(resolve,reject){
@@ -3805,14 +3830,13 @@ async function enviar(finalizar){
             var fGlob=await crearCarpetaDrive(lnom||'Sin edificio',DRIVE_FOLDER_ROOT,token);
             var fRegG=await crearCarpetaDrive(regCode||'SIN-CODIGO',fGlob,token);
             var fGeneral=await crearCarpetaDrive('general',fRegG,token);
-            var linksG=[];
-            for(var j=0;j<archivosGlobal.length;j++){
-              var ag=archivosGlobal[j];
-              var ext2=ag.type==='image'?'.jpg':ag.name.split('.').pop()||'.mp4';
+            // Subir archivos globales en paralelo
+            var promsG=archivosGlobal.map(function(ag,j){
               var nomG=(j+1)+'_'+ag.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-              var resG=await subirArchivoDrive(ag.blob,nomG,fGeneral,token);
-              if(resG.webViewLink)linksG.push(resG.webViewLink);
-            }
+              return subirArchivoDrive(ag.blob,nomG,fGeneral,token);
+            });
+            var resulsG=await Promise.all(promsG);
+            var linksG=resulsG.filter(function(r){return r&&r.webViewLink;}).map(function(r){return r.webViewLink;});
             if(linksG.length)driveLinks['general']=linksG;
           }
           resolve();
@@ -4621,6 +4645,34 @@ function filtrarHist(){
     }
   });
   renderHist(fAgrupado);
+}
+
+// ══════════════════════════════════════════════════════════
+// ESTADO DRIVE — indicador visual + conexión explícita
+// ══════════════════════════════════════════════════════════
+
+function actualizarEstadoDrive(){
+  var el=document.getElementById('driveStatus');
+  if(!el)return;
+  var hayFotos=archivosGlobal.length>0||Object.values(archivosIv||{}).some(function(a){return a.length>0;});
+  if(!hayFotos){el.style.display='none';return;}
+  el.style.display='block';
+  if(driveToken&&Date.now()<driveTokenExpiry){
+    el.style.background='rgba(0,200,100,.15)';
+    el.style.border='1.5px solid rgba(0,200,100,.4)';
+    el.style.color='#00c864';
+    el.textContent='✅ Google Drive conectado';
+  } else {
+    el.style.background='rgba(255,71,87,.15)';
+    el.style.border='1.5px solid rgba(255,71,87,.4)';
+    el.style.color='#ff4757';
+    el.textContent='⚠️ Tocar aquí para conectar Google Drive antes de enviar';
+  }
+}
+
+function conectarDrive(){
+  if(driveToken&&Date.now()<driveTokenExpiry)return;
+  getTokenDrive(function(){actualizarEstadoDrive();});
 }
 
 // ══════════════════════════════════════════════════════════
