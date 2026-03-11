@@ -382,6 +382,14 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .ord-modal-btns{display:flex;flex-direction:column;gap:10px;}
 .ord-btn-abrir{background:#ff8c00;border:none;border-radius:var(--rs);padding:16px;color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;}
 .ord-btn-cerrar{background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:13px;color:var(--t2);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;}
+/* ── DEBUG LOG (temporal) ── */
+#debugLog{position:fixed;bottom:0;left:0;right:0;max-height:200px;overflow-y:auto;background:rgba(0,0,0,.92);font-family:monospace;font-size:11px;z-index:99999;border-top:2px solid #ff4757;display:none;}
+#debugLog.on{display:block;}
+.dbg-line{padding:3px 8px;border-bottom:1px solid rgba(255,255,255,.05);}
+.dbg-ok{color:#00c864;}
+.dbg-err{color:#ff4757;font-weight:bold;}
+.dbg-info{color:#ffd700;}
+#debugToggle{position:fixed;bottom:0;right:0;z-index:100000;background:#ff4757;color:#fff;font-size:10px;padding:4px 8px;border:none;border-radius:4px 0 0 0;font-weight:bold;}
 /* ── VISOR DE ARCHIVOS DRIVE ── */
 .visor-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;overflow:hidden;}
 .visor-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;}
@@ -3802,6 +3810,11 @@ async function enviar(finalizar){
   };
   var payload={data:[datosReg]};
   var btn=document.getElementById('benv');btn.disabled=true;btn.textContent='⏳ Enviando...';
+  limpiarDebug();
+  dbg('ENVIAR iniciado','info');
+  dbg('Edificio: '+lnom,'info');
+  dbg('Codigo: '+regCode,'info');
+  dbg('TipoVisita: '+tipoVisita,'info');
 
   // Subir fotos/videos a Drive si hay archivos
   var driveLinks={};
@@ -3812,8 +3825,10 @@ async function enviar(finalizar){
       btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
       showToast('⚠️ Conectá Google Drive primero', true);
       actualizarEstadoDrive();
+      dbg('ERROR: sin token Drive','err');
       return;
     }
+    dbg('Token Drive OK, subiendo fotos...','info');
     btn.textContent='📤 Subiendo fotos...';
     try{
       await new Promise(function(resolve,reject){
@@ -3842,8 +3857,10 @@ async function enviar(finalizar){
           resolve();
         });
       });
+      dbg('Fotos subidas OK','ok');
       btn.textContent='⏳ Enviando...';
     }catch(e){
+      dbg('ERROR fotos: '+e.message,'err');
       showToast('⚠️ Error subiendo fotos: '+e.message+' — enviando igual');
       btn.textContent='⏳ Enviando...';
     }
@@ -3856,8 +3873,11 @@ async function enviar(finalizar){
     payload.data[0]['Fotos Drive']=allLinks.join(' | ');
   }
 
+  dbg('Enviando a SheetDB...','info');
+  dbg('Edificio en payload: '+(payload.data[0].Edificio||'VACIO'),'info');
   try{
     var r=await fetch(SHEETDB+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    dbg('SheetDB respuesta: '+r.status,'info');
     if(r.ok){
       showToast('✅ '+regCode+' enviado'+(Object.keys(driveLinks).length>0?' con fotos':''));
       // Si era obra finalizada: buscar todos los registros de la obra y parchear
@@ -3899,8 +3919,8 @@ async function enviar(finalizar){
       descontarStock(ivList);
       setTimeout(function(){location.reload();},2500);
     }
-    else throw new Error('Error '+r.status);
-  }catch(e){showToast('❌ '+e.message);btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';}
+    else{dbg('SheetDB fallo: '+r.status,'err');throw new Error('Error '+r.status);}
+  }catch(e){dbg('CATCH: '+e.message,'err');showToast('❌ '+e.message);btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';}
 }
 
 // ---------- STOCK ----------
@@ -4648,6 +4668,28 @@ function filtrarHist(){
 }
 
 // ══════════════════════════════════════════════════════════
+// DEBUG LOG (temporal)
+// ══════════════════════════════════════════════════════════
+function dbg(msg,tipo){
+  var el=document.getElementById('debugLog');
+  if(!el)return;
+  el.classList.add('on');
+  var line=document.createElement('div');
+  line.className='dbg-line '+(tipo==='ok'?'dbg-ok':tipo==='err'?'dbg-err':'dbg-info');
+  line.textContent=new Date().toTimeString().slice(0,8)+' '+msg;
+  el.appendChild(line);
+  el.scrollTop=el.scrollHeight;
+}
+function toggleDebug(){
+  var el=document.getElementById('debugLog');
+  if(el)el.classList.toggle('on');
+}
+function limpiarDebug(){
+  var el=document.getElementById('debugLog');
+  if(el){el.innerHTML='';el.classList.remove('on');}
+}
+
+// ══════════════════════════════════════════════════════════
 // ESTADO DRIVE — indicador visual + conexión explícita
 // ══════════════════════════════════════════════════════════
 
@@ -4875,5 +4917,7 @@ function parsearLinksArchivos(fotosStr){
   <option value="Cabina Ascensor 1"><option value="Cabina Ascensor 2">
   <option value="Cabina Ascensor 3"><option value="Cabina Ascensor 4">
 </datalist>
+<div id="debugLog"></div>
+<button id="debugToggle" onclick="toggleDebug()">🐛 LOG</button>
 </body>
 </html>
