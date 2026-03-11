@@ -636,7 +636,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="toast" id="toast"></div>
 
 <script>
-var SHEETDB = 'https://sheetdb.io/api/v1/pqo4oljkpi6dj';
+var SHEETDB = 'https://sheetdb.io/api/v1/pqo4oljkpi6dj'; // LEGACY
+var APIURL = 'https://script.google.com/macros/s/AKfycbxbWMbr2UGRLU-sfp7gb0iaTD8cWYygQF9zlCu7rTCAKM9w-PgskmzYe-UAy1h7bB0i/exec';
 var DRIVE_CLIENT_ID = '596065043884-v6thavfmpl82525rc9l31e4g2ge61c9c.apps.googleusercontent.com';
 var DRIVE_FOLDER_ROOT = '17eyldMB8FQb_vUj5NUrdhWh_AQnOjkQx';
 var driveToken = null;
@@ -690,7 +691,7 @@ async function loadEdif(){
     return;
   }
   try{
-    var r=await fetch(SHEETDB+'?sheet=Edificios&limit=2000');
+    var r=await fetch(API+'?sheet=Edificios&limit=2000');
     var j=await r.json();
     if(!Array.isArray(j)||!j.length){throw new Error('Sin datos');}
     edificios=j.filter(function(e){return e.ID||e.id;}).map(function(e){
@@ -710,7 +711,7 @@ async function loadPrecios(){
   if(cached&&Array.isArray(cached)&&cached.length){preciosConf=cached;return;}
   var c=cGet('pr');if(c)preciosConf=c;
   try{
-    var r=await fetch(SHEETDB+'?sheet=Config_Precios&limit=200');
+    var r=await fetch(API+'?sheet=Config_Precios&limit=200');
     preciosConf=await r.json();
     cSet('pr',preciosConf);
     cSetTTL('precios',preciosConf);
@@ -720,7 +721,7 @@ async function loadCat(){
   var cached=cGetTTL('cat');
   if(cached&&Array.isArray(cached)&&cached.length){catalogoMats=cached;return;}
   try{
-    var r=await fetch(SHEETDB+'?sheet=Catalogo_Materiales&limit=2000');
+    var r=await fetch(API+'?sheet=Catalogo_Materiales&limit=2000');
     var j=await r.json();
     if(Array.isArray(j)&&j.length){catalogoMats=j;cSetTTL('cat',j);}
   }catch(e){}
@@ -741,7 +742,7 @@ async function loadComp(){
   }
   // Fallback: cargar directo si preciosConf no está listo
   try{
-    var r=await fetch(SHEETDB+'?sheet=Config_Precios&limit=500');
+    var r=await fetch(API+'?sheet=Config_Precios&limit=500');
     var j=await r.json();
     if(Array.isArray(j)&&j.length){
       catalogoComp=j.filter(function(p){
@@ -758,7 +759,7 @@ async function loadMods(){
   var cached=cGetTTL('mods');
   if(cached&&Array.isArray(cached)&&cached.length){catalogoMods=cached;return;}
   try{
-    var r=await fetch(SHEETDB+'?sheet=Modificadores&limit=200');
+    var r=await fetch(API+'?sheet=Modificadores&limit=200');
     var j=await r.json();
     if(Array.isArray(j)&&j.length){catalogoMods=j;cSetTTL('mods',j);}
   }catch(e){}
@@ -768,7 +769,7 @@ async function loadUbicaciones(){
   var cached=cGetTTL('ubs');
   if(cached&&Array.isArray(cached)&&cached.length){window.catalogoUbicaciones=cached;return;}
   try{
-    var r=await fetch(SHEETDB+'?sheet=Ubicaciones&limit=200');
+    var r=await fetch(API+'?sheet=Ubicaciones&limit=200');
     var j=await r.json();
     if(Array.isArray(j)&&j.length){
       window.catalogoUbicaciones=j;
@@ -780,7 +781,7 @@ async function loadRegs(){
   var cont=document.getElementById('histLista');
   cont.innerHTML='<div class="hist-empty">Cargando...</div>';
   try{
-    var r=await fetch(SHEETDB+'?sheet=Registros&limit=5000');
+    var r=await fetch(API+'?sheet=Registros&limit=5000');
     var j=await r.json();
     if(!Array.isArray(j)){throw new Error('Error API: '+JSON.stringify(j).slice(0,80));}
     regCache=j.reverse();
@@ -1722,8 +1723,7 @@ async function mostrarAlertas(){
   // Traer registros del mes actual tipo Preventivo
   var hechos={};
   try{
-    var url=SHEETDB+'?sheet=Registros&limit=200&Fecha='+mes+'*';
-    var r=await fetch(SHEETDB+'?sheet=Registros&limit=5000');
+    var r=await fetch(API+'?sheet=Registros&limit=5000');
     var regs=await r.json();
     if(Array.isArray(regs)){
       regs.forEach(function(reg){
@@ -3818,19 +3818,19 @@ async function enviar(finalizar){
     payload.data[0]['Fotos Drive']=allLinks.join(' | ');
   }
 
-  dbg('Enviando a SheetDB...','info');
+  dbg('Enviando registro...','info');
   dbg('Edificio en payload: '+(payload.data[0].Edificio||'VACIO'),'info');
   dbg('Campos: '+Object.keys(payload.data[0]).join(', '),'info');
   dbg('JSON: '+JSON.stringify(payload.data[0]).slice(0,200),'info');
   try{
-    var r=await fetch(SHEETDB+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    dbg('SheetDB respuesta: '+r.status,'info');
+    var r=await fetch(API+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    dbg('API respuesta: '+r.status,'info');
     if(r.ok){
       showToast('✅ '+regCode+' enviado'+(Object.keys(driveLinks).length>0?' con fotos':''));
       // Si era obra finalizada: buscar todos los registros de la obra y parchear
       if(finalizar&&obraCode){
         try{
-          var rObra=await fetch(SHEETDB+'?sheet=Registros&limit=100');
+          var rObra=await fetch(API+'?sheet=Registros&limit=100');
           var jObra=await rObra.json();
           if(Array.isArray(jObra)){
             var regsObra=jObra.filter(function(r){return (r['Codigo Obra']||'')=== obraCode&&r.Estado!=='Finalizada';});
@@ -3838,10 +3838,7 @@ async function enviar(finalizar){
               var codR=regsObra[ri].Codigo;
               if(!codR)continue;
               try{
-                await fetch(SHEETDB+'/Codigo/'+encodeURIComponent(codR)+'?sheet=Registros',{
-                  method:'PATCH',headers:{'Content-Type':'application/json'},
-                  body:JSON.stringify({data:{Estado:'Finalizada'}})
-                });
+                await apiPatch('Registros','Codigo',codR,{Estado:'Finalizada'});
               }catch(ep){console.log('Error patch reg:',codR,ep);}
             }
           }
@@ -3854,11 +3851,7 @@ async function enviar(finalizar){
       if(window._ordenActiva){
         var ordCod=window._ordenActiva.Codigo;
         try{
-          await fetch(SHEETDB+'/Codigo/'+encodeURIComponent(ordCod)+'?sheet=Ordenes',{
-            method:'PATCH',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({data:{'Estado':'Resuelto','Codigo Registro':regCode}})
-          });
+          await apiPatch('Ordenes','Codigo',ordCod,{'Estado':'Resuelto','Codigo Registro':regCode});
         }catch(e){}
         window._ordenActiva=null;
       }
@@ -3866,7 +3859,7 @@ async function enviar(finalizar){
       descontarStock(ivList);
       setTimeout(function(){location.reload();},2500);
     }
-    else{dbg('SheetDB fallo: '+r.status,'err');throw new Error('Error '+r.status);}
+    else{dbg('API fallo: '+r.status,'err');throw new Error('Error '+r.status);}
   }catch(e){dbg('CATCH: '+e.message,'err');showToast('❌ '+e.message);btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';}
 }
 
@@ -3888,18 +3881,14 @@ async function descontarStock(ivs){
     try{
       var cant=usados[id];
       // Buscar el material en el catálogo para saber stock actual
-      var res=await fetch(SHEETDB+'?sheet=Catalogo_Materiales&ID='+encodeURIComponent(id));
+      var res=await fetch(API+'?sheet=Catalogo_Materiales&ID='+encodeURIComponent(id)+'&cache='+Date.now());
       var items=await res.json();
       if(!items||!items.length)continue;
       var item=items[0];
       var stockActual=parseFloat(item['Stock Camioneta']||0);
       var nuevoStock=stockActual-cant; // puede quedar negativo — Mario fue al proveedor
       // Actualizar
-      await fetch(SHEETDB+'/ID/'+encodeURIComponent(id)+'?sheet=Catalogo_Materiales',{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({data:{'Stock Camioneta':nuevoStock}})
-      });
+      await apiPatch('Catalogo_Materiales','ID',id,{'Stock Camioneta':nuevoStock});
     }catch(e){console.log('Error descontando stock ID '+id+':',e);}
   }
   // Actualizar caché local
@@ -3933,7 +3922,7 @@ function resetPanel(){
 async function cargarObrasEnCurso(){
   try{
     // Traer todos los registros de obra y filtrar en cliente
-    var r=await fetch(SHEETDB+'?sheet=Registros&limit=5000');
+    var r=await fetch(API+'?sheet=Registros&limit=5000');
     var j=await r.json();
     if(!Array.isArray(j)||!j.length){mostrarObras([]);return;}
     // Filtrar solo En curso (excluir Finalizada y otros)
@@ -4008,7 +3997,7 @@ function seleccionarObra(o){
 // ========== NOTAS DE OBRA (Mario) ==========
 async function cargarNotasObraM(obraCod){
   try{
-    var r=await fetch(SHEETDB+'?sheet=Notas_Obra&limit=500&cache='+Date.now());
+    var r=await fetch(API+'?sheet=Notas_Obra&limit=500&cache='+Date.now());
     var j=await r.json();
     var todas=Array.isArray(j)?j:[];
     return todas.filter(function(n){return (n.Codigo_Obra||'').trim()===obraCod.trim();});
@@ -4019,10 +4008,7 @@ async function marcarNotaVista(obraCod, notaFecha, notaTexto, btnEl){
   // SheetDB PATCH por Codigo_Obra + Fecha (combinación única)
   if(btnEl){btnEl.disabled=true;btnEl.textContent='...';}
   try{
-    await fetch(SHEETDB+'/Codigo_Obra/'+encodeURIComponent(obraCod)+'?sheet=Notas_Obra',{
-      method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({data:{Estado:'leida'}})
-    });
+    await apiPatch('Notas_Obra','Codigo_Obra',obraCod,{Estado:'leida'});
     if(btnEl){
       var card=btnEl.closest('.nota-mario');
       if(card){
@@ -4043,10 +4029,7 @@ async function enviarNotaMario(obraCod, texto, wrapEl, inputEl, btnEl){
   var fecha=ahora.toISOString().slice(0,10)+' '+ahora.toTimeString().slice(0,5);
   var nota={Codigo_Obra:obraCod,Texto:texto.trim(),Fecha:fecha,Autor:'Mario',Estado:'no_leida'};
   try{
-    await fetch(SHEETDB+'?sheet=Notas_Obra',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({data:nota})
-    });
+    await apiPost('Notas_Obra',nota);
     if(inputEl)inputEl.value='';
     if(btnEl)btnEl.disabled=false;
     // Recargar notas
@@ -4134,7 +4117,7 @@ async function cargarHistorialObra(obraCod){
   cont.style.display='block';
   cont.innerHTML='<div class="oh-titulo">📋 HISTORIAL '+esc(obraCod)+'</div><div class="oh-cargando">Cargando...</div>';
   try{
-    var r=await fetch(SHEETDB+'?sheet=Registros&limit=5000&cache='+Date.now());
+    var r=await fetch(API+'?sheet=Registros&limit=5000&cache='+Date.now());
     var j=await r.json();
     var jornadas=j.filter(function(reg){return (reg['Codigo Obra']||'')===obraCod;});
     jornadas.sort(function(a,b){return (a.Fecha||'')>(b.Fecha||'')?1:-1;});
@@ -4227,7 +4210,7 @@ var ordenesData=[];
 
 async function cargarOrdenes(){
   try{
-    var r=await fetch(SHEETDB+'?sheet=Ordenes&limit=200');
+    var r=await fetch(API+'?sheet=Ordenes&limit=200');
     var j=await r.json();
     if(!Array.isArray(j)){mostrarPillOrdenes();return;}
     ordenesData=j.filter(function(o){
@@ -4502,7 +4485,7 @@ function renderHist(regs){
 async function enviarAlerta(cod,lugar,msg,aform){
   var payload={data:[{Codigo:cod,Edificio:lugar,Tipo:'CORRECCIÓN',Mensaje:msg,Timestamp:new Date().toISOString(),Estado:'Pendiente revisión'}]};
   try{
-    var r=await fetch(SHEETDB+'?sheet=Alertas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var r=await fetch(API+'?sheet=Alertas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(r.ok){showToast('✅ Alerta enviada a Ali');aform.style.display='none';}
     else throw new Error('Error '+r.status);
   }catch(e){showToast('❌ '+e.message);}
@@ -4612,6 +4595,33 @@ function filtrarHist(){
     }
   });
   renderHist(fAgrupado);
+}
+
+// ══════════════════════════════════════════════════════════
+// API HELPER — compatible con Apps Script (solo GET/POST)
+// ══════════════════════════════════════════════════════════
+var API=APIURL;
+
+async function apiGet(sheet, params){
+  var url=API+'?sheet='+sheet;
+  if(params)Object.keys(params).forEach(function(k){url+='&'+k+'='+encodeURIComponent(params[k]);});
+  url+='&cache='+Date.now();
+  var r=await fetch(url);return await r.json();
+}
+async function apiPost(sheet,data){
+  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:Array.isArray(data)?data:[data]})});
+  return await r.json();
+}
+async function apiPatch(sheet,keyField,keyVal,newData){
+  // Apps Script: POST con _method=PATCH
+  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({_method:'PATCH',_key:keyField,_val:keyVal,data:newData})});
+  return await r.json();
+}
+async function apiDelete(sheet,keyField,keyVal){
+  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({_method:'DELETE',_key:keyField,_val:keyVal})});
+  return await r.json();
 }
 
 // ══════════════════════════════════════════════════════════
