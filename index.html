@@ -4616,6 +4616,14 @@ function abrirVisorArchivos(links, titulo){
     else fotos.push({link:link,fid:fid}); // por defecto foto
   });
 
+  // Pedir token para cargar imágenes autenticadas
+  getTokenDrive(function(token){
+    _abrirVisorConToken(fotos, videos, audios, titulo, token);
+  });
+}
+
+function _abrirVisorConToken(fotos, videos, audios, titulo, token){
+
   var ov=document.createElement('div');ov.className='visor-overlay';
 
   // Header
@@ -4642,12 +4650,19 @@ function abrirVisorArchivos(links, titulo){
       var thumb=document.createElement('div');thumb.className='visor-thumb';
       var loader=document.createElement('div');loader.className='visor-thumb-load';loader.textContent='⏳';
       thumb.appendChild(loader);
-      var img=new Image();
-      img.onload=function(){thumb.innerHTML='';thumb.appendChild(img);};
-      img.onerror=function(){loader.textContent='🖼️';};
-      img.src=thumbUrlDrive(f.fid);
-      img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-      thumb.onclick=(function(idx2){return function(){abrirLightbox(fotos,idx2);};})(idx);
+      // Cargar con token
+      (function(fid, thumbEl, i2){
+        fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?alt=media', {
+          headers:{Authorization:'Bearer '+token}
+        }).then(function(r){return r.blob();}).then(function(blob){
+          var url=URL.createObjectURL(blob);
+          var img=document.createElement('img');
+          img.src=url;
+          img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
+          thumbEl.innerHTML='';thumbEl.appendChild(img);
+          thumbEl.onclick=function(){abrirLightboxBlob(fotos,i2,token);};
+        }).catch(function(){loader.textContent='🖼️';});
+      })(f.fid, thumb, idx);
       grid.appendChild(thumb);
     });
     body.appendChild(grid);
@@ -4680,15 +4695,25 @@ function abrirVisorArchivos(links, titulo){
 }
 
 // Lightbox para ver fotos en grande con navegación
-function abrirLightbox(fotos, idx){
+function abrirLightboxBlob(fotos, idx, token){
   var lb=document.createElement('div');lb.className='visor-lb';
   var img=document.createElement('img');
+  img.style.cssText='max-width:100vw;max-height:85vh;object-fit:contain;border-radius:6px;';
   var cur=idx;
+  var blobCache={};
 
   function mostrar(i){
     cur=i;
     img.src='';
-    img.src=imgUrlDrive(fotos[i].fid);
+    img.style.opacity='0.3';
+    if(blobCache[i]){img.src=blobCache[i];img.style.opacity='1';return;}
+    fetch('https://www.googleapis.com/drive/v3/files/'+fotos[i].fid+'?alt=media',{
+      headers:{Authorization:'Bearer '+token}
+    }).then(function(r){return r.blob();}).then(function(blob){
+      var url=URL.createObjectURL(blob);
+      blobCache[i]=url;
+      img.src=url;img.style.opacity='1';
+    }).catch(function(){img.style.opacity='1';});
   }
 
   var cerrar=document.createElement('button');cerrar.className='visor-lb-cerrar';cerrar.textContent='✕';
@@ -4710,6 +4735,9 @@ function abrirLightbox(fotos, idx){
   mostrar(idx);
   document.body.appendChild(lb);
 }
+
+// Mantener función vieja por compatibilidad
+function abrirLightbox(fotos,idx){abrirLightboxBlob(fotos,idx,driveToken||'');}
 
 // Parsear links del campo Fotos Drive
 function parsearLinksArchivos(fotosStr){
