@@ -3875,6 +3875,8 @@ async function enviar(finalizar){
 
   dbg('Enviando a SheetDB...','info');
   dbg('Edificio en payload: '+(payload.data[0].Edificio||'VACIO'),'info');
+  dbg('Campos: '+Object.keys(payload.data[0]).join(', '),'info');
+  dbg('JSON: '+JSON.stringify(payload.data[0]).slice(0,200),'info');
   try{
     var r=await fetch(SHEETDB+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     dbg('SheetDB respuesta: '+r.status,'info');
