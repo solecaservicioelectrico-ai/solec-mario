@@ -2878,7 +2878,7 @@ async function subirTodosLosArchivos(edificio, regCod, onProgress) {
     if (onProgress) onProgress(i, total);
     try {
       var link = await subirArchivoViaScript(a, nombre, edificio, regCod, 'general');
-      if (link) links.push(link);
+      if (link) links.push(a.type+':'+link);
     } catch(e) {
       dbg('Error subiendo ' + nombre + ': ' + e.message, 'err');
     }
@@ -4465,7 +4465,14 @@ function renderHist(regs){
     var fotosLinks=parsearLinksArchivos(fotosStr);
     if(fotosLinks.length){
       var btnFotos=document.createElement('button');btnFotos.className='btn-ver-archivos';
-      btnFotos.innerHTML='📷 Ver archivos ('+fotosLinks.length+')';
+      var nFotos=fotosLinks.filter(function(x){return x.tipo==='foto';}).length;
+      var nVideos=fotosLinks.filter(function(x){return x.tipo==='video';}).length;
+      var nAudios=fotosLinks.filter(function(x){return x.tipo==='audio';}).length;
+      var partes=[];
+      if(nFotos)partes.push('📷 '+nFotos);
+      if(nVideos)partes.push('🎥 '+nVideos);
+      if(nAudios)partes.push('🎙️ '+nAudios);
+      btnFotos.innerHTML=partes.join('  ')+(partes.length?' — ':'')+' Ver archivos';
       (function(links,titulo){btnFotos.onclick=function(e){e.stopPropagation();abrirVisorArchivos(links,titulo);};})(fotosLinks, cod+' · '+lugar);
       body.appendChild(btnFotos);
     }
@@ -4705,16 +4712,15 @@ function imgUrlDrive(fileId){
 function abrirVisorArchivos(links, titulo){
   if(!links||!links.length){showToast('Sin archivos en este registro');return;}
   if(links.length===1){
-    window.open(links[0],'_blank');
+    window.open(links[0].link||links[0],'_blank');
     return;
   }
-  // Mostrar lista simple como toast con links
-  var msg='';
-  links.forEach(function(link,i){msg+=(i+1)+'. '+link+'\n';});
-  // Abrir todos en pestañas
   var confirmado=confirm('Abrir '+links.length+' archivos en Drive?');
   if(!confirmado)return;
-  links.forEach(function(link){window.open(link,'_blank');});
+  links.forEach(function(item){
+    var url=item.link||item;
+    window.open(url,'_blank');
+  });
 }
 function _abrirVisorConToken(fotos, videos, audios, titulo, token){
 
@@ -4807,7 +4813,14 @@ function abrirLightbox(fotos,idx){abrirLightboxBlob(fotos,idx,driveToken||'');}
 // Parsear links del campo Fotos Drive
 function parsearLinksArchivos(fotosStr){
   if(!fotosStr||!fotosStr.trim())return[];
-  return fotosStr.split('|').map(function(l){return l.trim();}).filter(Boolean);
+  return fotosStr.split('|').map(function(l){
+    var s=l.trim();
+    var tipo='foto',link=s;
+    if(s.startsWith('foto:')){tipo='foto';link=s.slice(5);}
+    else if(s.startsWith('video:')){tipo='video';link=s.slice(6);}
+    else if(s.startsWith('audio:')){tipo='audio';link=s.slice(6);}
+    return {tipo:tipo,link:link.trim()};
+  }).filter(function(x){return x.link;});
 }
 </script>
 <datalist id="pisos-dl">
