@@ -4715,10 +4715,7 @@ function abrirVisorArchivos(links, titulo){
     else fotos.push({link:link,fid:fid}); // por defecto foto
   });
 
-  // Pedir token para cargar imágenes autenticadas
-  getTokenDrive(function(token){
-    _abrirVisorConToken(fotos, videos, audios, titulo, token);
-  });
+  _abrirVisorConToken(fotos, videos, audios, titulo, '');
 }
 
 function _abrirVisorConToken(fotos, videos, audios, titulo, token){
@@ -4751,25 +4748,12 @@ function _abrirVisorConToken(fotos, videos, audios, titulo, token){
       thumb.appendChild(loader);
       // Cargar con token
       (function(fid, thumbEl, i2){
-        // Primero pedir metadata para obtener thumbnailLink
-        fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?fields=thumbnailLink', {
-          headers:{Authorization:'Bearer '+token}
-        }).then(function(r){return r.json();}).then(function(meta){
-          var thumbUrl=meta.thumbnailLink;
-          if(thumbUrl){
-            // Aumentar tamaño de miniatura a 400px
-            thumbUrl=thumbUrl.replace(/=s\d+$/,'=s400');
-            var img=document.createElement('img');
-            img.onload=function(){thumbEl.innerHTML='';thumbEl.appendChild(img);};
-            img.onerror=function(){loader.textContent='🖼️';};
-            img.src=thumbUrl;
-            img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-            thumbEl.onclick=function(){abrirLightboxBlob(fotos,i2,token);};
-          } else {
-            loader.textContent='🖼️';
-            thumbEl.onclick=function(){abrirLightboxBlob(fotos,i2,token);};
-          }
-        }).catch(function(){loader.textContent='🖼️';});
+        var img=document.createElement('img');
+        img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
+        img.src='https://drive.google.com/thumbnail?id='+fid+'&sz=w400';
+        img.onload=function(){thumbEl.innerHTML='';thumbEl.appendChild(img);};
+        img.onerror=function(){thumbEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;">🖼️</div>';};
+        thumbEl.onclick=function(){abrirLightboxBlob(fotos,i2,'');};
       })(f.fid, thumb, idx);
       grid.appendChild(thumb);
     });
@@ -4814,14 +4798,10 @@ function abrirLightboxBlob(fotos, idx, token){
     cur=i;
     img.src='';
     img.style.opacity='0.3';
-    if(blobCache[i]){img.src=blobCache[i];img.style.opacity='1';return;}
-    fetch('https://www.googleapis.com/drive/v3/files/'+fotos[i].fid+'?alt=media',{
-      headers:{Authorization:'Bearer '+token}
-    }).then(function(r){return r.blob();}).then(function(blob){
-      var url=URL.createObjectURL(blob);
-      blobCache[i]=url;
-      img.src=url;img.style.opacity='1';
-    }).catch(function(){img.style.opacity='1';});
+    // Usar URL directa de Drive (archivo público)
+    img.src='https://drive.google.com/uc?export=view&id='+fotos[i].fid;
+    img.onload=function(){img.style.opacity='1';};
+    img.onerror=function(){img.style.opacity='1';};
   }
 
   var cerrar=document.createElement('button');cerrar.className='visor-lb-cerrar';cerrar.textContent='✕';
