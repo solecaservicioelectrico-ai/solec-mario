@@ -4750,9 +4750,13 @@ function _abrirVisorConToken(fotos, videos, audios, titulo, token){
       (function(fid, thumbEl, i2){
         var img=document.createElement('img');
         img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-        img.src='https://drive.google.com/thumbnail?id='+fid+'&sz=w400';
+        img.src='https://lh3.googleusercontent.com/d/'+fid+'=w400';
         img.onload=function(){thumbEl.innerHTML='';thumbEl.appendChild(img);};
-        img.onerror=function(){thumbEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;">🖼️</div>';};
+        img.onerror=function(){
+          // Fallback: intentar con otra URL
+          img.src='https://drive.google.com/thumbnail?id='+fid+'&sz=w400';
+          img.onerror=function(){thumbEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;">🖼️</div>';};
+        };
         thumbEl.onclick=function(){abrirLightboxBlob(fotos,i2,'');};
       })(f.fid, thumb, idx);
       grid.appendChild(thumb);
@@ -4798,10 +4802,13 @@ function abrirLightboxBlob(fotos, idx, token){
     cur=i;
     img.src='';
     img.style.opacity='0.3';
-    // Usar URL directa de Drive (archivo público)
-    img.src='https://drive.google.com/uc?export=view&id='+fotos[i].fid;
+    img.src='https://lh3.googleusercontent.com/d/'+fotos[i].fid+'=w1200';
     img.onload=function(){img.style.opacity='1';};
-    img.onerror=function(){img.style.opacity='1';};
+    img.onerror=function(){
+      img.src='https://drive.google.com/thumbnail?id='+fotos[i].fid+'&sz=w1200';
+      img.onload=function(){img.style.opacity='1';};
+      img.onerror=function(){img.style.opacity='1';};
+    };
   }
 
   var cerrar=document.createElement('button');cerrar.className='visor-lb-cerrar';cerrar.textContent='✕';
