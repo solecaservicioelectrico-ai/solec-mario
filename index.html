@@ -3823,7 +3823,7 @@ async function enviar(finalizar){
   dbg('Campos: '+Object.keys(payload.data[0]).join(', '),'info');
   dbg('JSON: '+JSON.stringify(payload.data[0]).slice(0,200),'info');
   try{
-    var r=await fetch(API+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var r=await fetch(API+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
     dbg('API respuesta: '+r.status,'info');
     if(r.ok){
       showToast('✅ '+regCode+' enviado'+(Object.keys(driveLinks).length>0?' con fotos':''));
@@ -4485,7 +4485,7 @@ function renderHist(regs){
 async function enviarAlerta(cod,lugar,msg,aform){
   var payload={data:[{Codigo:cod,Edificio:lugar,Tipo:'CORRECCIÓN',Mensaje:msg,Timestamp:new Date().toISOString(),Estado:'Pendiente revisión'}]};
   try{
-    var r=await fetch(API+'?sheet=Alertas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var r=await fetch(API+'?sheet=Alertas',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
     if(r.ok){showToast('✅ Alerta enviada a Ali');aform.style.display='none';}
     else throw new Error('Error '+r.status);
   }catch(e){showToast('❌ '+e.message);}
@@ -4609,17 +4609,17 @@ async function apiGet(sheet, params){
   var r=await fetch(url);return await r.json();
 }
 async function apiPost(sheet,data){
-  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:Array.isArray(data)?data:[data]})});
+  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({data:Array.isArray(data)?data:[data]})});
   return await r.json();
 }
 async function apiPatch(sheet,keyField,keyVal,newData){
   // Apps Script: POST con _method=PATCH
-  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'application/json'},
+  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'text/plain'},
     body:JSON.stringify({_method:'PATCH',_key:keyField,_val:keyVal,data:newData})});
   return await r.json();
 }
 async function apiDelete(sheet,keyField,keyVal){
-  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'application/json'},
+  var r=await fetch(API+'?sheet='+sheet,{method:'POST',headers:{'Content-Type':'text/plain'},
     body:JSON.stringify({_method:'DELETE',_key:keyField,_val:keyVal})});
   return await r.json();
 }
