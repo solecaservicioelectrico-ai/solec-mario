@@ -4737,54 +4737,26 @@ function _abrirVisorConToken(fotos, videos, audios, titulo, token){
     body.appendChild(emp);
   }
 
-  // FOTOS
-  if(fotos.length){
-    var tFotos=document.createElement('div');tFotos.className='visor-seccion-tit';tFotos.textContent='Fotos ('+fotos.length+')';
-    body.appendChild(tFotos);
-    var grid=document.createElement('div');grid.className='visor-grid';
-    fotos.forEach(function(f,idx){
-      var thumb=document.createElement('div');thumb.className='visor-thumb';
-      var loader=document.createElement('div');loader.className='visor-thumb-load';loader.textContent='⏳';
-      thumb.appendChild(loader);
-      // Cargar con token
-      (function(fid, thumbEl, i2){
-        var img=document.createElement('img');
-        img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-        img.src='https://lh3.googleusercontent.com/d/'+fid+'=w400';
-        img.onload=function(){thumbEl.innerHTML='';thumbEl.appendChild(img);};
-        img.onerror=function(){
-          // Fallback: intentar con otra URL
-          img.src='https://drive.google.com/thumbnail?id='+fid+'&sz=w400';
-          img.onerror=function(){thumbEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;">🖼️</div>';};
-        };
-        thumbEl.onclick=function(){abrirLightboxBlob(fotos,i2,'');};
-      })(f.fid, thumb, idx);
-      grid.appendChild(thumb);
-    });
-    body.appendChild(grid);
-  }
+  // Todos los archivos como botones que abren en Drive
+  var todos = fotos.map(function(f,i){return {link:f.link,fid:f.fid,tipo:'foto',num:i+1};})
+    .concat(videos.map(function(v,i){return {link:v.link,fid:v.fid,tipo:'video',num:i+1};}))
+    .concat(audios.map(function(a,i){return {link:a.link,fid:a.fid,tipo:'audio',num:i+1};}))
+    .concat(otros.map(function(o,i){return {link:o.link,fid:o.fid,tipo:'archivo',num:i+1};}));
 
-  // VIDEOS
-  if(videos.length){
-    var tVid=document.createElement('div');tVid.className='visor-seccion-tit';tVid.textContent='Videos ('+videos.length+')';
-    body.appendChild(tVid);
-    videos.forEach(function(v,i){
-      var a=document.createElement('a');a.className='visor-media-btn';a.href=v.link;a.target='_blank';a.rel='noopener';
-      a.innerHTML='<span class="visor-media-icon">🎬</span><div class="visor-media-info"><div class="visor-media-nom">Video '+(i+1)+'</div><div class="visor-media-sub">Toca para abrir en Drive</div></div><span style="color:var(--t3);font-size:18px;">↗</span>';
-      body.appendChild(a);
-    });
-  }
-
-  // AUDIOS
-  if(audios.length){
-    var tAud=document.createElement('div');tAud.className='visor-seccion-tit';tAud.textContent='Audios ('+audios.length+')';
-    body.appendChild(tAud);
-    audios.forEach(function(au,i){
-      var a=document.createElement('a');a.className='visor-media-btn';a.href=au.link;a.target='_blank';a.rel='noopener';
-      a.innerHTML='<span class="visor-media-icon">🎙️</span><div class="visor-media-info"><div class="visor-media-nom">Audio '+(i+1)+'</div><div class="visor-media-sub">Toca para abrir en Drive</div></div><span style="color:var(--t3);font-size:18px;">↗</span>';
-      body.appendChild(a);
-    });
-  }
+  todos.forEach(function(arch){
+    var icon = arch.tipo==='foto'?'📷':arch.tipo==='video'?'🎥':arch.tipo==='audio'?'🎙️':'📎';
+    var label = arch.tipo==='foto'?'Foto':arch.tipo==='video'?'Video':arch.tipo==='audio'?'Audio':'Archivo';
+    var a=document.createElement('a');
+    a.href=arch.link;
+    a.target='_blank';
+    a.rel='noopener';
+    a.className='visor-media-btn';
+    a.innerHTML='<span class="visor-media-icon">'+icon+'</span>'
+      +'<div class="visor-media-info"><div class="visor-media-nom">'+label+' '+arch.num+'</div>'
+      +'<div class="visor-media-sub">Tocar para abrir</div></div>'
+      +'<span style="color:var(--t3);font-size:18px;">↗</span>';
+    body.appendChild(a);
+  });
 
   ov.appendChild(body);
   document.body.appendChild(ov);
