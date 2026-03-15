@@ -581,15 +581,27 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
     <!-- BLOQUE GLOBAL FOTOS -->
     <div id="bloqueFoGlobal" style="margin:12px 0;">
-      <button class="bnueva" id="btnAbrirFotos" onclick="toggleBloqueGlobal('fotos')" style="background:var(--s2);color:var(--t);border:2px solid var(--borde);">
-        <div class="bplus" id="bplusFotos">+</div>FOTOS / VIDEOS
-        <span id="foGlobalCnt" style="margin-left:10px;background:var(--am);color:#000;border-radius:10px;padding:1px 8px;font-size:13px;font-weight:800;display:none;"></span>
-      </button>
-      <div id="foGlobalBody" style="display:none;background:var(--s2);border:1px solid var(--borde);border-radius:var(--r);padding:14px;margin-top:4px;">
-        <button style="width:100%;background:var(--s3);border:2px dashed var(--borde);border-radius:var(--rs);padding:16px;color:var(--t2);font-size:15px;font-weight:700;cursor:pointer;text-align:center;" onclick="document.getElementById('foGlobalInp').click()">📷 Tocar para agregar fotos o video</button>
-        <input type="file" id="foGlobalInp" multiple accept="image/*,video/*" style="display:none;">
-        <div id="foGlobalPrev" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
-        <div style="font-size:11px;color:var(--t3);font-weight:600;margin-top:6px;">Las fotos se comprimen automáticamente. Videos: grabar en calidad media.</div>
+      <div style="background:var(--s2);border:1px solid var(--borde);border-radius:var(--r);padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--t);">📎 ARCHIVOS</span>
+          <span id="foGlobalCnt" style="background:var(--am);color:#000;border-radius:10px;padding:2px 10px;font-size:13px;font-weight:800;display:none;"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+          <button onclick="document.getElementById('foInpFoto').click()" style="background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 8px;color:var(--t2);font-size:13px;font-weight:800;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <span style="font-size:26px;">📷</span>FOTOS
+          </button>
+          <button onclick="document.getElementById('foInpVideo').click()" style="background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 8px;color:var(--t2);font-size:13px;font-weight:800;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <span style="font-size:26px;">🎥</span>VIDEO
+          </button>
+          <button onclick="document.getElementById('foInpAudio').click()" style="background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 8px;color:var(--t2);font-size:13px;font-weight:800;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <span style="font-size:26px;">🎙️</span>AUDIO
+          </button>
+        </div>
+        <input type="file" id="foInpFoto" accept="image/*" capture="environment" multiple style="display:none;" onchange="agregarArchivosGlobal(this,'foto')">
+        <input type="file" id="foInpVideo" accept="video/*" capture="environment" style="display:none;" onchange="agregarArchivosGlobal(this,'video')">
+        <input type="file" id="foInpAudio" accept="audio/*" capture="microphone" style="display:none;" onchange="agregarArchivosGlobal(this,'audio')">
+        <div id="foGlobalPrev" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        <div id="foUploadProgress" style="display:none;margin-top:10px;"></div>
       </div>
     </div>
 
@@ -2713,13 +2725,6 @@ function prevF(id){
   if(!archivosIv[id])archivosIv[id]=[];
   var nuevos=Array.from(inp.files);
   inp.value=''; // reset input para poder volver a seleccionar
-  // Pre-autenticar Drive al agregar fotos — evita interrupciones al enviar
-  if(nuevos.length>0){
-    setTimeout(function(){
-      if(!driveToken)getTokenDrive(function(){actualizarEstadoDrive();});
-      else actualizarEstadoDrive();
-    },300);
-  }
   nuevos.forEach(function(f){
     if(f.type.startsWith('image/')){
       comprimirFoto(f,function(blob,dataUrl){
@@ -2781,68 +2786,105 @@ function renderPrevF(id){
   if(cnt)cnt.textContent=archivos.length>0?archivos.length+' archivo'+(archivos.length>1?'s':''):'';
 }
 
-// ---------- GOOGLE DRIVE ----------
+// ---------- SUBIDA DE ARCHIVOS VIA APPS SCRIPT ----------
 
-function getTokenDrive(cb){
-  // Si token vigente en memoria, reusar
-  if(driveToken&&Date.now()<driveTokenExpiry){cb(driveToken);return;}
-  // Limpiar hint corrupto si existe
-  try{localStorage.removeItem('driveTokenData');}catch(e){}
-  // Siempre pedir cuenta explícitamente — evita error 400 de Google
-  var client=google.accounts.oauth2.initTokenClient({
-    client_id:DRIVE_CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/drive.file',
-    callback:function(resp){
-      if(resp.error){showToast('Error Google Drive: '+resp.error);return;}
-      driveToken=resp.access_token;
-      driveTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
-      cb(driveToken);
+function agregarArchivosGlobal(inp, tipo) {
+  var archivos = Array.from(inp.files);
+  inp.value = '';
+  if (!archivos.length) return;
+  archivos.forEach(function(f) {
+    if (tipo === 'foto') {
+      comprimirFoto(f, function(blob, dataUrl) {
+        archivosGlobal.push({blob:blob, name:f.name, type:'foto', dataUrl:dataUrl});
+        renderPrevGlobal();
+      });
+    } else {
+      var MAX = 50 * 1024 * 1024; // 50MB
+      if (f.size > MAX) { showToast('⚠️ Archivo demasiado grande (máx 50MB)'); return; }
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        archivosGlobal.push({blob:f, name:f.name, type:tipo, dataUrl:ev.target.result});
+        renderPrevGlobal();
+      };
+      reader.readAsDataURL(f);
     }
   });
-  client.requestAccessToken({prompt:'select_account'});
 }
 
-async function crearCarpetaDrive(nombre,parentId,token){
-  var meta={name:nombre,mimeType:'application/vnd.google-apps.folder',parents:[parentId]};
-  // Verificar si ya existe
-  var q=encodeURIComponent("name='"+nombre+"' and '"+parentId+"' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");
-  var check=await fetch('https://www.googleapis.com/drive/v3/files?q='+q+'&fields=files(id,name)',
-    {headers:{Authorization:'Bearer '+token}});
-  var chkJ=await check.json();
-  if(chkJ.files&&chkJ.files.length>0)return chkJ.files[0].id;
-  // Crear nueva
-  var r=await fetch('https://www.googleapis.com/drive/v3/files',{
-    method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify(meta)
+function renderPrevGlobal() {
+  var p = document.getElementById('foGlobalPrev'); if (!p) return;
+  p.innerHTML = '';
+  archivosGlobal.forEach(function(a, i) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;display:inline-block;';
+    if (a.type === 'foto' && a.dataUrl) {
+      var img = document.createElement('img'); img.src = a.dataUrl;
+      img.style.cssText = 'width:70px;height:70px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--borde);display:block;';
+      wrap.appendChild(img);
+    } else {
+      var icon = a.type === 'video' ? '🎥' : '🎙️';
+      var d = document.createElement('div');
+      d.style.cssText = 'width:70px;height:70px;background:var(--s3);border-radius:var(--rs);border:1px solid var(--borde);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;color:var(--t2);text-align:center;padding:4px;';
+      d.innerHTML = icon + '<span style="font-size:9px;margin-top:4px;">' + (a.blob.size/1024/1024).toFixed(1) + 'MB</span>';
+      wrap.appendChild(d);
+    }
+    var del = document.createElement('button');
+    del.style.cssText = 'position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--rojo);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;';
+    del.textContent = '✕';
+    (function(idx){del.addEventListener('click',function(){archivosGlobal.splice(idx,1);renderPrevGlobal();});})(i);
+    wrap.appendChild(del); p.appendChild(wrap);
   });
-  var j=await r.json();return j.id;
+  var cnt = document.getElementById('foGlobalCnt');
+  if (cnt) { cnt.textContent = archivosGlobal.length || ''; cnt.style.display = archivosGlobal.length ? 'inline-block' : 'none'; }
 }
 
-async function subirArchivoDrive(blob,nombre,folderId,token){
-  var meta={name:nombre,parents:[folderId]};
-  var form=new FormData();
-  form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
-  form.append('file',blob,nombre);
-  var r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{
-    method:'POST',headers:{Authorization:'Bearer '+token},body:form
+function blobToBase64(blob) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
-  return await r.json();
 }
 
-async function subirArchivosDrive(ivId,edificio,regCod,token){
-  var archivos=archivosIv[ivId]||[];
-  if(!archivos.length)return[];
-  // Estructura: SOLEC Registros / Edificio / Codigo Registro / iv1, iv2...
-  var fEdif=await crearCarpetaDrive(edificio||'Sin edificio',DRIVE_FOLDER_ROOT,token);
-  var fReg=await crearCarpetaDrive(regCod||'SIN-CODIGO',fEdif,token);
-  var fIv=await crearCarpetaDrive(ivId,fReg,token);
-  // Subir todas en paralelo
-  var promesas=archivos.map(function(a,i){
-    var nombre=(i+1)+'_'+a.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-    return subirArchivoDrive(a.blob,nombre,fIv,token);
+async function subirArchivoViaScript(archivo, nombre, edificio, regCod, carpeta) {
+  var base64 = await blobToBase64(archivo.blob);
+  var mimeType = archivo.blob.type || (archivo.type === 'foto' ? 'image/jpeg' : archivo.type === 'video' ? 'video/mp4' : 'audio/mpeg');
+  var body = {
+    _method: 'UPLOAD',
+    edificio: edificio || 'Sin edificio',
+    regCod: regCod || 'SIN-CODIGO',
+    carpeta: carpeta || 'general',
+    nombre: nombre,
+    mimeType: mimeType,
+    data: base64
+  };
+  var r = await fetch(API + '?sheet=Registros', {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(body)
   });
-  var resultados=await Promise.all(promesas);
-  return resultados.filter(function(r){return r&&r.webViewLink;}).map(function(r){return r.webViewLink;});
+  var j = await r.json();
+  return j.webViewLink || j.link || null;
+}
+
+async function subirTodosLosArchivos(edificio, regCod, onProgress) {
+  var links = [];
+  var total = archivosGlobal.length;
+  if (!total) return links;
+  for (var i = 0; i < total; i++) {
+    var a = archivosGlobal[i];
+    var nombre = (i+1) + '_' + a.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    if (onProgress) onProgress(i, total);
+    try {
+      var link = await subirArchivoViaScript(a, nombre, edificio, regCod, 'general');
+      if (link) links.push(link);
+    } catch(e) {
+      dbg('Error subiendo ' + nombre + ': ' + e.message, 'err');
+    }
+  }
+  if (onProgress) onProgress(total, total);
+  return links;
 }
 
 // ---------- UBICACIONES ----------
@@ -3198,12 +3240,6 @@ function prevFGlobal(){
   var inp=document.getElementById('foGlobalInp');
   if(!inp)return;
   var nuevos=Array.from(inp.files);inp.value='';
-  if(nuevos.length>0){
-    setTimeout(function(){
-      if(!driveToken)getTokenDrive(function(){actualizarEstadoDrive();});
-      else actualizarEstadoDrive();
-    },300);
-  }
   nuevos.forEach(function(f){
     if(f.type.startsWith('image/')){
       comprimirFoto(f,function(blob,dataUrl){
@@ -3766,51 +3802,29 @@ async function enviar(finalizar){
   dbg('Codigo: '+regCode,'info');
   dbg('TipoVisita: '+tipoVisita,'info');
 
-  // Subir fotos/videos a Drive si hay archivos
+  // Subir archivos a Drive via Apps Script
   var driveLinks={};
-  var hayArchivos=ivList.some(function(iv){return (archivosIv[iv.id]||[]).length>0;})||archivosGlobal.length>0;
+  var hayArchivos=archivosGlobal.length>0;
   if(hayArchivos){
-    dbg('Fotos desactivadas temporalmente — enviando sin Drive','info');
-    showToast('⚠️ Fotos desactivadas temporalmente');
-    if(false){ // BLOQUE DRIVE DESACTIVADO
-    btn.textContent='📤 Subiendo fotos...';
+    btn.textContent='📤 Subiendo archivos...';
+    var progEl=document.getElementById('foUploadProgress');
+    if(progEl){progEl.style.display='block';progEl.innerHTML='<div style="font-size:13px;color:var(--t2);font-weight:700;">Subiendo 1 de '+archivosGlobal.length+'...</div>';}
     try{
-      await new Promise(function(resolve,reject){
-        getTokenDrive(async function(token){
-          for(var i=0;i<ivList.length;i++){
-            var iv=ivList[i];
-            if((archivosIv[iv.id]||[]).length>0){
-              var links=await subirArchivosDrive(iv.id,lnom,regCode,token);
-              if(links.length)driveLinks[iv.id]=links;
-            }
-          }
-          // Subir archivos globales
-          if(archivosGlobal.length>0){
-            var fGlob=await crearCarpetaDrive(lnom||'Sin edificio',DRIVE_FOLDER_ROOT,token);
-            var fRegG=await crearCarpetaDrive(regCode||'SIN-CODIGO',fGlob,token);
-            var fGeneral=await crearCarpetaDrive('general',fRegG,token);
-            // Subir archivos globales en paralelo
-            var promsG=archivosGlobal.map(function(ag,j){
-              var nomG=(j+1)+'_'+ag.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-              return subirArchivoDrive(ag.blob,nomG,fGeneral,token);
-            });
-            var resulsG=await Promise.all(promsG);
-            var linksG=resulsG.filter(function(r){return r&&r.webViewLink;}).map(function(r){return r.webViewLink;});
-            if(linksG.length)driveLinks['general']=linksG;
-          }
-          resolve();
-        });
+      var links=await subirTodosLosArchivos(lnom,regCode,function(actual,total){
+        if(progEl)progEl.innerHTML='<div style="font-size:13px;color:var(--t2);font-weight:700;">Subiendo '+(actual+1)+' de '+total+'...</div>'
+          +'<div style="height:6px;background:var(--s3);border-radius:3px;margin-top:6px;"><div style="height:6px;background:var(--am);border-radius:3px;width:'+(Math.round(actual/total*100))+'%;transition:width .3s;"></div></div>';
       });
-      dbg('Fotos subidas OK','ok');
+      if(links.length){driveLinks['general']=links;}
+      dbg('Archivos subidos: '+links.length,'ok');
+      if(progEl)progEl.style.display='none';
       btn.textContent='⏳ Enviando...';
     }catch(e){
-      dbg('ERROR fotos: '+e.message,'err');
-      showToast('⚠️ Error subiendo fotos: '+e.message+' — enviando igual');
+      dbg('ERROR archivos: '+e.message,'err');
+      showToast('⚠️ Error subiendo archivos — enviando igual');
+      if(progEl)progEl.style.display='none';
       btn.textContent='⏳ Enviando...';
     }
   }
-
-  } // FIN BLOQUE DRIVE DESACTIVADO
   // Agregar links de Drive al payload
   if(Object.keys(driveLinks).length>0){
     var allLinks=[];
@@ -4650,29 +4664,8 @@ function limpiarDebug(){
 // ESTADO DRIVE — indicador visual + conexión explícita
 // ══════════════════════════════════════════════════════════
 
-function actualizarEstadoDrive(){
-  var el=document.getElementById('driveStatus');
-  if(!el)return;
-  var hayFotos=archivosGlobal.length>0||Object.values(archivosIv||{}).some(function(a){return a.length>0;});
-  if(!hayFotos){el.style.display='none';return;}
-  el.style.display='block';
-  if(driveToken&&Date.now()<driveTokenExpiry){
-    el.style.background='rgba(0,200,100,.15)';
-    el.style.border='1.5px solid rgba(0,200,100,.4)';
-    el.style.color='#00c864';
-    el.textContent='✅ Google Drive conectado';
-  } else {
-    el.style.background='rgba(255,71,87,.15)';
-    el.style.border='1.5px solid rgba(255,71,87,.4)';
-    el.style.color='#ff4757';
-    el.textContent='⚠️ Tocar aquí para conectar Google Drive antes de enviar';
-  }
-}
-
-function conectarDrive(){
-  if(driveToken&&Date.now()<driveTokenExpiry)return;
-  getTokenDrive(function(){actualizarEstadoDrive();});
-}
+function actualizarEstadoDrive(){ /* OAuth desactivado */ }
+function conectarDrive(){ /* OAuth desactivado */ }
 
 // ══════════════════════════════════════════════════════════
 // VISOR DE ARCHIVOS DRIVE
