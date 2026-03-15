@@ -4704,20 +4704,37 @@ function imgUrlDrive(fileId){
 
 function abrirVisorArchivos(links, titulo){
   if(!links||!links.length){showToast('Sin archivos en este registro');return;}
-
-  // Separar por tipo
-  var fotos=[], videos=[], audios=[], otros=[];
-  links.forEach(function(link){
-    var fid=extraerFileId(link);
-    if(!fid){otros.push({link:link,fid:null});return;}
-    if(esVideo(link)) videos.push({link:link,fid:fid});
-    else if(esAudio(link)) audios.push({link:link,fid:fid});
-    else fotos.push({link:link,fid:fid}); // por defecto foto
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;flex-direction:column;overflow:hidden;';
+  var hdr=document.createElement('div');
+  hdr.style.cssText='padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borde);flex-shrink:0;';
+  var tit=document.createElement('div');
+  tit.textContent='Archivos '+(titulo||'');
+  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--am);';
+  var cerrar=document.createElement('button');
+  cerrar.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:50%;width:34px;height:34px;color:var(--t);font-size:16px;cursor:pointer;';
+  cerrar.textContent='X';
+  cerrar.onclick=function(){document.body.removeChild(ov);};
+  hdr.appendChild(tit);hdr.appendChild(cerrar);ov.appendChild(hdr);
+  var body=document.createElement('div');
+  body.style.cssText='flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;';
+  links.forEach(function(link,i){
+    var ll=link.toLowerCase();
+    var tipo,icon;
+    if(ll.indexOf('mp4')!==-1||ll.indexOf('mov')!==-1||ll.indexOf('3gp')!==-1||ll.indexOf('avi')!==-1){tipo='Video';icon='VIDEO';}
+    else if(ll.indexOf('mp3')!==-1||ll.indexOf('m4a')!==-1||ll.indexOf('ogg')!==-1||ll.indexOf('wav')!==-1||ll.indexOf('aac')!==-1){tipo='Audio';icon='AUDIO';}
+    else{tipo='Foto';icon='FOTO';}
+    var a=document.createElement('a');
+    a.href=link;a.target='_blank';a.rel='noopener';
+    a.style.cssText='display:flex;align-items:center;gap:14px;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:14px 16px;text-decoration:none;color:var(--t);';
+    a.innerHTML='<div style="background:var(--am);color:#000;font-weight:900;font-size:11px;padding:4px 8px;border-radius:6px;">'+icon+'</div>'
+      +'<div style="flex:1;font-weight:800;font-size:15px;">'+tipo+' '+(i+1)+'<div style="font-size:12px;color:var(--t2);font-weight:600;">Tocar para abrir en Drive</div></div>'
+      +'<div style="color:var(--t3);font-size:20px;">&#8599;</div>';
+    body.appendChild(a);
   });
-
-  _abrirVisorConToken(fotos, videos, audios, titulo, '');
+  ov.appendChild(body);
+  document.body.appendChild(ov);
 }
-
 function _abrirVisorConToken(fotos, videos, audios, titulo, token){
 
   var ov=document.createElement('div');ov.className='visor-overlay';
