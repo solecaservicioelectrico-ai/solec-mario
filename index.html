@@ -3566,10 +3566,14 @@ function calcCosto(id){
     base=compMulti[id].reduce(function(s,x){
       var precioComp=getPrecio(catk,sc,ev,x.nombre);
       var qty=x.qty||1;
-      // Cable UTP: calcular bocas (1 boca cada 5m, redondeado hacia arriba)
-      if(x.nombre.toLowerCase().indexOf('cable utp')!==-1){
+      var xLow=(x.nombre||'').toLowerCase();
+      if(xLow.indexOf('cable utp')!==-1){
         var bocas=Math.ceil(qty/5);
         return s+precioComp*bocas;
+      }
+      // Tiras LED, perfiles, barrales: precio por metro directo
+      if(xLow.indexOf('tira de led')!==-1||xLow.indexOf('perfil p/tira')!==-1||xLow.indexOf('barral riel')!==-1||xLow.indexOf('liston p/tubo')!==-1){
+        return s+precioComp*qty;
       }
       return s+precioComp*qty;
     },0);
