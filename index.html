@@ -2107,7 +2107,10 @@ function getPrecio(catk,sc,ev,comp){
   // Nivel 4: mismo comp en CUALQUIER evento de cat (sin sc)
   var r4=rows.filter(function(p){if(nn(p.categoria)!==lN)return false;var pc=nn(p.componente);return pc&&pc!=='(cualquier componente)'&&(pc===compN||pc.indexOf(compN)!==-1||compN.indexOf(pc)!==-1);})[0];
   if(r4)return parseFloat(r4.precio_mo)||5000;
-  // Nivel 5: fallback genérico cat+sc+ev con (cualquier componente)
+  // Nivel 5: fallback — buscar mismo componente en evento "Reemplazo" de cat+sc
+  var r5b=rows.filter(function(p){if(nn(p.categoria)!==lN||nn(p.subcategoria)!==scN)return false;if(nn(p.evento)!=='reemplazo')return false;var pc=nn(p.componente);return pc&&pc!=='(cualquier componente)'&&(pc===compN||pc.indexOf(compN)!==-1||compN.indexOf(pc)!==-1);})[0];
+  if(r5b)return parseFloat(r5b.precio_mo)||5000;
+  // Nivel 6: fallback genérico cat+sc+ev con (cualquier componente)
   var r5=rows.filter(function(p){return nn(p.categoria)===lN&&nn(p.subcategoria)===scN&&nn(p.evento)===evN&&nn(p.componente||'').indexOf('cualquier')!==-1;})[0];
   if(r5)return parseFloat(r5.precio_mo)||5000;
   // Nivel 6: fallback genérico cat+ev con (cualquier componente)
