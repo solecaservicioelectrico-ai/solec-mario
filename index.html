@@ -2266,7 +2266,7 @@ function buildIv(num,id){
           qEl.addEventListener('click',function(){
             if(esMetroComp){
               abrirRuedaMetros(function(v){
-                ubPorIv[id][i2].qty=parseInt(v)||1;
+                ubPorIv[id][i2].qty=parseFloat(v)||1;
                 qEl.textContent=ubPorIv[id][i2].qty;
                 updR(id);
               });
@@ -2989,12 +2989,14 @@ function abrirModalUbNuevo(ivId, onClose){
   var btnOk=document.createElement('button');btnOk.className='qty-ok';btnOk.textContent='LISTO';
   var btnCan=document.createElement('button');btnCan.className='qty-cancel';btnCan.textContent='Cancelar';
   btnOk.addEventListener('click',function(){
-    // Si hay texto escrito y no está tildado nada de la lista filtrada, agregar el texto como ubicación libre
+    // Si hay texto escrito que no está en la lista ni ya tildado, agregarlo siempre
     var textoBuscador=(sinp.value||'').trim();
-    if(textoBuscador&&!Object.keys(tempSel).some(function(u){return tempSel[u];})){
+    if(textoBuscador&&!lista.some(function(u){return u.toLowerCase()===textoBuscador.toLowerCase();})&&!tempSel[textoBuscador]){
       tempSel[textoBuscador]=true;
-    } else if(textoBuscador&&!lista.some(function(u){return u.toLowerCase()===textoBuscador.toLowerCase();})&&!tempSel[textoBuscador]){
-      tempSel[textoBuscador]=true;
+    } else if(textoBuscador&&lista.some(function(u){return u.toLowerCase()===textoBuscador.toLowerCase();})){
+      // Si coincide con uno de la lista, tildarlo
+      var encontrado=lista.find(function(u){return u.toLowerCase()===textoBuscador.toLowerCase();});
+      if(encontrado)tempSel[encontrado]=true;
     }
     var nuevas=Object.keys(tempSel).filter(function(u){return tempSel[u];});
     ubPorIv[ivId]=nuevas.map(function(u){
@@ -3624,7 +3626,7 @@ function calcCosto(id){
   } else if(esMetroComp2){
     // Para componentes por metro: qty de la ubicación son los metros
     var ubs=ubPorIv[id]||[];
-    var totalMetros=ubs.reduce(function(s,u){return s+(parseInt(u.qty)||1);},0);
+    var totalMetros=ubs.reduce(function(s,u){return s+(parseFloat(u.qty)||1);},0);
     if(totalMetros>0)qtyUb=totalMetros;
   }
   var total=Math.round(base*qtyUb),dets=[];
