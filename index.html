@@ -2196,6 +2196,7 @@ function buildIv(num,id){
     var sc2=iv2?iv2.data.sc||'':'';
     var co2=coSel.value;
     var canComp=['Canalización embutir','Canalización exterior','Bandeja portacable'];
+    var metrosComp=['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt','Liston p/tubo simple o doble'];
     if(catk2==='en'&&sc2==='Canalización'&&canComp.indexOf(co2)!==-1){
       abrirRuedaMetros(function(metros){
         abrirRuedaCurvas(metros,function(m,c){
@@ -2208,6 +2209,12 @@ function buildIv(num,id){
       abrirSelectorCablecanal(function(tramo,bocas,curvas){
         if(!iv2.data)iv2.data={};
         iv2.data.ccTramo=tramo;iv2.data.ccBocas=bocas;iv2.data.ccCurvas=curvas;
+        updR(id);
+      });
+    } else if(['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt'].indexOf(co2)!==-1){
+      abrirRuedaMetros(function(metros){
+        if(!iv2.data)iv2.data={};
+        iv2.data.ledMetros=metros;
         updR(id);
       });
     } else {
@@ -2253,16 +2260,27 @@ function buildIv(num,id){
         qtyEl.textContent=u.qty||1;
         var bplus=document.createElement('button');bplus.type='button';bplus.textContent='→';
         bplus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
-        var unEl=document.createElement('span');unEl.textContent='u';unEl.style.cssText='font-size:11px;color:var(--t3);flex-shrink:0;';
+        var coActivo=document.getElementById(id+'-co');
+        var coVal=coActivo?coActivo.value:'';
+        var esMetroComp=['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt','Liston p/tubo simple o doble'].indexOf(coVal)!==-1;
+        var unEl=document.createElement('span');unEl.textContent=esMetroComp?'m':'u';unEl.style.cssText='font-size:11px;color:var(--t3);flex-shrink:0;';
         var bx=document.createElement('button');bx.type='button';bx.textContent='✕';
         bx.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0;';
         (function(i2,ub,qEl){
           qEl.addEventListener('click',function(){
+            if(esMetroComp){
+              abrirRuedaMetros(function(v){
+                ubPorIv[id][i2].qty=parseInt(v)||1;
+                qEl.textContent=ubPorIv[id][i2].qty;
+                updR(id);
+              });
+            } else {
             abrirRuedaCantidad(ub.nombre,'u',function(v){
               ubPorIv[id][i2].qty=parseInt(v)||1;
               qEl.textContent=ubPorIv[id][i2].qty;
               updR(id);
             },ub.qty);
+            }
           });
           bminus.addEventListener('click',function(){
             if(ubPorIv[id][i2].qty>1){ubPorIv[id][i2].qty--;qEl.textContent=ubPorIv[id][i2].qty;updR(id);}
@@ -3579,6 +3597,12 @@ function calcCosto(id){
     },0);
   } else {
     base=catk?getPrecio(catk,sc,ev,comp):5000;
+    // Componentes por metro en Tomas e Iluminación
+    var iv3=ivList.filter(function(i){return i.id===id;})[0];
+    if(iv3&&iv3.data&&iv3.data.ledMetros){
+      var ledM=parseFloat(iv3.data.ledMetros)||1;
+      base=base*ledM;
+    }
   }
   // Preventivo/Abono → MO = $0
   if(tipoVisita&&(tipoVisita.toLowerCase().indexOf('preventivo')!==-1||tipoVisita.toLowerCase().indexOf('abono')!==-1)){
@@ -3587,11 +3611,18 @@ function calcCosto(id){
   // Multiplicar por cantidad total de ubicaciones (excepto bombas rotación y canalización)
   var esBombaRot=(catk==='bo'&&(ev||'').toLowerCase().indexOf('rotaci')!==-1);
   var esCanal=(catk==='en'&&(sc||'').toLowerCase().indexOf('canaliz')!==-1);
+  var metrosComps=['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt'];
+  var esMetroComp2=metrosComps.indexOf(comp)!==-1;
   var qtyUb=1;
-  if(!esBombaRot&&!esCanal){
+  if(!esBombaRot&&!esCanal&&!esMetroComp2){
     var ubs=ubPorIv[id]||[];
     var totalQty=ubs.reduce(function(s,u){return s+(parseInt(u.qty)||1);},0);
     if(totalQty>0)qtyUb=totalQty;
+  } else if(esMetroComp2){
+    // Para componentes por metro: qty de la ubicación son los metros
+    var ubs=ubPorIv[id]||[];
+    var totalMetros=ubs.reduce(function(s,u){return s+(parseInt(u.qty)||1);},0);
+    if(totalMetros>0)qtyUb=totalMetros;
   }
   var total=Math.round(base*qtyUb),dets=[];
 
@@ -3703,6 +3734,9 @@ function updR(id){
       var bocasCCTotal=bocasCC+bocasCExtra;
       var cExtra2=' · Cablecanal: '+bocasCCTotal+' boca'+(bocasCCTotal!==1?'s':'');
       ub2=(ub2||'')+cExtra2;
+    }else if(iv2.data.ledMetros){
+      var ledM=parseFloat(iv2.data.ledMetros)||0;
+      ub2=(ub2||'')+' · '+ledM+'m';
     }
   }
   var sc2=iv&&iv.data&&iv.data.sc?iv.data.sc:'';
@@ -3800,6 +3834,7 @@ async function enviar(finalizar){
       ev:iv.data.ev,
       comp:iv.data.comp,
       compItems:iv.data.catk==='se'?(compMulti[iv.id]||[]):null,
+      ledMetros:iv.data.ledMetros||null,
       ubs:ubs.map(function(u){return {nombre:u.nombre,qty:u.qty||1};}),
       mods:Object.keys(mods).map(function(k){return {nombre:mods[k].nombre,unidad:mods[k].unidad,val:mods[k].val,curvas:mods[k].curvas||0};}),
       conds:conds,
