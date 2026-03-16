@@ -2212,11 +2212,7 @@ function buildIv(num,id){
         updR(id);
       });
     } else if(['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt'].indexOf(co2)!==-1){
-      abrirRuedaMetros(function(metros){
-        if(!iv2.data)iv2.data={};
-        iv2.data.ledMetros=metros;
-        updR(id);
-      });
+      updR(id);
     } else {
       updR(id);
     }
