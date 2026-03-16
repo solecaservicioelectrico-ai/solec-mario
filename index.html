@@ -1625,6 +1625,7 @@ function abrirBuscadorMatPiso(id,pisoIdx){
       div.innerHTML='<div class="motn">'+esc(m.Nombre||m.nombre||'')+'</div><div class="motc">'+(m.Unidad||'u')+'</div>';
       div.addEventListener('click',function(){
         var nom=m.Nombre||m.nombre||'',un=m.Unidad||'u';
+        if(nom.toLowerCase().indexOf('cable utp')!==-1)un='m';
         var tm=(m['Tiene Marca']||'').toLowerCase()==='si'||(m['Tiene Marca']||'').toLowerCase()==='sí';
         document.body.removeChild(ov);
         var doAgregar=function(marca,qty){
@@ -2645,17 +2646,28 @@ function selSC(id,catk,sc,el){
           qtyEl.textContent=item.qty||1;
           var bplus=document.createElement('button');bplus.type='button';bplus.textContent='→';
           bplus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
-          var unEl=document.createElement('span');unEl.textContent='u';unEl.style.cssText='font-size:11px;color:var(--t3);flex-shrink:0;';
+          var esMetro=item.nombre.toLowerCase().indexOf('x mt')!==-1||item.nombre.toLowerCase().indexOf('cable utp')!==-1;
+          var unidad=esMetro?'m':'u';
+          var unEl=document.createElement('span');unEl.textContent=unidad;unEl.style.cssText='font-size:11px;color:var(--t3);flex-shrink:0;';
           var bx=document.createElement('button');bx.type='button';bx.textContent='✕';
           bx.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0;';
           (function(i2,comp,qEl){
             qEl.addEventListener('click',function(){
+              if(esMetro){
+                abrirRuedaMetros(function(v){
+                  compMulti[id][i2].qty=parseInt(v)||1;
+                  seQty[id][comp]=compMulti[id][i2].qty;
+                  qEl.textContent=compMulti[id][i2].qty;
+                  updR(id);
+                });
+              } else {
               abrirRuedaCantidad(comp,'u',function(v){
                 compMulti[id][i2].qty=parseInt(v)||1;
                 seQty[id][comp]=compMulti[id][i2].qty;
                 qEl.textContent=compMulti[id][i2].qty;
                 updR(id);
               },compMulti[id][i2].qty);
+              }
             });
             bminus.addEventListener('click',function(){
               if(compMulti[id][i2].qty>1){compMulti[id][i2].qty--;seQty[id][comp]=compMulti[id][i2].qty;qEl.textContent=compMulti[id][i2].qty;updR(id);}
@@ -4837,7 +4849,6 @@ function parsearLinksArchivos(fotosStr){
   <option value="Cabina Ascensor 1"><option value="Cabina Ascensor 2">
   <option value="Cabina Ascensor 3"><option value="Cabina Ascensor 4">
 </datalist>
-<div id="debugLog"></div>
-<button id="debugToggle" onclick="toggleDebug()">🐛 LOG</button>
+
 </body>
 </html>
