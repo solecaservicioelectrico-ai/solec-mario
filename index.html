@@ -3795,6 +3795,7 @@ async function enviar(finalizar){
       sc:iv.data.sc,
       ev:iv.data.ev,
       comp:iv.data.comp,
+      compItems:iv.data.catk==='se'?(compMulti[iv.id]||[]):null,
       ubs:ubs.map(function(u){return {nombre:u.nombre,qty:u.qty||1};}),
       mods:Object.keys(mods).map(function(k){return {nombre:mods[k].nombre,unidad:mods[k].unidad,val:mods[k].val,curvas:mods[k].curvas||0};}),
       conds:conds,
