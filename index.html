@@ -3194,8 +3194,25 @@ function renderModalMatsGlobal(){
   if(!res.length){
     var empty=document.createElement('div');
     empty.style.cssText='padding:20px;text-align:center;color:var(--t3);font-size:13px;';
-    empty.textContent='Sin resultados para "'+q+'"';
-    mlist.appendChild(empty);return;
+    empty.textContent='Sin resultados para "'+document.getElementById('modalMatsGlobalInp').value+'"';
+    mlist.appendChild(empty);
+    if(q){
+      var btnLib=document.createElement('button');
+      btnLib.style.cssText='width:90%;margin:8px auto;display:block;background:rgba(245,197,24,.12);border:1.5px dashed var(--am);border-radius:10px;padding:14px;color:var(--am);font-weight:800;font-size:14px;cursor:pointer;';
+      btnLib.textContent='+ Agregar "'+document.getElementById('modalMatsGlobalInp').value+'" como material libre';
+      btnLib.addEventListener('click',function(){
+        var nombre=document.getElementById('modalMatsGlobalInp').value.trim();
+        if(!nombre)return;
+        matGlobal.push({nombre:nombre,cat:'Otro',marca:'',qty:1,un:'u',st:-1,id:'libre_'+Date.now()});
+        document.getElementById('modalMatsGlobalInp').value='';
+        var modal=document.getElementById('modalMatsGlobal');
+        if(modal)modal.style.display='none';
+        rendMatsGlobal();
+        showToast('✅ Material libre agregado: '+nombre);
+      });
+      mlist.appendChild(btnLib);
+    }
+    return;
   }
   res.forEach(function(m){
     var mid=m.ID||m.id||m.Nombre||m.nombre;
@@ -3683,7 +3700,13 @@ function updR(id){
     ev=bombaData[id].tab_ev||ev;
     comp=bombaData[id].tab_co||comp;
   }
-  var ubsArr=ubPorIv[id]||[];var ub=ubsArr.length?ubsArr.map(function(u){return u.nombre+(u.qty>1?' x'+u.qty:'');}).join(', '):(ubEl?ubEl.value:'');
+  var metrosCompsU=['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt'];
+  var coActualU=document.getElementById(id+'-co');var compActualU=coActualU?coActualU.value:'';
+  var esMetroU=metrosCompsU.indexOf(compActualU)!==-1;
+  var ubsArr=ubPorIv[id]||[];var ub=ubsArr.length?ubsArr.map(function(u){
+    if(esMetroU)return u.nombre+(u.qty&&u.qty!==1?' '+u.qty+'m':'');
+    return u.nombre+(u.qty>1?' x'+u.qty:'');
+  }).join(', '):(ubEl?ubEl.value:'');
   var s=document.getElementById(id+'-s'),re=document.getElementById(id+'-r');
   // Para bombas no aplicar el guard ya que usan su propia UI
   if(!esBombaCat&&!ev&&!comp){if(s){s.textContent='Elegí categoría y evento...';s.classList.remove('ok');}if(re)re.classList.remove('on');return;}
