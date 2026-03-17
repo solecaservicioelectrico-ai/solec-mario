@@ -417,7 +417,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .btn-ver-archivos{display:flex;align-items:center;gap:8px;background:rgba(245,197,24,.1);border:1.5px solid rgba(245,197,24,.3);color:var(--am);border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;justify-content:center;}
 .btn-ver-archivos:active{background:rgba(245,197,24,.2);}
 </style>
-<!-- GSI desactivado temporalmente -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -3269,44 +3269,96 @@ function blobToBase64(blob) {
   });
 }
 
-async function subirArchivoViaScript(archivo, nombre, edificio, regCod, carpeta) {
-  var base64 = await blobToBase64(archivo.blob);
-  var mimeType = archivo.blob.type || (archivo.type === 'foto' ? 'image/jpeg' : archivo.type === 'video' ? 'video/mp4' : 'audio/mpeg');
-  var body = {
-    _method: 'UPLOAD',
-    edificio: edificio || 'Sin edificio',
-    regCod: regCod || 'SIN-CODIGO',
-    carpeta: carpeta || 'general',
-    nombre: nombre,
-    mimeType: mimeType,
-    data: base64
-  };
-  var r = await fetch(API + '?sheet=Registros', {
-    method: 'POST',
-    headers: {'Content-Type': 'text/plain'},
-    body: JSON.stringify(body)
+function getTokenDrive(cb){
+  if(driveToken&&Date.now()<driveTokenExpiry){cb(driveToken);return;}
+  if(!window.google||!window.google.accounts){
+    // GSI no cargó todavía, usar Apps Script como fallback
+    cb(null);return;
+  }
+  var client=google.accounts.oauth2.initTokenClient({
+    client_id:DRIVE_CLIENT_ID,
+    scope:'https://www.googleapis.com/auth/drive.file',
+    callback:function(resp){
+      if(resp.error){cb(null);return;}
+      driveToken=resp.access_token;
+      driveTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
+      cb(driveToken);
+    }
   });
-  var j = await r.json();
-  return j.webViewLink || j.link || null;
+  client.requestAccessToken({prompt:''});
+}
+
+async function subirArchivoViaScript(archivo, nombre, edificio, regCod, carpeta) {
+  return new Promise(function(resolve){
+    getTokenDrive(async function(token){
+      if(token){
+        // Subida directa a Drive — rápida
+        try{
+          var link=await subirArchivoDriveDirecto(archivo,nombre,edificio,regCod,token);
+          resolve(link);return;
+        }catch(e){dbg('Drive directo falló, usando Script: '+e.message,'warn');}
+      }
+      // Fallback: Apps Script
+      try{
+        var base64=await blobToBase64(archivo.blob);
+        var mimeType=archivo.blob.type||(archivo.type==='foto'?'image/jpeg':archivo.type==='video'?'video/mp4':'audio/mpeg');
+        var body={_method:'UPLOAD',edificio:edificio||'Sin edificio',regCod:regCod||'SIN-CODIGO',carpeta:carpeta||'general',nombre:nombre,mimeType:mimeType,data:base64};
+        var r=await fetch(API+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});
+        var j=await r.json();
+        resolve(j.webViewLink||j.link||null);
+      }catch(e){resolve(null);}
+    });
+  });
+}
+
+async function subirArchivoDriveDirecto(archivo, nombre, edificio, regCod, token){
+  var FOLDER_ID='17eyldMB8FQb_vUj5NUrdhWh_AQnOjkQx';
+  var mimeType=archivo.blob.type||(archivo.type==='foto'?'image/jpeg':archivo.type==='video'?'video/mp4':'audio/mpeg');
+  // Crear metadata
+  var metadata={name:nombre,parents:[FOLDER_ID]};
+  var form=new FormData();
+  form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+  form.append('file',archivo.blob,nombre);
+  var r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+token},
+    body:form
+  });
+  if(!r.ok)throw new Error('Drive upload error '+r.status);
+  var j=await r.json();
+  // Hacer público
+  if(j.id){
+    await fetch('https://www.googleapis.com/drive/v3/files/'+j.id+'/permissions',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({role:'reader',type:'anyone'})
+    });
+  }
+  return j.webViewLink||null;
 }
 
 async function subirTodosLosArchivos(edificio, regCod, onProgress) {
-  var links = [];
   var total = archivosGlobal.length;
-  if (!total) return links;
-  for (var i = 0; i < total; i++) {
-    var a = archivosGlobal[i];
+  if (!total) return [];
+  if (onProgress) onProgress(0, total);
+  var completados = 0;
+  var promesas = archivosGlobal.map(function(a, i) {
     var nombre = (i+1) + '_' + a.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-    if (onProgress) onProgress(i, total);
-    try {
-      var link = await subirArchivoViaScript(a, nombre, edificio, regCod, 'general');
-      if (link) links.push(a.type+':'+link);
-    } catch(e) {
-      dbg('Error subiendo ' + nombre + ': ' + e.message, 'err');
-    }
-  }
-  if (onProgress) onProgress(total, total);
-  return links;
+    return subirArchivoViaScript(a, nombre, edificio, regCod, 'general')
+      .then(function(link) {
+        completados++;
+        if (onProgress) onProgress(completados, total);
+        return link ? a.type+':'+link : null;
+      })
+      .catch(function(e) {
+        completados++;
+        if (onProgress) onProgress(completados, total);
+        dbg('Error subiendo ' + nombre + ': ' + e.message, 'err');
+        return null;
+      });
+  });
+  var results = await Promise.all(promesas);
+  return results.filter(Boolean);
 }
 
 // ---------- UBICACIONES ----------
@@ -5237,17 +5289,49 @@ function imgUrlDrive(fileId){
 }
 
 function abrirVisorArchivos(links, titulo){
-  if(!links||!links.length){showToast('Sin archivos en este registro');return;}
-  if(links.length===1){
-    window.open(links[0].link||links[0],'_blank');
-    return;
-  }
-  var confirmado=confirm('Abrir '+links.length+' archivos en Drive?');
-  if(!confirmado)return;
-  links.forEach(function(item){
+  if(!links||!links.length){showToast('Sin archivos');return;}
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;display:flex;flex-direction:column;';
+  var hdr=document.createElement('div');
+  hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--s1);border-bottom:1px solid var(--borde);flex-shrink:0;';
+  var tit=document.createElement('div');
+  tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:17px;letter-spacing:2px;color:var(--am);';
+  tit.textContent='📷 '+(titulo||'Archivos')+' ('+links.length+')';
+  var cerrar=document.createElement('button');
+  cerrar.style.cssText='background:var(--rojo);border:none;border-radius:8px;padding:8px 14px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;';
+  cerrar.textContent='✕ CERRAR';
+  cerrar.onclick=function(){document.body.removeChild(ov);};
+  hdr.appendChild(tit);hdr.appendChild(cerrar);ov.appendChild(hdr);
+  var body=document.createElement('div');
+  body.style.cssText='overflow-y:auto;flex:1;padding:14px;';
+  links.forEach(function(item,i){
     var url=item.link||item;
-    window.open(url,'_blank');
+    // Detectar tipo
+    var tipo='foto',icono='📷';
+    if(typeof url==='string'){
+      if(url.indexOf('video:')===0){tipo='video';icono='🎥';url=url.slice(6);}
+      else if(url.indexOf('audio:')===0){tipo='audio';icono='🎙️';url=url.slice(6);}
+      else if(url.indexOf('foto:')===0){url=url.slice(5);}
+      else if(/\.(mp4|mov|avi|3gp)/i.test(url)){tipo='video';icono='🎥';}
+      else if(/\.(mp3|ogg|m4a|wav|aac|amr)/i.test(url)){tipo='audio';icono='🎙️';}
+    }
+    // Extraer fileId para link limpio
+    var fid=null;
+    var m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if(m)fid=m[1];
+    var viewUrl=fid?'https://drive.google.com/file/d/'+fid+'/view':url;
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--borde);border-radius:10px;margin-bottom:8px;';
+    var lbl=document.createElement('span');
+    lbl.style.cssText='flex:1;font-size:14px;font-weight:700;color:var(--t);';
+    lbl.textContent=icono+' '+tipo.charAt(0).toUpperCase()+tipo.slice(1)+' '+(i+1);
+    var btn=document.createElement('button');
+    btn.style.cssText='background:var(--azul);border:none;border-radius:8px;padding:9px 18px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;';
+    btn.textContent='▶ ABRIR';
+    btn.onclick=function(){window.open(viewUrl,'_blank');};
+    row.appendChild(lbl);row.appendChild(btn);body.appendChild(row);
   });
+  ov.appendChild(body);document.body.appendChild(ov);
 }
 function _abrirVisorConToken(fotos, videos, audios, titulo, token){
 
