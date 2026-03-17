@@ -482,10 +482,10 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="sb" id="b1">
       <div class="r2">
         <div class="f"><label>Fecha</label><input class="fi" type="date" id="fecha"></div>
-        <div class="f"><label>Hora llegada</label><input class="fi" type="time" id="hora" oninput="calcDur()" step="60"></div>
+        <div class="f"><label>Hora llegada</label><button type="button" class="fi" id="horaBtn" onclick="abrirRuedaHora('hora')" style="text-align:left;cursor:pointer;font-size:16px;font-weight:700;color:var(--am);">—:—</button><input type="hidden" id="hora" oninput="calcDur()"></div>
       </div>
       <div class="r2" style="margin-top:8px">
-        <div class="f"><label>Hora salida</label><input class="fi" type="time" id="hfin" oninput="calcDur()" step="60"></div>
+        <div class="f"><label>Hora salida</label><button type="button" class="fi" id="hfinBtn" onclick="abrirRuedaHora('hfin')" style="text-align:left;cursor:pointer;font-size:16px;font-weight:700;color:var(--t2);">—:—</button><input type="hidden" id="hfin" oninput="calcDur()"></div>
         <div class="f"><label>Duración</label><div id="dur" class="fi" style="color:var(--t2)">—</div></div>
       </div>
       <button class="bsig" onclick="abrirSiguiente(2)">SIGUIENTE ▶</button>
@@ -964,6 +964,61 @@ function abrirRuedaCantidad(nom,un,cb,valorInicial){
   for(var i=1;i<=500;i++)items.push(i+' '+un);
   var startIdx=(valorInicial&&valorInicial>0)?valorInicial-1:0;
   abrirRueda('CANTIDAD',nom,items,startIdx,function(v,idx){cb(idx+1);});
+}
+
+function abrirRuedaHora(inputId){
+  var horas=[];for(var h=0;h<24;h++)horas.push(String(h).padStart(2,'0'));
+  var mins=['00','05','10','15','20','25','30','35','40','45','50','55'];
+  var cur=(document.getElementById(inputId).value||'').split(':');
+  var curH=cur[0]||String(new Date().getHours()).padStart(2,'0');
+  var curM=cur[1]||String(Math.round(new Date().getMinutes()/5)*5%60).padStart(2,'0');
+  var selH=curH,selM=curM;
+  var ov=document.createElement('div');ov.className='qty-overlay';
+  var modal=document.createElement('div');modal.className='qty-modal';
+  modal.style.cssText='background:var(--s1);border-radius:18px 18px 0 0;padding:24px 20px;width:100%;max-width:480px;';
+  var tit=document.createElement('div');tit.className='qty-title';
+  tit.textContent=inputId==='hora'?'HORA LLEGADA':'HORA SALIDA';
+  var display=document.createElement('div');
+  display.style.cssText='font-family:Bebas Neue,sans-serif;font-size:52px;text-align:center;color:var(--am);letter-spacing:4px;margin:16px 0;';
+  function updDisplay(){display.textContent=selH+':'+selM;}
+  updDisplay();
+  // Selector horas
+  var rowH=document.createElement('div');rowH.style.cssText='display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;';
+  horas.forEach(function(h){
+    var b=document.createElement('button');b.type='button';b.textContent=h;
+    b.style.cssText='padding:8px 10px;border-radius:8px;border:2px solid '+(h===selH?'var(--am)':'var(--borde)')+';background:'+(h===selH?'var(--am)':'var(--s2)')+';color:'+(h===selH?'#000':'var(--t)')+';font-family:Bebas Neue,sans-serif;font-size:16px;cursor:pointer;min-width:40px;';
+    b.addEventListener('click',function(){
+      selH=h;updDisplay();
+      rowH.querySelectorAll('button').forEach(function(x){x.style.borderColor='var(--borde)';x.style.background='var(--s2)';x.style.color='var(--t)';});
+      b.style.borderColor='var(--am)';b.style.background='var(--am)';b.style.color='#000';
+    });
+    rowH.appendChild(b);
+  });
+  // Selector minutos
+  var rowM=document.createElement('div');rowM.style.cssText='display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;';
+  mins.forEach(function(m){
+    var b=document.createElement('button');b.type='button';b.textContent=m;
+    b.style.cssText='padding:8px 12px;border-radius:8px;border:2px solid '+(m===selM?'var(--am)':'var(--borde)')+';background:'+(m===selM?'var(--am)':'var(--s2)')+';color:'+(m===selM?'#000':'var(--t)')+';font-family:Bebas Neue,sans-serif;font-size:16px;cursor:pointer;min-width:46px;';
+    b.addEventListener('click',function(){
+      selM=m;updDisplay();
+      rowM.querySelectorAll('button').forEach(function(x){x.style.borderColor='var(--borde)';x.style.background='var(--s2)';x.style.color='var(--t)';});
+      b.style.borderColor='var(--am)';b.style.background='var(--am)';b.style.color='#000';
+    });
+    rowM.appendChild(b);
+  });
+  var btnOk=document.createElement('button');btnOk.className='qty-ok';btnOk.textContent='CONFIRMAR';
+  btnOk.addEventListener('click',function(){
+    var val=selH+':'+selM;
+    document.getElementById(inputId).value=val;
+    var btn=document.getElementById(inputId+'Btn');
+    if(btn){btn.textContent=val;btn.style.color=inputId==='hora'?'var(--am)':'var(--t2)';}
+    calcDur();
+    document.body.removeChild(ov);
+  });
+  modal.appendChild(tit);modal.appendChild(display);
+  modal.appendChild(rowH);modal.appendChild(rowM);modal.appendChild(btnOk);
+  ov.appendChild(modal);document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)document.body.removeChild(ov);});
 }
 
 function abrirRuedaMetros(cb){
@@ -1676,7 +1731,11 @@ window.onload=function(){
   var mm=String(n.getMonth()+1).padStart(2,'0');
   var dd=String(n.getDate()).padStart(2,'0');
   document.getElementById('fecha').value=yyyy+'-'+mm+'-'+dd;
-  document.getElementById('hora').value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  var hh=String(n.getHours()).padStart(2,'0');
+  var mn=String(Math.round(n.getMinutes()/5)*5%60).padStart(2,'0');
+  var horaVal=hh+':'+mn;
+  document.getElementById('hora').value=horaVal;
+  var horaBtn=document.getElementById('horaBtn');if(horaBtn){horaBtn.textContent=horaVal;horaBtn.style.color='var(--am)';}
   document.getElementById('lsearch').addEventListener('input',onLugar);
   document.getElementById('lsearch').addEventListener('focus',onLugar);
   // Cargar en secuencia con pausa para no saturar SheetDB (evitar 429)
