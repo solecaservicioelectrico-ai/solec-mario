@@ -602,7 +602,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <input type="file" id="foInpFoto" accept="image/*" capture="environment" multiple style="display:none;" onchange="agregarArchivosGlobal(this,'foto')">
         <input type="file" id="foInpVideo" accept="video/*" capture="environment" style="display:none;" onchange="agregarArchivosGlobal(this,'video')">
         <input type="file" id="foInpAudio" accept="audio/*" capture="microphone" style="display:none;" onchange="agregarArchivosGlobal(this,'audio')">
-        <input type="file" id="foInpGaleria" accept="image/*,video/*" multiple style="display:none;" onchange="agregarArchivosGlobal(this,'foto')">
+        <input type="file" id="foInpGaleria" accept="image/*,video/*,audio/*" multiple style="display:none;" onchange="agregarArchivosGlobalAuto(this)">
         <div id="foGlobalPrev" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
         <div id="foUploadProgress" style="display:none;margin-top:10px;"></div>
       </div>
@@ -3198,6 +3198,17 @@ function renderPrevF(id){
 }
 
 // ---------- SUBIDA DE ARCHIVOS VIA APPS SCRIPT ----------
+
+function agregarArchivosGlobalAuto(inp){
+  var archivos=Array.from(inp.files);inp.value='';
+  if(!archivos.length)return;
+  archivos.forEach(function(f){
+    var tipo='foto';
+    if(f.type.startsWith('video/'))tipo='video';
+    else if(f.type.startsWith('audio/'))tipo='audio';
+    agregarArchivosGlobal({files:[f],value:''},tipo);
+  });
+}
 
 function agregarArchivosGlobal(inp, tipo) {
   var archivos = Array.from(inp.files);
