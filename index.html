@@ -3954,7 +3954,7 @@ async function enviar(finalizar){
       }
       // Descuento automático de stock camioneta
       descontarStock(ivList);
-      setTimeout(function(){location.reload();},2500);
+      setTimeout(function(){resetPanel();},1500);
     }
     else{dbg('API fallo: '+r.status,'err');throw new Error('Error '+r.status);}
   }catch(e){dbg('CATCH: '+e.message,'err');showToast('❌ '+e.message);btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';}
@@ -4012,7 +4012,38 @@ function cancelarVistaObra(){
 }
 
 function resetPanel(){
-  location.reload();
+  // Resetear formulario sin recargar toda la página
+  ivList=[];
+  matPorIv={};archivosIv={};archivosGlobal=[];
+  compMulti={};seChecked={};seQty={};
+  ubPorIv={};mdPorIv={};bombaData={};pisosData={};
+  matGlobal=[];matSelTemp={};
+  tipoVisita='';window._ordenActiva=null;
+  // Volver al formulario limpio
+  var hWrap=document.getElementById('hist-wrap');
+  var fWrap=document.getElementById('form-wrap')||document.querySelector('.wrap');
+  if(hWrap)hWrap.style.display='none';
+  // Resetear selector de edificio
+  var selEdif=document.getElementById('selEdif');if(selEdif)selEdif.value='';
+  var selTipo=document.getElementById('selTipo');if(selTipo)selTipo.value='';
+  // Limpiar intervenciones del DOM
+  var ivCont=document.getElementById('ivCont');if(ivCont)ivCont.innerHTML='';
+  var rtotal=document.getElementById('rtotal');if(rtotal)rtotal.classList.remove('on');
+  // Agregar primera intervención limpia
+  agregarIv();
+  // Limpiar fotos
+  var foGlobalPrev=document.getElementById('foGlobalPrev');if(foGlobalPrev)foGlobalPrev.innerHTML='';
+  var foGlobalCnt=document.getElementById('foGlobalCnt');if(foGlobalCnt)foGlobalCnt.style.display='none';
+  // Limpiar observaciones
+  var obsgen=document.getElementById('obsgen');if(obsgen)obsgen.value='';
+  // Recargar solo el historial en segundo plano
+  setTimeout(function(){
+    var cacheKeys=['solec_hist','s_regs'];
+    cacheKeys.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
+    cargarHistorial();
+    cargarObrasEnCurso().then(mostrarPillObras);
+  },1000);
+  showToast('✅ Listo para nuevo registro');
 }
 
 
