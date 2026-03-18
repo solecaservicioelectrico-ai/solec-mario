@@ -3342,23 +3342,32 @@ async function subirTodosLosArchivos(edificio, regCod, onProgress) {
   if (!total) return [];
   if (onProgress) onProgress(0, total);
   var completados = 0;
-  var promesas = archivosGlobal.map(function(a, i) {
-    var nombre = (i+1) + '_' + a.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-    return subirArchivoViaScript(a, nombre, edificio, regCod, 'general')
-      .then(function(link) {
-        completados++;
-        if (onProgress) onProgress(completados, total);
-        return link ? a.type+':'+link : null;
-      })
-      .catch(function(e) {
-        completados++;
-        if (onProgress) onProgress(completados, total);
-        dbg('Error subiendo ' + nombre + ': ' + e.message, 'err');
-        return null;
-      });
-  });
-  var results = await Promise.all(promesas);
-  return results.filter(Boolean);
+  // Subir en lotes de 3 para no saturar
+  var links = [];
+  var LOTE = 3;
+  for(var i=0; i<total; i+=LOTE){
+    var lote = archivosGlobal.slice(i, i+LOTE);
+    var promesas = lote.map(function(a, li){
+      var nombre = (i+li+1) + '_' + a.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      // Timeout de 45 segundos por archivo
+      var timeout = new Promise(function(resolve){setTimeout(function(){resolve(null);},45000);});
+      var upload = subirArchivoViaScript(a, nombre, edificio, regCod, 'general')
+        .then(function(link){
+          completados++;
+          if(onProgress)onProgress(completados,total);
+          return link ? a.type+':'+link : null;
+        })
+        .catch(function(){
+          completados++;
+          if(onProgress)onProgress(completados,total);
+          return null;
+        });
+      return Promise.race([upload, timeout]);
+    });
+    var resultados = await Promise.all(promesas);
+    resultados.forEach(function(r){if(r)links.push(r);});
+  }
+  return links;
 }
 
 // ---------- UBICACIONES ----------
@@ -4356,11 +4365,12 @@ async function enviar(finalizar){
   if(hayArchivos){
     btn.textContent='📤 Subiendo archivos...';
     var progEl=document.getElementById('foUploadProgress');
-    if(progEl){progEl.style.display='block';progEl.innerHTML='<div style="font-size:13px;color:var(--t2);font-weight:700;">Subiendo 1 de '+archivosGlobal.length+'...</div>';}
+    if(progEl){progEl.style.display='block';progEl.innerHTML='<div style="font-size:13px;color:var(--t2);font-weight:700;" id="progTxt">Subiendo archivos (0/'+archivosGlobal.length+')...</div><div style="height:8px;background:var(--s3);border-radius:4px;margin-top:8px;"><div id="progBar" style="height:8px;background:var(--am);border-radius:4px;width:0%;transition:width .3s;"></div></div>';}
     try{
       var links=await subirTodosLosArchivos(lnom,regCode,function(actual,total){
-        if(progEl)progEl.innerHTML='<div style="font-size:13px;color:var(--t2);font-weight:700;">Subiendo '+(actual+1)+' de '+total+'...</div>'
-          +'<div style="height:6px;background:var(--s3);border-radius:3px;margin-top:6px;"><div style="height:6px;background:var(--am);border-radius:3px;width:'+(Math.round(actual/total*100))+'%;transition:width .3s;"></div></div>';
+        var txt=document.getElementById('progTxt');var bar=document.getElementById('progBar');
+        if(txt)txt.textContent='Subiendo archivos ('+actual+'/'+total+')...';
+        if(bar)bar.style.width=Math.round(actual/total*100)+'%';
       });
       if(links.length){driveLinks['general']=links;}
       dbg('Archivos subidos: '+links.length,'ok');
