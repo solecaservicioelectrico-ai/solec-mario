@@ -1805,6 +1805,18 @@ function limpiarCacheVieja(){
     }
   }catch(e){}
 }
+window.addEventListener('beforeunload',function(e){
+  // Solo advertir si hay intervenciones cargadas o archivos pendientes
+  var hayDatos=(ivList&&ivList.some(function(iv){return iv.data&&iv.data.lin;}))
+    ||(archivosGlobal&&archivosGlobal.length>0)
+    ||(matGlobal&&matGlobal.length>0);
+  if(hayDatos){
+    e.preventDefault();
+    e.returnValue='Tenés un registro sin enviar. ¿Seguro que querés salir?';
+    return e.returnValue;
+  }
+});
+
 window.onload=function(){
   limpiarCacheVieja();
   tick();setInterval(tick,1000);
