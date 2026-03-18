@@ -426,7 +426,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.0</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.2</span></div>
   </div>
 </div>
 
@@ -4411,37 +4411,30 @@ async function enviar(finalizar){
     dbg('API respuesta: '+r.status,'info');
     if(r.ok){
       showToast('✅ '+regCode+' enviado'+(Object.keys(driveLinks).length>0?' con fotos':''));
-      // Si era obra finalizada: buscar todos los registros de la obra y parchear
-      if(finalizar&&obraCode){
-        try{
-          var rObra=await fetch(API+'?sheet=Registros&limit=100');
-          var jObra=await rObra.json();
-          if(Array.isArray(jObra)){
-            var regsObra=jObra.filter(function(r){return (r['Codigo Obra']||'')=== obraCode&&r.Estado!=='Finalizada';});
-            for(var ri=0;ri<regsObra.length;ri++){
-              var codR=regsObra[ri].Codigo;
-              if(!codR)continue;
-              try{
-                await apiPatch('Registros','Codigo',codR,{Estado:'Finalizada'});
-              }catch(ep){console.log('Error patch reg:',codR,ep);}
-            }
-          }
-        }catch(e){console.log('Error al finalizar obra:',e);}
-        // Limpiar cache de obras para forzar recarga
-        try{localStorage.removeItem('solec_cache_obras');}catch(e){}
-        setTimeout(function(){cargarObrasEnCurso().then(mostrarPillObras);},2000);
-      }
-      // Cerrar orden activa si existe
-      if(window._ordenActiva){
-        var ordCod=window._ordenActiva.Codigo;
-        try{
-          await apiPatch('Ordenes','Codigo',ordCod,{'Estado':'Resuelto','Codigo Registro':regCode});
-        }catch(e){}
-        window._ordenActiva=null;
-      }
-      // Descuento automático de stock camioneta
-      descontarStock(ivList);
+      btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
       setTimeout(function(){resetPanel();},1500);
+      // Operaciones secundarias en segundo plano — no bloquean
+      setTimeout(function(){
+        // Obra finalizada
+        if(finalizar&&obraCode){
+          fetch(API+'?sheet=Registros&limit=100').then(function(r){return r.json();}).then(function(jObra){
+            if(Array.isArray(jObra)){
+              jObra.filter(function(r){return (r['Codigo Obra']||'')===obraCode&&r.Estado!=='Finalizada';})
+                .forEach(function(r){if(r.Codigo)apiPatch('Registros','Codigo',r.Codigo,{Estado:'Finalizada'}).catch(function(){});});
+            }
+          }).catch(function(){});
+          try{localStorage.removeItem('solec_cache_obras');}catch(ex){}
+          setTimeout(function(){cargarObrasEnCurso().then(mostrarPillObras);},3000);
+        }
+        // Orden activa
+        if(window._ordenActiva){
+          var ordCod=window._ordenActiva.Codigo;
+          apiPatch('Ordenes','Codigo',ordCod,{'Estado':'Resuelto','Codigo Registro':regCode}).catch(function(){});
+          window._ordenActiva=null;
+        }
+        // Stock
+        descontarStock(ivList);
+      },100);
     }
     else{dbg('API fallo: '+r.status,'err');throw new Error('Error '+r.status);}
   }catch(e){dbg('CATCH: '+e.message,'err');showToast('❌ '+e.message);btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';}
