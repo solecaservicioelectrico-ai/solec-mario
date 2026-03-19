@@ -425,7 +425,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.6</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.7</span></div>
   </div>
 </div>
 
@@ -3367,6 +3367,7 @@ function abrirModalUbNuevo(ivId, onClose){
 
   function renderLista(){
     var nnU=function(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();};
+    lista=getUbicaciones(); // siempre lista fresca
     var q=nnU(sinp.value||'');
     var filtrada=q?lista.filter(function(u){return nnU(u).indexOf(q)!==-1;}):lista;
     listDiv.innerHTML='';
@@ -4368,7 +4369,7 @@ async function enviar(finalizar){
     var rJson=null;
     try{rJson=await r.json();}catch(ex){}
     dbg('API body: '+JSON.stringify(rJson),'info');
-    if(r.ok && (!rJson || !rJson.error)){  // reset even if rJson is null
+    if(r.ok){
       showToast('✅ '+regCode+' guardado'+(Object.keys(driveLinks).length>0?' con archivos':''));
       btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
       setTimeout(function(){resetPanel();},1500);
