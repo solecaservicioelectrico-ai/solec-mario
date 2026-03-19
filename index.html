@@ -425,7 +425,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.5</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.6</span></div>
   </div>
 </div>
 
@@ -3018,37 +3018,22 @@ function selSC(id,catk,sc,el){
       genListWrap.innerHTML='';
       if(!compMulti[id])return;
       compMulti[id].forEach(function(item,idx){
-        var esMetroC=['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt'].indexOf(item.nombre)!==-1;
         var row2=document.createElement('div');
-        row2.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--borde);';
+        row2.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--borde);';
         var nom2=document.createElement('span');
         nom2.style.cssText='flex:1;font-size:14px;font-weight:700;color:'+(item.esOtro?'var(--am)':'var(--t)')+';';
         nom2.textContent=item.nombre;
-        var bminus=document.createElement('button');bminus.type='button';bminus.textContent='←';
-        bminus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
-        var qtyEl=document.createElement('span');
-        qtyEl.style.cssText='font-size:16px;font-weight:900;min-width:28px;text-align:center;color:var(--am);cursor:pointer;padding:2px;';
-        qtyEl.textContent=item.qty||1;
-        var bplus=document.createElement('button');bplus.type='button';bplus.textContent='→';
-        bplus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
-        var unEl=document.createElement('span');unEl.textContent=esMetroC?'m':'u';unEl.style.cssText='font-size:11px;color:var(--t3);flex-shrink:0;';
         var bx=document.createElement('button');bx.type='button';bx.textContent='✕';
         bx.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0;';
-        (function(i2,it,qEl,esM){
-          qEl.addEventListener('click',function(){
-            if(esM){abrirRuedaMetros(function(v){compMulti[id][i2].qty=parseFloat(v)||1;qEl.textContent=compMulti[id][i2].qty;updR(id);});}
-            else{abrirRuedaCantidad(it.nombre,'u',function(v){compMulti[id][i2].qty=parseInt(v)||1;qEl.textContent=compMulti[id][i2].qty;updR(id);},it.qty);}
-          });
-          bminus.addEventListener('click',function(){if(compMulti[id][i2].qty>1){compMulti[id][i2].qty--;qEl.textContent=compMulti[id][i2].qty;updR(id);}});
-          bplus.addEventListener('click',function(){compMulti[id][i2].qty=(compMulti[id][i2].qty||1)+1;qEl.textContent=compMulti[id][i2].qty;updR(id);});
+        (function(i2){
           bx.addEventListener('click',function(){
             compMulti[id].splice(i2,1);
             cs.value=compMulti[id].map(function(x){return x.nombre;}).join(', ');
             btnGenSel.textContent=compMulti[id].length?'COMPONENTES ('+compMulti[id].length+')':'COMPONENTES';
             renderGenList();updR(id);
           });
-        })(idx,item,qtyEl,esMetroC);
-        row2.appendChild(nom2);row2.appendChild(bminus);row2.appendChild(qtyEl);row2.appendChild(bplus);row2.appendChild(unEl);row2.appendChild(bx);
+        })(idx);
+        row2.appendChild(nom2);row2.appendChild(bx);
         genListWrap.appendChild(row2);
       });
     }
@@ -3401,13 +3386,15 @@ function abrirModalUbNuevo(ivId, onClose){
       (function(ub,fn){row.addEventListener('click',function(){tempSel[ub]=!tempSel[ub];fn();});})(u,actualizarChk);
       listDiv.appendChild(row);
     });
-    // Opción libre
-    if(q&&!lista.some(function(u){return nnU(u)===q;})){
+    // Opción libre — siempre visible cuando hay texto escrito
+    if(sinp.value.trim()){
       var rowLib=document.createElement('div');
-      rowLib.style.cssText='padding:14px 0;cursor:pointer;color:var(--am);font-weight:700;font-size:15px;';
-      rowLib.textContent='+ Agregar "'+sinp.value+'"';
+      rowLib.style.cssText='padding:12px 0;cursor:pointer;color:var(--am);font-weight:700;font-size:14px;border-top:1px dashed var(--borde);margin-top:4px;';
+      rowLib.textContent='+ Agregar "'+sinp.value.trim()+'" como ubicación libre';
       rowLib.addEventListener('click',function(){
-        lista.push(sinp.value);tempSel[sinp.value]=true;sinp.value='';renderLista();
+        var val=sinp.value.trim();
+        if(!lista.some(function(u){return u.toLowerCase()===val.toLowerCase();}))lista.push(val);
+        tempSel[val]=true;sinp.value='';renderLista();
       });
       listDiv.appendChild(rowLib);
     }
@@ -4381,7 +4368,7 @@ async function enviar(finalizar){
     var rJson=null;
     try{rJson=await r.json();}catch(ex){}
     dbg('API body: '+JSON.stringify(rJson),'info');
-    if(r.ok && rJson && !rJson.error){
+    if(r.ok && (!rJson || !rJson.error)){  // reset even if rJson is null
       showToast('✅ '+regCode+' guardado'+(Object.keys(driveLinks).length>0?' con archivos':''));
       btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
       setTimeout(function(){resetPanel();},1500);
