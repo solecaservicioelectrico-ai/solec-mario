@@ -417,7 +417,6 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .btn-ver-archivos{display:flex;align-items:center;gap:8px;background:rgba(245,197,24,.1);border:1.5px solid rgba(245,197,24,.3);color:var(--am);border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;justify-content:center;}
 .btn-ver-archivos:active{background:rgba(245,197,24,.2);}
 </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -426,7 +425,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.2</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.4</span></div>
   </div>
 </div>
 
@@ -3281,72 +3280,33 @@ function blobToBase64(blob) {
   });
 }
 
-function getTokenDrive(cb){
-  if(driveToken&&Date.now()<driveTokenExpiry){cb(driveToken);return;}
-  if(!window.google||!window.google.accounts){
-    // GSI no cargó todavía, usar Apps Script como fallback
-    cb(null);return;
-  }
-  var client=google.accounts.oauth2.initTokenClient({
-    client_id:DRIVE_CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/drive.file',
-    callback:function(resp){
-      if(resp.error){cb(null);return;}
-      driveToken=resp.access_token;
-      driveTokenExpiry=Date.now()+(resp.expires_in-60)*1000;
-      cb(driveToken);
-    }
-  });
-  client.requestAccessToken({prompt:''});
-}
+function getTokenDrive(cb){cb(null);}
 
 async function subirArchivoViaScript(archivo, nombre, edificio, regCod, carpeta) {
-  return new Promise(function(resolve){
-    getTokenDrive(async function(token){
-      if(token){
-        // Subida directa a Drive — rápida
-        try{
-          var link=await subirArchivoDriveDirecto(archivo,nombre,edificio,regCod,token);
-          resolve(link);return;
-        }catch(e){dbg('Drive directo falló, usando Script: '+e.message,'warn');}
-      }
-      // Fallback: Apps Script
-      try{
-        var base64=await blobToBase64(archivo.blob);
-        var mimeType=archivo.blob.type||(archivo.type==='foto'?'image/jpeg':archivo.type==='video'?'video/mp4':'audio/mpeg');
-        var body={_method:'UPLOAD',edificio:edificio||'Sin edificio',regCod:regCod||'SIN-CODIGO',carpeta:carpeta||'general',nombre:nombre,mimeType:mimeType,data:base64};
-        var r=await fetch(API+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});
-        var j=await r.json();
-        resolve(j.webViewLink||j.link||null);
-      }catch(e){resolve(null);}
-    });
+  var base64 = await blobToBase64(archivo.blob);
+  var mimeType = archivo.blob.type || (archivo.type === 'foto' ? 'image/jpeg' : archivo.type === 'video' ? 'video/mp4' : 'audio/mpeg');
+  var body = {
+    _method: 'UPLOAD',
+    edificio: edificio || 'Sin edificio',
+    regCod: regCod || 'SIN-CODIGO',
+    carpeta: carpeta || 'general',
+    nombre: nombre,
+    mimeType: mimeType,
+    data: base64
+  };
+  var r = await fetch(API + '?sheet=Registros', {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(body)
   });
+  var j = await r.json();
+  if(j.error) throw new Error(j.error);
+  return j.link || j.webViewLink || null;
 }
 
 async function subirArchivoDriveDirecto(archivo, nombre, edificio, regCod, token){
-  var FOLDER_ID='17eyldMB8FQb_vUj5NUrdhWh_AQnOjkQx';
-  var mimeType=archivo.blob.type||(archivo.type==='foto'?'image/jpeg':archivo.type==='video'?'video/mp4':'audio/mpeg');
-  // Crear metadata
-  var metadata={name:nombre,parents:[FOLDER_ID]};
-  var form=new FormData();
-  form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
-  form.append('file',archivo.blob,nombre);
-  var r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{
-    method:'POST',
-    headers:{Authorization:'Bearer '+token},
-    body:form
-  });
-  if(!r.ok)throw new Error('Drive upload error '+r.status);
-  var j=await r.json();
-  // Hacer público
-  if(j.id){
-    await fetch('https://www.googleapis.com/drive/v3/files/'+j.id+'/permissions',{
-      method:'POST',
-      headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({role:'reader',type:'anyone'})
-    });
-  }
-  return j.webViewLink||null;
+  // No usado — subida via Service Account en Apps Script
+  return null;
 }
 
 async function subirTodosLosArchivos(edificio, regCod, onProgress) {
@@ -4409,8 +4369,11 @@ async function enviar(finalizar){
   try{
     var r=await fetch(API+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
     dbg('API respuesta: '+r.status,'info');
-    if(r.ok){
-      showToast('✅ '+regCode+' enviado'+(Object.keys(driveLinks).length>0?' con fotos':''));
+    var rJson=null;
+    try{rJson=await r.json();}catch(ex){}
+    dbg('API body: '+JSON.stringify(rJson),'info');
+    if(r.ok && rJson && !rJson.error){
+      showToast('✅ '+regCode+' guardado'+(Object.keys(driveLinks).length>0?' con archivos':''));
       btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
       setTimeout(function(){resetPanel();},1500);
       // Operaciones secundarias en segundo plano — no bloquean
@@ -4436,7 +4399,11 @@ async function enviar(finalizar){
         descontarStock(ivList);
       },100);
     }
-    else{dbg('API fallo: '+r.status,'err');throw new Error('Error '+r.status);}
+    else{
+      var errMsg=rJson&&rJson.error?rJson.error:'Error '+r.status;
+      dbg('API fallo: '+errMsg,'err');
+      throw new Error(errMsg);
+    }
   }catch(e){dbg('CATCH: '+e.message,'err');showToast('❌ '+e.message);btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';}
 }
 
