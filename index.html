@@ -425,7 +425,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.7</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.8</span></div>
   </div>
 </div>
 
@@ -3344,9 +3344,11 @@ var UBICACIONES_DEFAULT=[
 ];
 
 function getUbicaciones(){
-  // Usar catálogo del Sheet si está disponible, si no usar default
   if(window.catalogoUbicaciones&&catalogoUbicaciones.length){
-    return catalogoUbicaciones.map(function(u){return u.Nombre||u.nombre||u;});
+    return catalogoUbicaciones.map(function(u){
+      var s=typeof u==='string'?u:(u.Nombre||u.nombre||'');
+      return s?s:JSON.stringify(u);
+    }).filter(Boolean);
   }
   return UBICACIONES_DEFAULT;
 }
@@ -4476,7 +4478,7 @@ function resetPanel(){
   var ivCont=document.getElementById('ivCont');if(ivCont)ivCont.innerHTML='';
   var rtotal=document.getElementById('rtotal');if(rtotal)rtotal.classList.remove('on');
   // Agregar primera intervención limpia
-  agregarIv();
+  if(typeof agregarIv==='function')agregarIv();
   // Limpiar fotos
   var foGlobalPrev=document.getElementById('foGlobalPrev');if(foGlobalPrev)foGlobalPrev.innerHTML='';
   var foGlobalCnt=document.getElementById('foGlobalCnt');if(foGlobalCnt)foGlobalCnt.style.display='none';
