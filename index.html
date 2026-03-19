@@ -425,7 +425,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.1</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.2</span></div>
   </div>
 </div>
 
@@ -1813,6 +1813,24 @@ window.addEventListener('beforeunload',function(e){
     e.preventDefault();
     e.returnValue='Tenés un registro sin enviar. ¿Seguro que querés salir?';
     return e.returnValue;
+  }
+});
+// Interceptar botón atrás de Android
+history.pushState(null,null,location.href);
+window.addEventListener('popstate',function(){
+  if(_enviando){return;}
+  var hayDatos=(ivList&&ivList.some(function(iv){return iv.data&&iv.data.lin;}))
+    ||(archivosGlobal&&archivosGlobal.length>0)
+    ||(matGlobal&&matGlobal.length>0);
+  if(hayDatos){
+    var ok=confirm('Tenés un registro sin enviar.\n¿Seguro que querés salir?');
+    if(ok){
+      history.go(-2);
+    } else {
+      history.pushState(null,null,location.href);
+    }
+  } else {
+    history.go(-1);
   }
 });
 
@@ -4270,7 +4288,7 @@ async function enviar(finalizar){
     return;
   }
   if(!tipoVisita)return showToast('⚠️ Elegí el tipo de visita');
-  if(ivList.length===0)return showToast('⚠️ Agregá al menos una intervención');
+  if(ivList.length===0&&tipoVisita!=='Visita técnica')return showToast('⚠️ Agregá al menos una intervención');
   var regCode=genCode('REG');
   var res=ivList.filter(function(iv){return iv.data.lin;}).map(function(iv,i){
     return (i+1)+'. '+iv.data.lin;
