@@ -425,7 +425,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v1.9</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.0</span></div>
   </div>
 </div>
 
@@ -4470,11 +4470,31 @@ function resetPanel(){
   tipoVisita='';window._ordenActiva=null;
   // Volver al formulario limpio
   var hWrap=document.getElementById('hist-wrap');
-  var fWrap=document.getElementById('form-wrap')||document.querySelector('.wrap');
   if(hWrap)hWrap.style.display='none';
-  // Resetear selector de edificio
-  var selEdif=document.getElementById('selEdif');if(selEdif)selEdif.value='';
-  var selTipo=document.getElementById('selTipo');if(selTipo)selTipo.value='';
+  // Limpiar paso 1 — fecha y hora
+  var fechaEl=document.getElementById('fecha');if(fechaEl)fechaEl.value='';
+  var horaEl=document.getElementById('hora');if(horaEl)horaEl.value='';
+  var horaBtn=document.getElementById('horaBtn');if(horaBtn)horaBtn.textContent='—:—';
+  var durEl=document.getElementById('dur');if(durEl)durEl.textContent='—';
+  var horaFEl=document.getElementById('horaF');if(horaFEl)horaFEl.value='';
+  // Limpiar paso 2 — edificio
+  var lsearch=document.getElementById('lsearch');if(lsearch)lsearch.value='';
+  var ldd=document.getElementById('ldd');if(ldd)ldd.style.display='none';
+  var edidEl=document.getElementById('edid');if(edidEl)edidEl.value='';
+  var lnomEl=document.getElementById('lnom');if(lnomEl)lnomEl.value='';
+  var ldirEl=document.getElementById('ldir');if(ldirEl)ldirEl.value='';
+  var detalleEl=document.getElementById('detalle');if(detalleEl)detalleEl.value='';
+  var detwEl=document.getElementById('detw');if(detwEl)detwEl.style.display='none';
+  var btnMaps=document.getElementById('btnMaps');if(btnMaps)btnMaps.style.display='none';
+  // Limpiar paso 3 — tipo visita
+  document.querySelectorAll('.chip.cv').forEach(function(c){c.classList.remove('on');});
+  tipoVisita='';
+  // Volver al paso 1
+  document.querySelectorAll('.sc').forEach(function(sc){
+    var sb=sc.querySelector('.sb');var sa=sc.querySelector('.sa');
+    if(sb)sb.style.display='none';if(sa)sa.textContent='▶';
+  });
+  var p1=document.getElementById('b1');if(p1)p1.style.display='block';
   // Limpiar intervenciones del DOM
   var ivCont=document.getElementById('ivCont');if(ivCont)ivCont.innerHTML='';
   var rtotal=document.getElementById('rtotal');if(rtotal)rtotal.classList.remove('on');
@@ -4483,6 +4503,7 @@ function resetPanel(){
   // Limpiar fotos
   var foGlobalPrev=document.getElementById('foGlobalPrev');if(foGlobalPrev)foGlobalPrev.innerHTML='';
   var foGlobalCnt=document.getElementById('foGlobalCnt');if(foGlobalCnt)foGlobalCnt.style.display='none';
+  var foUpload=document.getElementById('foUploadProgress');if(foUpload)foUpload.style.display='none';
   // Limpiar observaciones
   var obsgen=document.getElementById('obsgen');if(obsgen)obsgen.value='';
   // Recargar solo el historial en segundo plano
