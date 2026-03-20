@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.3</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.4</span></div>
   </div>
 </div>
 
@@ -1841,11 +1841,132 @@ window.addEventListener('popstate',function(){
   }
 });
 
+
+// ── AUTOGUARDADO ──────────────────────────────────────────
+function guardarBorrador(){
+  try{
+    var fecha=document.getElementById('fecha');var hora=document.getElementById('hora');
+    var lsearch=document.getElementById('lsearch');var lnom=document.getElementById('lnom');
+    var detalle=document.getElementById('detalle');var obsgen=document.getElementById('obsgen');
+    var borrador={
+      ts:Date.now(),
+      fecha:fecha?fecha.value:'',
+      hora:hora?hora.value:'',
+      lsearch:lsearch?lsearch.value:'',
+      lnom:lnom?lnom.value:'',
+      detalle:detalle?detalle.value:'',
+      obsgen:obsgen?obsgen.value:'',
+      tipoVisita:tipoVisita,
+      ivList:ivList.map(function(iv){return {id:iv.id,data:iv.data};}),
+      compMulti:JSON.parse(JSON.stringify(compMulti||{})),
+      ubPorIv:JSON.parse(JSON.stringify(ubPorIv||{})),
+      matGlobal:JSON.parse(JSON.stringify(matGlobal||[]))
+    };
+    localStorage.setItem('solec_borrador',JSON.stringify(borrador));
+  }catch(ex){}
+}
+
+function limpiarBorrador(){
+  try{localStorage.removeItem('solec_borrador');}catch(ex){}
+}
+
+function verificarBorrador(){
+  try{
+    var raw=localStorage.getItem('solec_borrador');
+    if(!raw)return;
+    var b=JSON.parse(raw);
+    // Solo mostrar si tiene datos relevantes y es de menos de 24hs
+    var edad=(Date.now()-b.ts)/(1000*60*60);
+    if(edad>24){limpiarBorrador();return;}
+    var tieneContenido=b.lnom||(b.ivList&&b.ivList.length>0&&b.ivList.some(function(iv){return iv.data&&iv.data.lin;}));
+    if(!tieneContenido){limpiarBorrador();return;}
+    // Mostrar cartel de recuperación
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    var box=document.createElement('div');
+    box.style.cssText='background:var(--s1);border-radius:16px;padding:24px;max-width:340px;width:100%;border:2px solid var(--am);';
+    var tit=document.createElement('div');
+    tit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--am);letter-spacing:2px;margin-bottom:8px;';
+    tit.textContent='📋 REGISTRO EN PROGRESO';
+    var msg=document.createElement('div');
+    msg.style.cssText='font-size:14px;color:var(--t2);margin-bottom:16px;line-height:1.5;';
+    var hace=edad<1?Math.round(edad*60)+' minutos':Math.round(edad)+' horas';
+    msg.textContent='Tenés un registro sin enviar de hace '+hace+'. ¿Querés recuperarlo?';
+    if(b.lnom){
+      var edifTag=document.createElement('div');
+      edifTag.style.cssText='font-size:13px;font-weight:800;color:var(--t);background:var(--s2);border-radius:8px;padding:8px 12px;margin-bottom:16px;';
+      edifTag.textContent='📍 '+b.lnom+(b.tipoVisita?' · '+b.tipoVisita:'');
+      box.appendChild(tit);box.appendChild(msg);box.appendChild(edifTag);
+    } else {
+      box.appendChild(tit);box.appendChild(msg);
+    }
+    var btnSi=document.createElement('button');
+    btnSi.style.cssText='width:100%;padding:13px;background:var(--am);border:none;border-radius:10px;color:#000;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;margin-bottom:8px;';
+    btnSi.textContent='✅ RECUPERAR REGISTRO';
+    var btnNo=document.createElement('button');
+    btnNo.style.cssText='width:100%;padding:11px;background:transparent;border:1px solid var(--borde);border-radius:10px;color:var(--t3);font-size:14px;cursor:pointer;';
+    btnNo.textContent='Descartar y empezar nuevo';
+    btnSi.onclick=function(){
+      document.body.removeChild(ov);
+      restaurarBorrador(b);
+    };
+    btnNo.onclick=function(){
+      limpiarBorrador();
+      document.body.removeChild(ov);
+    };
+    box.appendChild(btnSi);box.appendChild(btnNo);
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+  }catch(ex){}
+}
+
+function restaurarBorrador(b){
+  try{
+    // Restaurar datos básicos
+    var fecha=document.getElementById('fecha');if(fecha&&b.fecha)fecha.value=b.fecha;
+    var hora=document.getElementById('hora');if(hora&&b.hora)hora.value=b.hora;
+    var horaBtn=document.getElementById('horaBtn');if(horaBtn&&b.hora)horaBtn.textContent=b.hora;
+    var lsearch=document.getElementById('lsearch');if(lsearch&&b.lsearch)lsearch.value=b.lsearch;
+    var lnom=document.getElementById('lnom');if(lnom&&b.lnom)lnom.value=b.lnom;
+    var detalle=document.getElementById('detalle');if(detalle&&b.detalle){detalle.value=b.detalle;document.getElementById('detw').style.display='block';}
+    var obsgen=document.getElementById('obsgen');if(obsgen&&b.obsgen)obsgen.value=b.obsgen;
+    // Restaurar tipo visita
+    if(b.tipoVisita){
+      tipoVisita=b.tipoVisita;
+      document.querySelectorAll('.chip.cv').forEach(function(c){
+        if(c.dataset.tipo===b.tipoVisita)c.classList.add('on');
+      });
+    }
+    // Restaurar estado interno
+    if(b.compMulti)compMulti=b.compMulti;
+    if(b.ubPorIv)ubPorIv=b.ubPorIv;
+    if(b.matGlobal)matGlobal=b.matGlobal;
+    // Restaurar intervenciones
+    if(b.ivList&&b.ivList.length){
+      ivList=[];
+      b.ivList.forEach(function(iv){
+        ivList.push(iv);
+      });
+    }
+    showToast('✅ Registro recuperado');
+  }catch(ex){showToast('⚠️ Error al recuperar');}
+}
+
+// Autoguardado cada 20 segundos
+setInterval(function(){
+  var hayDatos=(ivList&&ivList.some(function(iv){return iv.data&&iv.data.lin;}))
+    ||(archivosGlobal&&archivosGlobal.length>0)
+    ||(matGlobal&&matGlobal.length>0)
+    ||(document.getElementById('lnom')&&document.getElementById('lnom').value);
+  if(hayDatos)guardarBorrador();
+},20000);
+
 window.onload=function(){
   // Registrar Service Worker para PWA
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/solec-mario/sw.js').catch(function(){});
   }
+  setTimeout(verificarBorrador, 800);
   limpiarCacheVieja();
   tick();setInterval(tick,1000);
   // Drive OAuth desactivado temporalmente
@@ -4407,6 +4528,7 @@ async function enviar(finalizar){
       setTimeout(function(){
         // Recarga limpia — más confiable que resetear manualmente
         _enviando=true;
+        limpiarBorrador();
         location.reload();
       },2000);
       // Operaciones secundarias en segundo plano — no bloquean
