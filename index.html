@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.7</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.8</span></div>
   </div>
 </div>
 
@@ -1981,28 +1981,35 @@ function restaurarBorrador(b){
           if(biv)biv.style.display='block';
           if(aiv)aiv.style.transform='rotate(90deg)';
         }
-        setTimeout((function(ivId,oldIvId,data,vtDescs){return function(){
+        setTimeout((function(ivId,oldIvId,data,vtDescs,estabaAbierto){return function(){
           var evEl=document.getElementById(ivId+'-ev');if(evEl&&data.ev)evEl.value=data.ev;
           var coEl=document.getElementById(ivId+'-co');if(coEl&&data.comp)coEl.value=data.comp;
-          // Restaurar descripción visita técnica
           var vtEl=document.getElementById(ivId+'-vt-desc');
           if(vtEl&&vtDescs&&vtDescs[oldIvId])vtEl.value=vtDescs[oldIvId];
           if(typeof updR==='function')updR(ivId);
           if(typeof rendUb==='function')rendUb(ivId);
-        };})(id,oldId,ivSaved.data||{},b.vtDescs||{}),300);
+          // Abrir acordeón si tenía datos aunque no estuviera explícitamente abierto
+          if(estabaAbierto||(data&&data.lin)){
+            var biv=document.getElementById(ivId+'-b');
+            var aiv=document.getElementById(ivId+'-ar');
+            if(biv)biv.style.display='block';
+            if(aiv)aiv.style.transform='rotate(90deg)';
+          }
+        };})(id,oldId,ivSaved.data||{},b.vtDescs||{},estabaAbierto),300);
       });
     }
     // Abrir pasos que estaban abiertos
-    if(b.pasosAbiertos&&b.pasosAbiertos.length){
-      b.pasosAbiertos.forEach(function(n){
-        var bp=document.getElementById('b'+n);
-        var ap=document.getElementById('a'+n);
-        var pp=document.getElementById('p'+n);
-        if(bp)bp.style.display='block';
-        if(ap)ap.style.transform='rotate(90deg)';
-        if(pp)pp.classList.add('on');
-      });
-    }
+    // Abrir pasos que estaban abiertos — o al menos el de intervenciones si hay datos
+    var pasosParaAbrir=b.pasosAbiertos||[];
+    if(b.ivList&&b.ivList.length&&pasosParaAbrir.indexOf(4)===-1)pasosParaAbrir.push(4);
+    pasosParaAbrir.forEach(function(n){
+      var bp=document.getElementById('b'+n);
+      var ap=document.getElementById('a'+n);
+      var pp=document.getElementById('p'+n);
+      if(bp)bp.style.display='block';
+      if(ap)ap.style.transform='rotate(90deg)';
+      if(pp)pp.classList.add('on');
+    });
     // Mostrar aviso de archivos perdidos
     // Restaurar archivos del borrador de Drive
     if(b.archivosBorrador&&b.archivosBorrador.length){
@@ -3485,11 +3492,21 @@ function renderPrevGlobal() {
       var img = document.createElement('img'); img.src = a.dataUrl;
       img.style.cssText = 'width:70px;height:70px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--borde);display:block;';
       wrap.appendChild(img);
+    } else if (a.type === 'foto' && a.driveId) {
+      // Foto recuperada del borrador — mostrar miniatura de Drive
+      var img2 = document.createElement('img');
+      img2.src = 'https://drive.google.com/thumbnail?id='+a.driveId+'&sz=w100';
+      img2.style.cssText = 'width:70px;height:70px;object-fit:cover;border-radius:var(--rs);border:2px solid var(--am);display:block;';
+      var recovBadge = document.createElement('div');
+      recovBadge.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(245,197,24,.8);font-size:8px;font-weight:800;text-align:center;color:#000;border-radius:0 0 var(--rs) var(--rs);';
+      recovBadge.textContent = '✓ Drive';
+      wrap.appendChild(img2);wrap.appendChild(recovBadge);
     } else {
-      var icon = a.type === 'video' ? '🎥' : '🎙️';
+      var icon = a.type === 'video' ? '🎥' : (a.type === 'audio' ? '🎙️' : '📷');
       var d = document.createElement('div');
       d.style.cssText = 'width:70px;height:70px;background:var(--s3);border-radius:var(--rs);border:1px solid var(--borde);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;color:var(--t2);text-align:center;padding:4px;';
-      d.innerHTML = icon + '<span style="font-size:9px;margin-top:4px;">' + (a.blob.size/1024/1024).toFixed(1) + 'MB</span>';
+      var sizeStr = a.driveId ? '✓' : (a.blob && a.blob.size ? (a.blob.size/1024/1024).toFixed(1)+'MB' : '');
+      d.innerHTML = icon + '<span style="font-size:9px;margin-top:4px;">' + sizeStr + '</span>';
       wrap.appendChild(d);
     }
     var del = document.createElement('button');
