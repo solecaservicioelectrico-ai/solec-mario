@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.8</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.9</span></div>
   </div>
 </div>
 
@@ -1866,8 +1866,12 @@ function guardarBorrador(){
       ts:Date.now(),
       fecha:fecha?fecha.value:'',
       hora:hora?hora.value:'',
+      horaDisplay:document.getElementById('horaBtn')?document.getElementById('horaBtn').textContent:'',
       lsearch:lsearch?lsearch.value:'',
       lnom:lnom?lnom.value:'',
+      ldir:document.getElementById('ldir')?document.getElementById('ldir').value:'',
+      edid:document.getElementById('edid')?document.getElementById('edid').value:'',
+      lSel:lSel?JSON.parse(JSON.stringify(lSel)):null,
       detalle:detalle?detalle.value:'',
       obsgen:obsgen?obsgen.value:'',
       tipoVisita:tipoVisita,
@@ -1944,15 +1948,28 @@ function restaurarBorrador(b){
     var fecha=document.getElementById('fecha');if(fecha&&b.fecha)fecha.value=b.fecha;
     var hora=document.getElementById('hora');if(hora&&b.hora)hora.value=b.hora;
     var horaBtn=document.getElementById('horaBtn');if(horaBtn&&b.hora)horaBtn.textContent=b.hora;
-    var lsearch=document.getElementById('lsearch');if(lsearch&&b.lsearch)lsearch.value=b.lsearch;
-    var lnom=document.getElementById('lnom');if(lnom&&b.lnom)lnom.value=b.lnom;
+    // Restaurar edificio seleccionado
+    if(b.lSel&&typeof selL==='function'){
+      selL(b.lSel);
+    } else {
+      var lsearch=document.getElementById('lsearch');if(lsearch&&b.lsearch)lsearch.value=b.lsearch;
+      var lnom=document.getElementById('lnom');if(lnom&&b.lnom)lnom.value=b.lnom;
+    }
+    var ldirEl2=document.getElementById('ldir');if(ldirEl2&&b.ldir)ldirEl2.value=b.ldir;
+    var edidEl2=document.getElementById('edid');if(edidEl2&&b.edid)edidEl2.value=b.edid;
     var detalle=document.getElementById('detalle');if(detalle&&b.detalle){detalle.value=b.detalle;var detw=document.getElementById('detw');if(detw)detw.style.display='block';}
     var obsgen=document.getElementById('obsgen');if(obsgen&&b.obsgen)obsgen.value=b.obsgen;
     if(b.tipoVisita){
-      tipoVisita=b.tipoVisita;
-      document.querySelectorAll('.chip.cv').forEach(function(c){
-        if(c.dataset.tipo===b.tipoVisita)c.classList.add('on');
-      });
+      // Usar selTipo si existe, si no hacerlo manual
+      var chipTarget=document.querySelector('.chip.cv[data-tipo="'+b.tipoVisita+'"]');
+      if(chipTarget&&typeof selTipo==='function'){
+        selTipo(chipTarget);
+      } else {
+        tipoVisita=b.tipoVisita;
+        document.querySelectorAll('.chip.cv').forEach(function(c){
+          if(c.dataset.tipo===b.tipoVisita)c.classList.add('on');
+        });
+      }
     }
     if(b.compMulti)compMulti=b.compMulti;
     if(b.ubPorIv)ubPorIv=b.ubPorIv;
