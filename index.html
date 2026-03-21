@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.5</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v2.7</span></div>
   </div>
 </div>
 
@@ -1848,6 +1848,20 @@ function guardarBorrador(){
     var fecha=document.getElementById('fecha');var hora=document.getElementById('hora');
     var lsearch=document.getElementById('lsearch');var lnom=document.getElementById('lnom');
     var detalle=document.getElementById('detalle');var obsgen=document.getElementById('obsgen');
+    // Guardar qué pasos están abiertos
+    var pasosAbiertos=[];
+    for(var pi=1;pi<=5;pi++){var bi=document.getElementById('b'+pi);if(bi&&bi.style.display==='block')pasosAbiertos.push(pi);}
+    // Guardar qué intervenciones están abiertas
+    var ivsAbiertos=[];
+    ivList.forEach(function(iv){var b=document.getElementById(iv.id+'-b');if(b&&b.style.display==='block')ivsAbiertos.push(iv.id);});
+    // Guardar descripción visita técnica por intervención
+    var vtDescs={};
+    ivList.forEach(function(iv){
+      var vtEl=document.getElementById(iv.id+'-vt-desc');
+      if(vtEl&&vtEl.value)vtDescs[iv.id]=vtEl.value;
+    });
+    // Guardar nombres de archivos (no el blob)
+    var archivosNombres=archivosGlobal.map(function(a){return {name:a.name,type:a.type};});
     var borrador={
       ts:Date.now(),
       fecha:fecha?fecha.value:'',
@@ -1857,6 +1871,11 @@ function guardarBorrador(){
       detalle:detalle?detalle.value:'',
       obsgen:obsgen?obsgen.value:'',
       tipoVisita:tipoVisita,
+      pasosAbiertos:pasosAbiertos,
+      ivsAbiertos:ivsAbiertos,
+      vtDescs:vtDescs,
+      archivosNombres:archivosNombres,
+      archivosBorrador:archivosGlobal.filter(function(a){return a.driveId;}).map(function(a){return{name:a.name,type:a.type,driveId:a.driveId,driveLink:a.driveLink};}),
       ivList:ivList.map(function(iv){return {id:iv.id,data:iv.data};}),
       compMulti:JSON.parse(JSON.stringify(compMulti||{})),
       ubPorIv:JSON.parse(JSON.stringify(ubPorIv||{})),
@@ -1954,13 +1973,49 @@ function restaurarBorrador(b){
         ivList.push({id:id,data:ivSaved.data||{}});
         var div=buildIv(ivCount,id);
         if(ivCont)ivCont.appendChild(div);
-        setTimeout((function(ivId,data){return function(){
+        // Abrir acordeón si estaba abierto
+        var estabaAbierto=b.ivsAbiertos&&b.ivsAbiertos.indexOf(oldId)!==-1;
+        if(estabaAbierto){
+          var biv=document.getElementById(id+'-b');
+          var aiv=document.getElementById(id+'-ar');
+          if(biv)biv.style.display='block';
+          if(aiv)aiv.style.transform='rotate(90deg)';
+        }
+        setTimeout((function(ivId,oldIvId,data,vtDescs){return function(){
           var evEl=document.getElementById(ivId+'-ev');if(evEl&&data.ev)evEl.value=data.ev;
           var coEl=document.getElementById(ivId+'-co');if(coEl&&data.comp)coEl.value=data.comp;
+          // Restaurar descripción visita técnica
+          var vtEl=document.getElementById(ivId+'-vt-desc');
+          if(vtEl&&vtDescs&&vtDescs[oldIvId])vtEl.value=vtDescs[oldIvId];
           if(typeof updR==='function')updR(ivId);
           if(typeof rendUb==='function')rendUb(ivId);
-        };})(id,ivSaved.data||{}),300);
+        };})(id,oldId,ivSaved.data||{},b.vtDescs||{}),300);
       });
+    }
+    // Abrir pasos que estaban abiertos
+    if(b.pasosAbiertos&&b.pasosAbiertos.length){
+      b.pasosAbiertos.forEach(function(n){
+        var bp=document.getElementById('b'+n);
+        var ap=document.getElementById('a'+n);
+        var pp=document.getElementById('p'+n);
+        if(bp)bp.style.display='block';
+        if(ap)ap.style.transform='rotate(90deg)';
+        if(pp)pp.classList.add('on');
+      });
+    }
+    // Mostrar aviso de archivos perdidos
+    // Restaurar archivos del borrador de Drive
+    if(b.archivosBorrador&&b.archivosBorrador.length){
+      b.archivosBorrador.forEach(function(a){
+        archivosGlobal.push({blob:null,name:a.name,type:a.type,dataUrl:null,driveId:a.driveId,driveLink:a.driveLink});
+      });
+      renderPrevGlobal();
+    }
+    if(b.archivosNombres&&b.archivosNombres.length){
+      setTimeout(function(){
+        var faltantes=b.archivosNombres.length-(b.archivosBorrador?b.archivosBorrador.length:0);
+        if(faltantes>0)showToast('⚠️ '+faltantes+' archivo(s) no se pueden recuperar — volvé a agregarlos');
+      },1000);
     }
     if(typeof updCnt==='function')updCnt();
     showToast('✅ Registro recuperado');
@@ -3378,20 +3433,46 @@ function agregarArchivosGlobal(inp, tipo) {
   archivos.forEach(function(f) {
     if (tipo === 'foto') {
       comprimirFoto(f, function(blob, dataUrl) {
-        archivosGlobal.push({blob:blob, name:f.name, type:'foto', dataUrl:dataUrl});
+        var archivo = {blob:blob, name:f.name, type:'foto', dataUrl:dataUrl, driveId:null, driveLink:null};
+        archivosGlobal.push(archivo);
         renderPrevGlobal();
+        // Subir automáticamente a borradores
+        subirArchivoBorrador(archivo, blob, dataUrl);
       });
     } else {
-      var MAX = 50 * 1024 * 1024; // 50MB
+      var MAX = 50 * 1024 * 1024;
       if (f.size > MAX) { showToast('⚠️ Archivo demasiado grande (máx 50MB)'); return; }
       var reader = new FileReader();
       reader.onload = function(ev) {
-        archivosGlobal.push({blob:f, name:f.name, type:tipo, dataUrl:ev.target.result});
+        var archivo = {blob:f, name:f.name, type:tipo, dataUrl:ev.target.result, driveId:null, driveLink:null};
+        archivosGlobal.push(archivo);
         renderPrevGlobal();
+        subirArchivoBorrador(archivo, f, ev.target.result);
       };
       reader.readAsDataURL(f);
     }
   });
+}
+
+async function subirArchivoBorrador(archivoRef, blob, dataUrl){
+  try{
+    var mimeType=blob.type||(archivoRef.type==='foto'?'image/jpeg':archivoRef.type==='video'?'video/mp4':'audio/mpeg');
+    var nombre=Date.now()+'_'+archivoRef.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    var body={
+      _method:'UPLOAD',
+      esBorrador:true,
+      edificio:'_borrador',
+      nombre:nombre,
+      mimeType:mimeType,
+      data:dataUrl
+    };
+    var r=await fetch(API+'?sheet=Registros',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(j.id){
+      archivoRef.driveId=j.id;
+      archivoRef.driveLink=j.link;
+    }
+  }catch(ex){}
 }
 
 function renderPrevGlobal() {
@@ -3463,15 +3544,35 @@ async function subirTodosLosArchivos(edificio, regCod, onProgress) {
   var total = archivosGlobal.length;
   if (!total) return [];
   if (onProgress) onProgress(0, total);
+
+  // Separar archivos ya subidos (borradores) de los que no
+  var yaSubidos = archivosGlobal.filter(function(a){return a.driveId;});
+  var porSubir = archivosGlobal.filter(function(a){return !a.driveId;});
   var completados = 0;
-  // Subir en lotes de 3 para no saturar
   var links = [];
+
+  // Mover borradores a carpeta definitiva
+  if(yaSubidos.length){
+    try{
+      var r=await fetch(API+'?sheet=Registros',{
+        method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({_method:'MOVER_BORRADOR',fileIds:yaSubidos.map(function(a){return a.driveId;}),edificio:edificio,regCod:regCod})
+      });
+      var j=await r.json();
+    }catch(ex){}
+    yaSubidos.forEach(function(a){
+      links.push(a.type+':'+a.driveLink);
+      completados++;
+      if(onProgress)onProgress(completados,total);
+    });
+  }
+
+  // Subir los que no estaban en borrador — en lotes de 3
   var LOTE = 3;
-  for(var i=0; i<total; i+=LOTE){
-    var lote = archivosGlobal.slice(i, i+LOTE);
+  for(var i=0; i<porSubir.length; i+=LOTE){
+    var lote = porSubir.slice(i, i+LOTE);
     var promesas = lote.map(function(a, li){
       var nombre = (i+li+1) + '_' + a.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-      // Timeout de 45 segundos por archivo
       var timeout = new Promise(function(resolve){setTimeout(function(){resolve(null);},45000);});
       var upload = subirArchivoViaScript(a, nombre, edificio, regCod, 'general')
         .then(function(link){
