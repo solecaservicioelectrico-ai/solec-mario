@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.0</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.2</span></div>
   </div>
 </div>
 
@@ -1930,8 +1930,47 @@ function verificarBorrador(){
     btnNo.style.cssText='width:100%;padding:11px;background:transparent;border:1px solid var(--borde);border-radius:10px;color:var(--t3);font-size:14px;cursor:pointer;';
     btnNo.textContent='Descartar y empezar nuevo';
     btnSi.onclick=function(){
-      document.body.removeChild(ov);
-      restaurarBorrador(b);
+      // Mostrar barra de carga mientras esperan los datos
+      box.innerHTML='';
+      var loadTit=document.createElement('div');
+      loadTit.style.cssText='font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--am);letter-spacing:2px;margin-bottom:16px;text-align:center;';
+      loadTit.textContent='⏳ RECUPERANDO REGISTRO...';
+      var barWrap=document.createElement('div');
+      barWrap.style.cssText='height:8px;background:var(--s3);border-radius:4px;overflow:hidden;';
+      var barFill=document.createElement('div');
+      barFill.style.cssText='height:8px;background:var(--am);border-radius:4px;width:0%;transition:width .3s;';
+      barWrap.appendChild(barFill);
+      var loadMsg=document.createElement('div');
+      loadMsg.style.cssText='font-size:13px;color:var(--t3);margin-top:10px;text-align:center;';
+      loadMsg.textContent='Cargando datos...';
+      box.appendChild(loadTit);box.appendChild(barWrap);box.appendChild(loadMsg);
+      // Animar barra mientras espera
+      var pct=0;
+      var barAnim=setInterval(function(){
+        pct=Math.min(pct+3,90);
+        barFill.style.width=pct+'%';
+      },100);
+      // Esperar que edificios estén cargados
+      var _bRef=b;
+      var _waitData=setInterval(function(){
+        if(edificios&&edificios.length>0){
+          clearInterval(_waitData);
+          clearInterval(barAnim);
+          barFill.style.width='100%';
+          loadMsg.textContent='¡Listo!';
+          setTimeout(function(){
+            document.body.removeChild(ov);
+            restaurarBorrador(_bRef);
+          },400);
+        }
+      },200);
+      // Timeout máximo 8 segundos
+      setTimeout(function(){
+        clearInterval(_waitData);clearInterval(barAnim);
+        barFill.style.width='100%';
+        document.body.removeChild(ov);
+        restaurarBorrador(_bRef);
+      },8000);
     };
     btnNo.onclick=function(){
       limpiarBorrador();
@@ -1972,19 +2011,8 @@ function restaurarBorrador(b){
         }
       }
     }
-    // Si edificios ya cargaron, aplicar ahora; si no, esperar
-    if(edificios&&edificios.length>0){
-      _aplicarEdifYTipo();
-    } else {
-      var _waitEdif=setInterval(function(){
-        if(edificios&&edificios.length>0){
-          clearInterval(_waitEdif);
-          _aplicarEdifYTipo();
-        }
-      },200);
-      // Timeout de 5 segundos
-      setTimeout(function(){clearInterval(_waitEdif);_aplicarEdifYTipo();},5000);
-    }
+    // Edificios ya cargados — aplicar directo
+    _aplicarEdifYTipo();
     var detalle=document.getElementById('detalle');if(detalle&&b.detalle){detalle.value=b.detalle;var detw=document.getElementById('detw');if(detw)detw.style.display='block';}
     var obsgen=document.getElementById('obsgen');if(obsgen&&b.obsgen)obsgen.value=b.obsgen;
     // tipo visita se aplica en _aplicarEdifYTipo arriba
@@ -2077,7 +2105,7 @@ window.onload=function(){
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/solec-mario/sw.js').catch(function(){});
   }
-  setTimeout(verificarBorrador, 800);
+  setTimeout(verificarBorrador, 800); // Mostrar cartel temprano
   limpiarCacheVieja();
   tick();setInterval(tick,1000);
   // Drive OAuth desactivado temporalmente
