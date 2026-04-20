@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.14</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.15</span></div>
   </div>
 </div>
 
@@ -3717,17 +3717,32 @@ function selSC(id,catk,sc,el){
         var nom2=document.createElement('span');
         nom2.style.cssText='flex:1;font-size:14px;font-weight:700;color:'+(item.esOtro?'var(--am)':'var(--t)')+';';
         nom2.textContent=item.nombre;
+        // Controles de cantidad
+        var bminus2=document.createElement('button');bminus2.type='button';bminus2.textContent='←';
+        bminus2.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
+        var qtyEl2=document.createElement('span');
+        qtyEl2.style.cssText='font-size:16px;font-weight:900;min-width:28px;text-align:center;color:var(--am);cursor:pointer;padding:2px;';
+        qtyEl2.textContent=item.qty||1;
+        var bplus2=document.createElement('button');bplus2.type='button';bplus2.textContent='→';
+        bplus2.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
+        var unEl2=document.createElement('span');unEl2.textContent='u';unEl2.style.cssText='font-size:11px;color:var(--t3);min-width:14px;';
         var bx=document.createElement('button');bx.type='button';bx.textContent='✕';
         bx.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0;';
-        (function(i2){
+        (function(i2,qEl2){
+          bminus2.addEventListener('click',function(){
+            if((compMulti[id][i2].qty||1)>1){compMulti[id][i2].qty=(compMulti[id][i2].qty||1)-1;qEl2.textContent=compMulti[id][i2].qty;updR(id);}
+          });
+          bplus2.addEventListener('click',function(){
+            compMulti[id][i2].qty=(compMulti[id][i2].qty||1)+1;qEl2.textContent=compMulti[id][i2].qty;updR(id);
+          });
           bx.addEventListener('click',function(){
             compMulti[id].splice(i2,1);
             cs.value=compMulti[id].map(function(x){return x.nombre;}).join(', ');
             btnGenSel.textContent=compMulti[id].length?'COMPONENTES ('+compMulti[id].length+')':'COMPONENTES';
             renderGenList();updR(id);
           });
-        })(idx);
-        row2.appendChild(nom2);row2.appendChild(bx);
+        })(idx,qtyEl2);
+        row2.appendChild(nom2);row2.appendChild(bminus2);row2.appendChild(qtyEl2);row2.appendChild(unEl2);row2.appendChild(bplus2);row2.appendChild(bx);
         genListWrap.appendChild(row2);
       });
     }
