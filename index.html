@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.10</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.11</span></div>
   </div>
 </div>
 
@@ -5684,8 +5684,9 @@ function renderHist(regs){
     var cod=r.Codigo||r.codigo||r.ID||r.id||('REG-#'+(idx+1));
     var lugar=r.Edificio||r.edificio||'Sin lugar';
     var fecha=r.Fecha||r.fecha||'';
-    var hora=r.Hora||r['Hora Inicio']||r.hora||'';
-    var horafin=r['Hora Fin']||r.hora_fin||'';
+    var lH=function(v){if(!v)return'';if(v.indexOf('T')!==-1){var t=v.split('T')[1];return t?t.slice(0,5):'';}return v.length>=5?v.slice(0,5):v;};
+    var hora=lH(r.Hora||r['Hora Inicio']||r.hora||'');
+    var horafin=lH(r['Hora Fin']||r.hora_fin||'');
     var dur=r['Duración']||r.duracion||'';
     var tipo=r['Tipo de Visita']||r['Tipo de visita']||r.tipo_de_visita||'';
     var ivs=r.Intervenciones||r.Interversiones||r['Trabajos Estructurados']||r.intervenciones||'';
@@ -5694,8 +5695,10 @@ function renderHist(regs){
     var obs=r.Observaciones||r.observaciones||'';
     var obraCod=r['Codigo Obra']||r.codigo_obra||'';
     var tipoCls=getTipoCls(tipo);
-    var fechaFmt=fecha;
-    try{var dp=fecha.split('-');if(dp.length===3)fechaFmt=dp[2]+'/'+dp[1]+'/'+dp[0];}catch(e){}
+    var lF=function(v){if(!v)return'';if(v.indexOf('T')!==-1)v=v.split('T')[0];return v.length>=10?v.slice(0,10):v;};
+    var fechaLimpia=lF(fecha);
+    var fechaFmt=fechaLimpia;
+    try{var dp=fechaLimpia.split('-');if(dp.length===3)fechaFmt=dp[2]+'/'+dp[1]+'/'+dp[0];}catch(e){}
 
     var card=document.createElement('div');card.className='reg-card';
 
@@ -5710,8 +5713,9 @@ function renderHist(regs){
     // Badge corrección parpadeante
     var correcCard=correccionesMario.filter(function(c){return(c.Codigo||'').trim()===(cod||'').trim();});
     if(correcCard.length){
-      var badgeC=document.createElement('span');badgeC.className='badge-correc-mario';
-      badgeC.textContent='⚠️ '+correcCard.length+(correcCard.length===1?' corrección':' correcciones');
+      var badgeC=document.createElement('div');
+      badgeC.style.cssText='display:inline-flex;align-items:center;gap:5px;background:rgba(255,71,87,.15);border:1.5px solid #ff4757;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;color:#ff4757;animation:mario-parpadeo 1.2s ease-in-out infinite;margin-top:6px;width:fit-content;';
+      badgeC.textContent='⚠️ '+correcCard.length+(correcCard.length===1?' CORRECCIÓN ENVIADA A ALI':' CORRECCIONES ENVIADAS A ALI');
       info.appendChild(badgeC);
     }
     top.appendChild(info);top.appendChild(badge);top.appendChild(arr);
