@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.9</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.10</span></div>
   </div>
 </div>
 
@@ -798,6 +798,18 @@ async function loadUbicaciones(){
     }
   }catch(e){console.error('loadUbicaciones:',e);}
 }
+var correccionesMario=[];
+
+async function loadCorreccionesMario(){
+  try{
+    var r=await fetch(API+'?sheet=Alertas&limit=500');
+    var j=await r.json();
+    correccionesMario=Array.isArray(j)?j.filter(function(a){
+      return (a.Tipo||'').toUpperCase()==='CORRECCIÓN'||(a.Tipo||'').toUpperCase()==='CORRECCION';
+    }):[];
+  }catch(e){correccionesMario=[];}
+}
+
 async function loadRegs(){
   var cont=document.getElementById('histLista');
   cont.innerHTML='<div class="hist-empty">Cargando...</div>';
@@ -2157,148 +2169,237 @@ function cargarRegistroParaEditar(reg){
   _modoEdicion = true;
   _codEditando = reg.Codigo || reg.codigo || null;
 
-  // Construir objeto borrador desde el registro del Sheet
-  var b = {};
+  // Reset limpio
+  resetPanel();
 
-  // Fecha y hora
-  b.fecha = reg.Fecha || reg.fecha || '';
-  // Hora como string HH:MM
-  var horaRaw = reg.Hora || reg.hora || '';
-  // Si viene como timestamp (1899-12-30T...) extraer la hora
-  if(horaRaw.indexOf('T') !== -1){
-    horaRaw = horaRaw.split('T')[1] ? horaRaw.split('T')[1].slice(0,5) : '';
-  }
-  b.hora = horaRaw;
-  var horaFinRaw = reg['Hora Fin'] || reg['Hora_Fin'] || reg.horaFin || '';
-  if(horaFinRaw.indexOf('T') !== -1){
-    horaFinRaw = horaFinRaw.split('T')[1] ? horaFinRaw.split('T')[1].slice(0,5) : '';
-  }
-  b.horaFin = horaFinRaw;
+  setTimeout(function(){
+    var nn2=function(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();};
 
-  // Edificio
-  b.lsearch = reg.Edificio || '';
-  b.lnom = reg.Edificio || '';
-  b.ldir = reg['Detalle Ubicacion'] || reg['Detalle Ubicación'] || '';
-  b.detalle = reg['Detalle Ubicacion'] || reg['Detalle Ubicación'] || '';
+    // ── Fecha ──
+    var fechaEl=document.getElementById('fecha');
+    if(fechaEl&&reg.Fecha)fechaEl.value=reg.Fecha;
 
-  // Tipo visita
-  b.tipoVisita = reg['Tipo de Visita'] || reg.tipoVisita || 'Service';
+    // ── Hora ──
+    var horaRaw=reg.Hora||'';
+    if(horaRaw.indexOf('T')!==-1)horaRaw=horaRaw.split('T')[1]?horaRaw.split('T')[1].slice(0,5):'';
+    var horaEl=document.getElementById('hora');
+    var horaBtn=document.getElementById('horaBtn');
+    if(horaEl&&horaRaw){horaEl.value=horaRaw;if(horaBtn){horaBtn.textContent=horaRaw;horaBtn.style.color='var(--am)';}}
 
-  // Observaciones
-  b.obsgen = reg.Observaciones || '';
+    // ── Hora fin ──
+    var hfinRaw=reg['Hora Fin']||reg['Hora_Fin']||'';
+    if(hfinRaw.indexOf('T')!==-1)hfinRaw=hfinRaw.split('T')[1]?hfinRaw.split('T')[1].slice(0,5):'';
+    var hfinEl=document.getElementById('hfin');
+    var hfinBtn=document.getElementById('hfinBtn');
+    if(hfinEl&&hfinRaw){hfinEl.value=hfinRaw;if(hfinBtn){hfinBtn.textContent=hfinRaw;hfinBtn.style.color='var(--am)';}}
+    if(typeof calcDur==='function')calcDur();
 
-  // Intervenciones desde MO_Data
-  var moData = [];
-  try{ moData = JSON.parse(reg.MO_Data || reg.mo_data || '[]'); }catch(e){}
-
-  // Parsear notas libres del texto de Intervenciones
-  var notasLibres = {};
-  if(reg.Intervenciones){
-    reg.Intervenciones.split(' || ').forEach(function(parte, i){
-      var mNota = parte.match(/"([^"]+)"/);
-      if(mNota) notasLibres[i] = mNota[1];
-      // Visita técnica sin comillas
-      var mVT = parte.match(/Visita t[eé]cnica:\s*(.+)/i);
-      if(mVT && !notasLibres[i]) notasLibres[i] = mVT[1].trim();
-    });
-  }
-
-  // Construir ivList y compMulti y ubPorIv desde MO_Data
-  var ivListB = [];
-  var compMultiB = {};
-  var ubPorIvB = {};
-
-  moData.forEach(function(iv, i){
-    var id = 'iv' + (i+1);
-    var catObj = (typeof CATS !== 'undefined' && CATS[iv.catk]) ? CATS[iv.catk] : {l: iv.catk || '', sc: ['']};
-    var nota = notasLibres[i] || '';
-
-    var ivData = {
-      catk: iv.catk || 'lu',
-      lin: catObj.l + (iv.sc ? ' · ' + iv.sc : '') + (iv.ev ? ' · ' + iv.ev : '') + (iv.comp ? ' · ' + iv.comp : ''),
-      sc: iv.sc || '',
-      ev: iv.ev || '',
-      comp: iv.comp || '',
-      nota: nota,
-      canalMetros: iv.canalMetros || null,
-      canalCurvas: iv.canalCurvas || null
-    };
-
-    // Visita técnica: guardar descripción
-    if(iv.catk === 'vt'){
-      ivData.vtDesc = iv.comp || nota;
-      ivData.lin = 'Visita técnica: ' + (iv.comp || nota);
+    // ── Edificio ──
+    var edifMatch=edificios.filter(function(e){return(e.nombre||'')===reg.Edificio;})[0];
+    if(edifMatch&&typeof selL==='function'){selL(edifMatch);}
+    else{
+      var lsEl=document.getElementById('lsearch');if(lsEl)lsEl.value=reg.Edificio||'';
+      var lnEl=document.getElementById('lnom');if(lnEl)lnEl.value=reg.Edificio||'';
     }
 
-    ivListB.push({id: id, data: ivData});
+    // ── Detalle ubicación ──
+    var detEl=document.getElementById('detalle');
+    var detwEl=document.getElementById('detw');
+    var detVal=reg['Detalle Ubicacion']||reg['Detalle Ubicaci\u00f3n']||'';
+    if(detEl&&detVal){detEl.value=detVal;if(detwEl)detwEl.style.display='block';}
 
-    // Componentes
-    if(iv.compItems && iv.compItems.length){
-      compMultiB[id] = iv.compItems.map(function(c){ return {nombre: c.nombre, qty: c.cantidad || 1}; });
-    } else if(iv.comp){
-      compMultiB[id] = [{nombre: iv.comp, qty: 1}];
-    }
-
-    // Ubicaciones
-    if(iv.ubs && iv.ubs.length){
-      ubPorIvB[id] = iv.ubs.map(function(u){ return {nombre: u.nombre, qty: u.qty || u.cantidad || 1}; });
-    }
-  });
-
-  b.ivList = ivListB;
-  b.compMulti = compMultiB;
-  b.ubPorIv = ubPorIvB;
-
-  // Materiales globales desde texto de Intervenciones
-  var matGlobalB = [];
-  if(reg.Intervenciones){
-    var mIdx = reg.Intervenciones.indexOf('MATERIALES:');
-    if(mIdx !== -1){
-      var matsStr = reg.Intervenciones.slice(mIdx + 11).trim();
-      matsStr.split(',').forEach(function(m){
-        m = m.trim().replace(/\[SIN STOCK\]/gi,'').replace(/\[SIN CARGAR\]/gi,'').trim();
-        if(!m) return;
-        var match = m.match(/^(\d+(?:[.,]\d+)?)\s*([a-zA-Z]*)\s+(.+)$/);
-        if(match){
-          matGlobalB.push({nombre: match[3].trim(), qty: parseFloat(match[1]) || 1, un: match[2] || 'u', id: 'libre', precio: 0});
-        } else {
-          matGlobalB.push({nombre: m, qty: 1, un: 'u', id: 'libre', precio: 0});
+    // ── Tipo de visita ──
+    var tvRaw=reg['Tipo de Visita']||'Service';
+    var tvLow=nn2(tvRaw);
+    if(tvLow.indexOf('urgencia')!==-1){
+      var horario=tvLow.indexOf('fuera')!==-1?'Fuera de horario':'Dentro de horario';
+      tipoVisita='Urgencia - '+horario;
+      var chipUrg=document.querySelector('.chip[data-tipo="Urgencia"]');
+      if(chipUrg){
+        document.querySelectorAll('.chip.cv[data-tipo]').forEach(function(c){c.classList.remove('on');});
+        chipUrg.classList.add('on');
+        var urgWrap=document.getElementById('urgWrap');
+        if(urgWrap){
+          urgWrap.classList.add('on');
+          urgWrap.querySelectorAll('.chip').forEach(function(c){
+            c.classList.remove('on');
+            var ct=nn2(c.textContent);
+            if(horario==='Dentro de horario'&&ct.indexOf('dentro')!==-1)c.classList.add('on');
+            if(horario==='Fuera de horario'&&ct.indexOf('fuera')!==-1)c.classList.add('on');
+          });
         }
+      }
+    } else {
+      var chip=document.querySelector('.chip.cv[data-tipo="'+tvRaw+'"]');
+      if(chip&&typeof selTipo==='function')selTipo(chip);
+      else{tipoVisita=tvRaw;document.querySelectorAll('.chip.cv[data-tipo]').forEach(function(c){if(c.dataset.tipo===tvRaw)c.classList.add('on');});}
+    }
+
+    // ── Observaciones ──
+    var obsEl=document.getElementById('obsgen');
+    if(obsEl&&reg.Observaciones)obsEl.value=reg.Observaciones;
+
+    // ── Intervenciones desde MO_Data ──
+    var moData=[];
+    try{moData=JSON.parse(reg.MO_Data||'[]');}catch(e){}
+
+    // Parsear notas libres del texto de Intervenciones
+    var notasLibres={};
+    if(reg.Intervenciones){
+      reg.Intervenciones.split(' || ').forEach(function(parte,i){
+        var mNota=parte.match(/"([^"]+)"/);
+        if(mNota)notasLibres[i]=mNota[1];
+        if(!notasLibres[i]){var mVT=parte.match(/Visita t[e\u00e9]cnica:\s*(.+)/i);if(mVT)notasLibres[i]=mVT[1].trim();}
       });
     }
-  }
-  b.matGlobal = matGlobalB;
 
-  // Mostrar banner de modo edición
-  var banner = document.getElementById('bannerEdicion');
-  if(!banner){
-    banner = document.createElement('div');
-    banner.id = 'bannerEdicion';
-    banner.style.cssText = 'background:rgba(74,158,255,.15);border:2px solid var(--azul);border-radius:var(--rs);padding:10px 16px;margin-bottom:12px;font-size:13px;color:var(--azul);font-weight:800;text-align:center;';
-    var wrap = document.getElementById('vForm') || document.body;
-    wrap.insertBefore(banner, wrap.firstChild);
-  }
-  banner.textContent = '✏️ MODO EDICIÓN — ' + (reg.Edificio || '') + ' · ' + (_codEditando || '');
+    // Parsear materiales globales
+    var matGlobalNuevo=[];
+    if(reg.Intervenciones){
+      var mIdx=reg.Intervenciones.indexOf('MATERIALES:');
+      if(mIdx!==-1){
+        var matsStr=reg.Intervenciones.slice(mIdx+11).trim();
+        matsStr.split(',').forEach(function(m){
+          m=m.trim().replace(/\[SIN STOCK\]/gi,'').replace(/\[SIN CARGAR\]/gi,'').trim();
+          if(!m)return;
+          var match=m.match(/^(\d+(?:[.,]\d+)?)\s*([a-zA-Z]*)\s+(.+)$/);
+          if(match)matGlobalNuevo.push({nombre:match[3].trim(),qty:parseFloat(match[1])||1,un:match[2]||'u',id:'libre',precio:0});
+          else matGlobalNuevo.push({nombre:m,qty:1,un:'u',id:'libre',precio:0});
+        });
+      }
+    }
+    matGlobal=matGlobalNuevo;
+    if(typeof renderMatGlobal==='function')renderMatGlobal();
 
-  // Cambiar texto del botón ENVIAR
-  var btnEnv = document.getElementById('benv');
-  if(btnEnv) btnEnv.textContent = '💾 GUARDAR CAMBIOS';
+    // Construir intervenciones con la misma lógica del asistente de voz
+    if(moData.length){
+      var ivCont=document.getElementById('ivList');
+      if(ivCont)ivCont.innerHTML='';
+      ivList=[];ivCount=0;compMulti={};ubPorIv={};
 
-  // Restaurar el borrador con los datos del registro
-  resetPanel();
-  setTimeout(function(){
-    restaurarBorrador(b);
-    // Setear hora de llegada y fin manualmente
+      moData.forEach(function(ivData,idx2){
+        ivCount++;
+        var id='iv'+ivCount;
+        var catObj=CATS[ivData.catk]||CATS['lu'];
+        var comp=ivData.comp||'';
+        var ivDataObj={
+          catk:ivData.catk||'lu',
+          lin:catObj.l+(ivData.sc?' · '+ivData.sc:'')+(ivData.ev?' · '+ivData.ev:'')+(comp?' · '+comp:''),
+          sc:ivData.sc||catObj.sc[0],
+          ev:ivData.ev||'',
+          comp:comp,
+          nota:notasLibres[idx2]||''
+        };
+        if(ivData.catk==='vt'){
+          ivDataObj.vtDesc=comp||(notasLibres[idx2]||'');
+          ivDataObj.lin='Visita técnica: '+(comp||(notasLibres[idx2]||''));
+        }
+        ivList.push({id:id,data:ivDataObj});
+        // Componentes
+        if(ivData.compItems&&ivData.compItems.length){
+          compMulti[id]=ivData.compItems.map(function(c){return{nombre:c.nombre,qty:c.cantidad||1};});
+        } else if(comp){
+          compMulti[id]=[{nombre:comp,qty:1}];
+        }
+        // Ubicaciones
+        if(ivData.ubs&&ivData.ubs.length){
+          ubPorIv[id]=ivData.ubs.map(function(u){return{nombre:u.nombre,qty:u.qty||u.cantidad||1};});
+        }
+        // Modificadores
+        if(ivData.mods&&ivData.mods.length){
+          if(!window.mdPorIv)mdPorIv={};
+          mdPorIv[id]={};
+          ivData.mods.forEach(function(m,mi){mdPorIv[id]['mod'+mi]={nombre:m.nombre,val:m.val,unidad:m.unidad||'u',curvas:m.curvas||0,tieneCant:true};});
+        }
+        // Condiciones
+        if(ivData.conds&&ivData.conds.length){
+          // Se aplican después del DOM
+        }
+        var div=buildIv(ivCount,id);
+        if(ivCont)ivCont.appendChild(div);
+        // Setear DOM con cadena de timeouts
+        setTimeout((function(ivId,ivD,ivDObj){return function(){
+          var catBtn=document.querySelector('#'+ivId+' [data-catk="'+ivDObj.catk+'"]');
+          if(catBtn)catBtn.click();
+          setTimeout(function(){
+            var scCont=document.getElementById(ivId+'-sc');
+            if(scCont&&ivDObj.sc){
+              scCont.querySelectorAll('.subb').forEach(function(btn){
+                if(nn2(btn.textContent)===nn2(ivDObj.sc))btn.click();
+              });
+            }
+            setTimeout(function(){
+              var evSel=document.getElementById(ivId+'-ev');
+              if(evSel&&ivDObj.ev){
+                for(var ei=0;ei<evSel.options.length;ei++){
+                  if(nn2(evSel.options[ei].value)===nn2(ivDObj.ev)){evSel.selectedIndex=ei;evSel.dispatchEvent(new Event('change'));break;}
+                }
+              }
+              setTimeout(function(){
+                // Componente
+                if(!compMulti[ivId]||!compMulti[ivId].length){
+                  if(ivDObj.comp)compMulti[ivId]=[{nombre:ivDObj.comp,qty:1}];
+                }
+                var coSel=document.getElementById(ivId+'-co');
+                if(coSel&&ivDObj.comp){
+                  for(var ci=0;ci<coSel.options.length;ci++){
+                    if(nn2(coSel.options[ci].value)===nn2(ivDObj.comp)){coSel.selectedIndex=ci;break;}
+                  }
+                }
+                // Visita técnica
+                if(ivDObj.catk==='vt'){
+                  var vtEl=document.getElementById(ivId+'-vt-desc');
+                  if(vtEl)vtEl.value=ivDObj.vtDesc||ivDObj.comp||ivDObj.nota||'';
+                }
+                // Nota libre
+                if(ivDObj.nota){
+                  var notaEl=document.getElementById(ivId+'-nota');
+                  var notaWrapEl=document.getElementById(ivId+'-nw');
+                  var bnotaEl=document.getElementById(ivId+'-bn');
+                  if(notaEl){notaEl.value=ivDObj.nota;if(notaWrapEl)notaWrapEl.style.display='block';if(bnotaEl)bnotaEl.textContent='\u2715 Quitar nota';}
+                }
+                // Condiciones
+                if(ivD.conds&&ivD.conds.length){
+                  ivD.conds.forEach(function(ck){
+                    var condBtn=document.getElementById(ivId+'-c-'+ck);
+                    if(condBtn&&!condBtn.classList.contains('on'))condBtn.classList.add('on');
+                  });
+                }
+                if(typeof rendUb==='function')rendUb(ivId);
+                if(typeof updR==='function')updR(ivId);
+                var bivEl=document.getElementById(ivId+'-b');var aivEl=document.getElementById(ivId+'-ar');
+                if(bivEl)bivEl.style.display='block';if(aivEl)aivEl.style.transform='rotate(90deg)';
+              },400);
+            },400);
+          },400);
+        };})(id,ivData,ivDataObj),600);
+      });
+    }
+
+    // Abrir pasos del formulario
     setTimeout(function(){
-      var horaEl = document.getElementById('hora');
-      var horaBtn = document.getElementById('horaBtn');
-      var hfinEl = document.getElementById('hfin');
-      var hfinBtn = document.getElementById('hfinBtn');
-      if(horaEl && b.hora){ horaEl.value = b.hora; if(horaBtn){ horaBtn.textContent = b.hora; horaBtn.style.color = 'var(--am)'; } }
-      if(hfinEl && b.horaFin){ hfinEl.value = b.horaFin; if(hfinBtn){ hfinBtn.textContent = b.horaFin; hfinBtn.style.color = 'var(--am)'; } }
-      if(typeof calcDur === 'function') calcDur();
-    }, 600);
-  }, 300);
+      [1,2,3].forEach(function(n){
+        var bEl=document.getElementById('b'+n);var aEl=document.getElementById('a'+n);var pEl=document.getElementById('p'+n);
+        if(bEl)bEl.style.display='block';if(aEl)aEl.style.transform='rotate(90deg)';if(pEl)pEl.classList.add('on');
+      });
+      // Mostrar sección intervenciones
+      var secIv=document.getElementById('secIv');if(secIv)secIv.classList.add('on');
+      window.scrollTo(0,0);
+    },1200);
+
+    // Banner modo edición
+    var banner=document.getElementById('bannerEdicion');
+    if(!banner){
+      banner=document.createElement('div');banner.id='bannerEdicion';
+      banner.style.cssText='background:rgba(74,158,255,.15);border:2px solid var(--azul);border-radius:var(--rs);padding:10px 16px;margin-bottom:12px;font-size:13px;color:var(--azul);font-weight:800;text-align:center;position:sticky;top:0;z-index:50;';
+      var wrap=document.getElementById('vForm')||document.body;
+      wrap.insertBefore(banner,wrap.firstChild);
+    }
+    banner.textContent='\u270F\uFE0F MODO EDICI\u00d3N \u2014 '+(reg.Edificio||'')+' \u00b7 '+(_codEditando||'');
+    var btnEnv=document.getElementById('benv');
+    if(btnEnv)btnEnv.textContent='\uD83D\uDCBE GUARDAR CAMBIOS';
+
+  },500);
 }
 
 // ── Override de enviar() para modo edición ──
@@ -2343,6 +2444,8 @@ window.onload=function(){
     await cargarObrasEnCurso(); mostrarPillObras();
     await pausa(300);
     await cargarOrdenes();
+    await pausa(200);
+    await loadCorreccionesMario();
   }
   initCarga();
   initBloqueGlobal();
@@ -5532,7 +5635,7 @@ function togVista(){
   var fv=document.getElementById('vForm'),hv=document.getElementById('vHist'),btn=document.getElementById('btnHist');
   var enHist=hv.classList.contains('on');
   if(enHist){hv.classList.remove('on');fv.style.display='block';btn.classList.remove('on');btn.textContent='📋 Historial';}
-  else{fv.style.display='none';hv.classList.add('on');btn.classList.add('on');btn.textContent='← Formulario';loadRegs();}
+  else{fv.style.display='none';hv.classList.add('on');btn.classList.add('on');btn.textContent='← Formulario';loadRegs();loadCorreccionesMario();}
 }
 
 function getTipoCls(tipo){
@@ -5604,6 +5707,13 @@ function renderHist(regs){
       +'<div class="reg-lug">'+esc(lugar)+'</div>'
       +'<div class="reg-met">📅 '+esc(fechaFmt)+(hora?' · ⏰ '+esc(hora):'')+(horafin?' → '+esc(horafin):'')+(dur?' ('+esc(dur)+')':'')+'</div>';
     var badge=document.createElement('div');badge.className='reg-badge '+tipoCls;badge.textContent=tipo||'—';
+    // Badge corrección parpadeante
+    var correcCard=correccionesMario.filter(function(c){return(c.Codigo||'').trim()===(cod||'').trim();});
+    if(correcCard.length){
+      var badgeC=document.createElement('span');badgeC.className='badge-correc-mario';
+      badgeC.textContent='⚠️ '+correcCard.length+(correcCard.length===1?' corrección':' correcciones');
+      info.appendChild(badgeC);
+    }
     top.appendChild(info);top.appendChild(badge);top.appendChild(arr);
 
     // BODY
@@ -5611,6 +5721,21 @@ function renderHist(regs){
     if(obraCod){var oh=document.createElement('div');oh.className='obra-hdr';oh.textContent='🏗️ Obra: '+obraCod;body.appendChild(oh);}
     if(det){var dh=document.createElement('div');dh.style.cssText='font-size:13px;color:var(--t2);margin-bottom:10px;';dh.textContent='📍 '+det;body.appendChild(dh);}
 
+    // Bloque correcciones enviadas
+    if(correcCard.length){
+      var cboxM=document.createElement('div');cboxM.className='correc-box-mario';
+      var ctitM=document.createElement('div');ctitM.className='correc-box-mario-tit';
+      ctitM.innerHTML='⚠️ TUS CORRECCIONES ENVIADAS A ALI';
+      cboxM.appendChild(ctitM);
+      correcCard.forEach(function(c){
+        var ci=document.createElement('div');ci.className='correc-item-mario';
+        ci.textContent=c.Mensaje||c.mensaje||'(sin texto)';
+        var ts=c.Timestamp||c.timestamp||'';
+        if(ts){var fecha=document.createElement('div');fecha.style.cssText='font-size:11px;color:var(--t3);margin-top:2px;';fecha.textContent=ts.split('T')[0];ci.appendChild(fecha);}
+        cboxM.appendChild(ci);
+      });
+      body.appendChild(cboxM);
+    }
     var ivsTitle=document.createElement('div');
     ivsTitle.style.cssText='font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:8px;';
     ivsTitle.textContent='Intervenciones realizadas';body.appendChild(ivsTitle);
