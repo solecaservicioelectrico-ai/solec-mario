@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.13</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.14</span></div>
   </div>
 </div>
 
@@ -1501,7 +1501,7 @@ function buildBombasUI(id){
   bwrap.appendChild(bMdLabel);
   bwrap.appendChild(bMdWrap);
 
-  if(!mdPorIv[id])mdPorIv[id]={};
+  mdPorIv[id]={}; // Limpiar siempre al entrar a Bombas Tablero
   var bMdSel=mdPorIv[id];
   var bModsSource=catalogoMods.length?catalogoMods:[{Nombre:'Cableado',TieneCantidad:'si',Unidad:'m'}];
   function rendBMdWrap(){
@@ -1521,16 +1521,51 @@ function buildBombasUI(id){
       keys.forEach(function(key){
         var mod=bMdSel[key];
         var row=document.createElement('div');
-        row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:6px;background:var(--s3);border-radius:8px;padding:8px 10px;';
-        var nom=document.createElement('span');nom.style.cssText='flex:1;font-size:14px;color:var(--t);';nom.textContent=key+(mod.val?' · '+mod.val+(mod.un?' '+mod.un:''):'');
+        row.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--borde);';
+        var nom=document.createElement('span');nom.style.cssText='flex:1;font-size:14px;font-weight:700;color:var(--t);';
+        nom.textContent=mod.nombre+(mod.curvas>0?' + '+mod.curvas+(mod.curvas===1?' curva':' curvas'):'');
         var bx=document.createElement('button');bx.type='button';bx.textContent='✕';
-        bx.style.cssText='background:none;border:none;color:var(--rojo);font-size:16px;cursor:pointer;padding:0 4px;';
-        bx.addEventListener('click',function(){delete bMdSel[key];updR(id);rendBMdWrap();});
-        row.appendChild(nom);row.appendChild(bx);
+        bx.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0;';
+        row.appendChild(nom);
+        var bminus=document.createElement('button');bminus.type='button';bminus.textContent='←';
+        bminus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
+        var qtyEl=document.createElement('span');
+        qtyEl.style.cssText='font-size:16px;font-weight:900;min-width:36px;text-align:center;color:var(--am);cursor:pointer;padding:2px;';
+        var esCurva2=mod.nombre.toLowerCase().indexOf('canaliz')!==-1;
+        var dispVal2=mod.tieneCant?(mod.val+(mod.unidad==='m'?' m':' '+mod.unidad)):(mod.val||1)+' u';
+        qtyEl.textContent=dispVal2;
+        var bplus=document.createElement('button');bplus.type='button';bplus.textContent='→';
+        bplus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
+        (function(k,qEl){
+          function cambiarValB(){
+            if(bMdSel[k].unidad==='m'){
+              abrirRuedaMetros(function(v){
+                if(esCurva2){
+                  var items2=[];for(var j=0;j<=15;j++)items2.push(j===0?'Sin curvas':j+(j===1?' curva':' curvas'));
+                  abrirRueda('CURVAS','Curvas ('+v+'m)',items2,bMdSel[k].curvas||0,function(vc,ci){bMdSel[k].val=v;bMdSel[k].curvas=ci;updR(id);rendBMdWrap();});
+                } else {bMdSel[k].val=v;updR(id);rendBMdWrap();}
+              });
+            } else {
+              abrirRuedaCantidad(bMdSel[k].nombre,bMdSel[k].unidad,function(v){bMdSel[k].val=v;updR(id);rendBMdWrap();});
+            }
+          }
+          qEl.addEventListener('click',cambiarValB);
+          bminus.addEventListener('click',function(){
+            if(bMdSel[k].unidad==='m'){var cur=bMdSel[k].val||0.5;if(cur>0.5){bMdSel[k].val=Math.round((cur-0.5)*10)/10;updR(id);rendBMdWrap();}}
+            else{if((bMdSel[k].val||1)>1){bMdSel[k].val=(bMdSel[k].val||1)-1;updR(id);rendBMdWrap();}}
+          });
+          bplus.addEventListener('click',function(){
+            if(bMdSel[k].unidad==='m'){bMdSel[k].val=Math.round(((bMdSel[k].val||0)+0.5)*10)/10;updR(id);rendBMdWrap();}
+            else{bMdSel[k].val=(bMdSel[k].val||1)+1;updR(id);rendBMdWrap();}
+          });
+        })(key,qtyEl);
+        row.appendChild(bminus);row.appendChild(qtyEl);row.appendChild(bplus);
+        (function(k){bx.addEventListener('click',function(){delete bMdSel[k];updR(id);rendBMdWrap();});})(key);
+        row.appendChild(bx);
         bMdWrap.appendChild(row);
       });
       var btnMas=document.createElement('button');btnMas.type='button';btnMas.textContent='+ Agregar más';
-      btnMas.style.cssText='margin-top:6px;width:100%;padding:10px;border-radius:10px;border:2px dashed var(--am);background:transparent;color:var(--am);font-size:14px;font-weight:700;cursor:pointer;';
+      btnMas.style.cssText='margin-top:10px;width:100%;padding:12px;border-radius:10px;border:2px dashed var(--am);background:transparent;color:var(--am);font-size:14px;font-weight:700;cursor:pointer;';
       btnMas.addEventListener('click',function(){abrirModalMods(id,bModsSource,bMdSel,rendBMdWrap);});
       bMdWrap.appendChild(btnMas);
     }
