@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.11</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.12</span></div>
   </div>
 </div>
 
@@ -643,6 +643,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-dias on" id="bd7" onclick="setDias(7,this)">7 días</button>
     <button class="btn-dias" id="bd30" onclick="setDias(30,this)">30 días</button>
     <button class="btn-dias" id="bdTodos" onclick="setDias(0,this)">Todos</button>
+    <button class="btn-dias" id="bdRamirez" onclick="setSocio('Ramírez',this)" style="background:rgba(167,139,250,.15);border-color:var(--lila);color:var(--lila);">Ramírez</button>
+    <button class="btn-dias" id="bdFuente" onclick="setSocio('Fuente',this)" style="background:rgba(0,219,160,.08);border-color:var(--verde);color:var(--verde);">Fuente</button>
     <div style="display:flex;align-items:center;gap:6px;margin-left:4px;">
       <input type="number" id="diasCustom" min="1" max="365" placeholder="días" 
         style="width:64px;background:var(--s2);border:1px solid var(--borde);border-radius:8px;padding:7px 10px;color:var(--t);font-family:'DM Mono',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;"
@@ -1210,8 +1212,11 @@ function buildBombasUI(id){
   if(!wrap)return;
   wrap.classList.add('on');
   // Ocultar TODA la interfaz normal - bombas usa sus propios acordeones
-  var toHide=[id+'-sc',id+'-ev',id+'-co',id+'-fub',id+'-pisos-wrap',id+'-bn',id+'-nw',
-              id+'-mods-stog',id+'-mods-cont',id+'-cond-stog',id+'-cond-cont'];
+  // Si sc=Tablero, mantener modificadores y condiciones visibles
+  var ivTmpBo=ivList.filter(function(i){return i.id===id;})[0];
+  var scEsTablero=ivTmpBo&&ivTmpBo.data.sc==='Tablero';
+  var toHide=[id+'-sc',id+'-ev',id+'-co',id+'-fub',id+'-pisos-wrap',id+'-bn',id+'-nw'];
+  if(!scEsTablero){toHide.push(id+'-mods-stog',id+'-mods-cont',id+'-cond-stog',id+'-cond-cont');}
   toHide.forEach(function(eid){var el=document.getElementById(eid);if(el)el.style.display='none';});
   // Ocultar también stog, scont y md-label por clase dentro del wrap
   wrap.querySelectorAll('.stog').forEach(function(el){el.style.display='none';});
@@ -1776,7 +1781,20 @@ function abrirBuscadorMatPiso(id,pisoIdx){
   inp.addEventListener('input',function(){
     var q=nn(inp.value);dd.innerHTML='';
     if(!q)return;
-    var ms=catalogoMats.filter(function(m){return nn(m.Nombre||'').indexOf(q)!==-1;}).slice(0,8);
+    // Búsqueda fuzzy: todas las palabras del query deben aparecer en el nombre (en cualquier orden)
+    var ms=catalogoMats.filter(function(m){
+      var nom=nn(m.Nombre||'');
+      var palabras=q.split(/\s+/).filter(Boolean);
+      return palabras.every(function(p){return nom.indexOf(p)!==-1;});
+    }).slice(0,12);
+    // Si no hay resultados con todas las palabras, buscar con al menos una
+    if(!ms.length&&q.length>2){
+      var palabras2=q.split(/\s+/).filter(Boolean);
+      ms=catalogoMats.filter(function(m){
+        var nom=nn(m.Nombre||'');
+        return palabras2.some(function(p){return p.length>2&&nom.indexOf(p)!==-1;});
+      }).slice(0,12);
+    }
     ms.forEach(function(m){
       var div=document.createElement('div');div.className='mopt';
       div.innerHTML='<div class="motn">'+esc(m.Nombre||m.nombre||'')+'</div><div class="motc">'+(m.Unidad||'u')+'</div>';
@@ -3113,9 +3131,9 @@ function buildIv(num,id){
         row.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--borde);';
         var nom=document.createElement('span');nom.style.cssText='flex:1;font-size:14px;font-weight:700;color:var(--t);';nom.textContent=u.nombre;
         var bminus=document.createElement('button');bminus.type='button';bminus.textContent='←';
-        bminus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
+        bminus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;display:none;';
         var qtyEl=document.createElement('span');
-        qtyEl.style.cssText='font-size:16px;font-weight:900;min-width:28px;text-align:center;color:var(--am);cursor:pointer;padding:2px;';
+        qtyEl.style.cssText='font-size:16px;font-weight:900;min-width:28px;text-align:center;color:var(--am);cursor:pointer;padding:2px;display:none;';
         qtyEl.textContent=u.qty||1;
         var bplus=document.createElement('button');bplus.type='button';bplus.textContent='→';
         bplus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
@@ -3414,7 +3432,14 @@ function selSC(id,catk,sc,el){
   if(existBomba)existBomba.parentNode.removeChild(existBomba);
   if(catk==='bo'&&sc==='Bombas')setTimeout(function(){buildBombasUI(id);},60);
   var es=document.getElementById(id+'-ev');es.innerHTML='<option value="">— Qué se hizo —</option>';
-  (cat.ev[sc]||[]).forEach(function(v){es.innerHTML+='<option value="'+esc(v)+'">'+esc(v)+'</option>';});
+  var evsDynSet={};var evsDyn=[];
+  preciosConf.filter(function(p){
+    return (p.categoria||'').toLowerCase().trim()===(catNombre||'').toLowerCase().trim()&&
+           (p.subcategoria||'').toLowerCase().trim()===(sc||'').toLowerCase().trim()&&
+           p.evento&&p.evento.trim()&&p.evento!=='(cualquier componente)';
+  }).forEach(function(p){if(!evsDynSet[p.evento]){evsDynSet[p.evento]=true;evsDyn.push(p.evento);}});
+  var evsFinal=evsDyn.length?evsDyn:(cat.ev[sc]||[]);
+  evsFinal.forEach(function(v){es.innerHTML+='<option value="'+esc(v)+'">'+esc(v)+'</option>';});
   var cs=document.getElementById(id+'-co');
   var dynComp=catalogoComp.filter(function(c){
     var catMatch=(c.Categoria||'').toLowerCase().trim()===(catNombre||'').toLowerCase().trim();
@@ -5827,6 +5852,7 @@ async function enviarAlerta(cod,lugar,msg,aform){
 }
 
 var diasFiltro=7;
+var filtroSocio='';
 var histEdifSelec=''; // edificio seleccionado del dropdown
 
 function onHistEdifInput(){
@@ -5886,6 +5912,21 @@ function setDiasCustom(){
   filtrarHist();
 }
 
+function setSocio(socio,btn){
+  if(filtroSocio===socio){
+    filtroSocio='';
+    document.querySelectorAll('#bdRamirez,#bdFuente').forEach(function(b){b.classList.remove('on');});
+  } else {
+    filtroSocio=socio;
+    document.querySelectorAll('#bdRamirez,#bdFuente').forEach(function(b){b.classList.remove('on');});
+    if(btn)btn.classList.add('on');
+    // Desactivar filtro de días al activar socio
+    diasFiltro=0;
+    document.querySelectorAll('.btn-dias').forEach(function(b){b.classList.remove('on');});
+  }
+  filtrarHist();
+}
+
 function filtrarHist(){
   var rawE=document.getElementById('fEdif').value||'';
   var qE=nn(rawE);
@@ -5907,7 +5948,14 @@ function filtrarHist(){
     var obraCod=r['Codigo Obra']||'';
     var estado=r.Estado||'';
     var esJornadaEnCurso=obraCod&&estado!=='Finalizada';
-    return okE&&okD&&!esJornadaEnCurso;
+    // Filtro por socio (Ramírez / Fuente)
+    var okS=true;
+    if(filtroSocio){
+      var edifData2=edificios.filter(function(e){return nn(e.nombre||e.Nombre||'')===nn(edif);})[0];
+      var socioEdif=edifData2?(edifData2['Socio Interno']||edifData2.socio_interno||edifData2.Socio||''):'';
+      okS=nn(socioEdif)===nn(filtroSocio);
+    }
+    return okE&&okD&&okS&&!esJornadaEnCurso;
   });
   // Agrupar obras finalizadas — mostrar una sola entrada por obra
   var procesados={};
