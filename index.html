@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.18</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.19</span></div>
   </div>
 </div>
 
@@ -4149,9 +4149,9 @@ var UBICACIONES_DEFAULT=[
 function getUbicaciones(){
   if(window.catalogoUbicaciones&&catalogoUbicaciones.length){
     return catalogoUbicaciones.map(function(u){
-      var s=typeof u==='string'?u:(u.Nombre||u.nombre||'');
-      return s?s:JSON.stringify(u);
-    }).filter(Boolean);
+      var s=typeof u==='string'?u:(u.Nombre||u.nombre);
+      return s!==null&&s!==undefined?String(s).trim():'';
+    }).filter(function(s){return s.length>0;});
   }
   return UBICACIONES_DEFAULT;
 }
@@ -4173,7 +4173,7 @@ function abrirModalUbNuevo(ivId, onClose){
   function renderLista(){
     var nnU=function(s){var str=typeof s==='string'?s:(s&&(s.Nombre||s.nombre))||String(s||'');return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();};
     var listaRaw=getUbicaciones();
-    lista=listaRaw.map(function(u){return typeof u==='string'?u:(u&&(u.Nombre||u.nombre))||'';}).filter(Boolean);
+    lista=listaRaw.map(function(u){var s=typeof u==='string'?u:(u&&(u.Nombre||u.nombre||u.nombre));return s!==null&&s!==undefined?String(s).trim():'';}).filter(function(s){return s.length>0;});
     var q=nnU(sinp.value||'');
     var filtrada=q?lista.filter(function(u){return nnU(u).indexOf(q)!==-1;}):lista;
     listDiv.innerHTML='';
