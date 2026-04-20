@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.8</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.9</span></div>
   </div>
 </div>
 
@@ -2031,34 +2031,68 @@ function restaurarBorrador(b){
         var div=buildIv(ivCount,id);
         if(ivCont)ivCont.appendChild(div);
         setTimeout((function(ivId,oldIvId,data,vtDescs){return function(){
-          // Categoría — click en el botón correcto
+          var nn2=function(s){return(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();};
+          // PASO 1: click categoría
           if(data.catk){
             var catBtn=document.querySelector('#'+ivId+' [data-catk="'+data.catk+'"]');
             if(catBtn)catBtn.click();
           }
-          var evEl=document.getElementById(ivId+'-ev');if(evEl&&data.ev)evEl.value=data.ev;
-          var coEl=document.getElementById(ivId+'-co');if(coEl&&data.comp)coEl.value=data.comp;
-          // Nota libre
-          if(data.nota){
-            var notaEl=document.getElementById(ivId+'-nota');
-            var notaWrapEl=document.getElementById(ivId+'-nw');
-            var bnotaEl=document.getElementById(ivId+'-bn');
-            if(notaEl){
-              notaEl.value=data.nota;
-              if(notaWrapEl)notaWrapEl.style.display='block';
-              if(bnotaEl)bnotaEl.textContent='✕ Quitar nota';
+          setTimeout(function(){
+            // PASO 2: click subcategoría (es un div .subb)
+            var scCont=document.getElementById(ivId+'-sc');
+            if(scCont&&data.sc){
+              scCont.querySelectorAll('.subb').forEach(function(btn){
+                if(nn2(btn.textContent)===nn2(data.sc))btn.click();
+              });
             }
-          }
-          var vtEl=document.getElementById(ivId+'-vt-desc');
-          if(vtEl&&vtDescs&&vtDescs[oldIvId])vtEl.value=vtDescs[oldIvId];
-          if(typeof updR==='function')updR(ivId);
-          if(typeof rendUb==='function')rendUb(ivId);
-          // Abrir acordeón de intervención
-          var bivEl=document.getElementById(ivId+'-b');
-          var aivEl=document.getElementById(ivId+'-ar');
-          if(bivEl)bivEl.style.display='block';
-          if(aivEl)aivEl.style.transform='rotate(90deg)';
-        };})(id,oldId,ivSaved.data||{},b.vtDescs||{}),400);
+            setTimeout(function(){
+              // PASO 3: setear evento
+              var evEl=document.getElementById(ivId+'-ev');
+              if(evEl&&data.ev){
+                for(var ei=0;ei<evEl.options.length;ei++){
+                  if(nn2(evEl.options[ei].value)===nn2(data.ev)||nn2(evEl.options[ei].text)===nn2(data.ev)){
+                    evEl.selectedIndex=ei;evEl.dispatchEvent(new Event('change'));break;
+                  }
+                }
+              }
+              // Visita técnica
+              var vtEl=document.getElementById(ivId+'-vt-desc');
+              if(vtEl&&vtDescs&&vtDescs[oldIvId])vtEl.value=vtDescs[oldIvId];
+              setTimeout(function(){
+                // PASO 4: componente
+                if(data.comp){
+                  if(!compMulti[ivId]||!compMulti[ivId].length){
+                    compMulti[ivId]=[{nombre:data.comp,qty:1}];
+                  }
+                  var coEl=document.getElementById(ivId+'-co');
+                  if(coEl){
+                    for(var ci=0;ci<coEl.options.length;ci++){
+                      if(nn2(coEl.options[ci].value)===nn2(data.comp)){coEl.selectedIndex=ci;break;}
+                    }
+                  }
+                }
+                // PASO 5: nota libre
+                if(data.nota){
+                  var notaEl=document.getElementById(ivId+'-nota');
+                  var notaWrapEl=document.getElementById(ivId+'-nw');
+                  var bnotaEl=document.getElementById(ivId+'-bn');
+                  if(notaEl){
+                    notaEl.value=data.nota;
+                    if(notaWrapEl)notaWrapEl.style.display='block';
+                    if(bnotaEl)bnotaEl.textContent='✕ Quitar nota';
+                  }
+                }
+                if(typeof rendUb==='function')rendUb(ivId);
+                if(typeof updR==='function')updR(ivId);
+                // Abrir acordeón
+                var bivEl=document.getElementById(ivId+'-b');
+                var aivEl=document.getElementById(ivId+'-ar');
+                if(bivEl)bivEl.style.display='block';
+                if(aivEl)aivEl.style.transform='rotate(90deg)';
+              },400);
+            },400);
+          },400);
+        };})(id,oldId,ivSaved.data||{},b.vtDescs||{}),500);
       });
     }
 
