@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.19</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.20</span></div>
   </div>
 </div>
 
@@ -5098,7 +5098,7 @@ async function enviar(finalizar){
   }).join(' || ');
   // Materiales globales como ítem separado
   if(matGlobal.length>0){
-    var matsStr='MATERIALES: '+matGlobal.map(function(m){return m.qty+(m.un||'u')+' '+m.nombre+(m.marca?' '+m.marca:'');}).join(', ');
+    var matsStr='MATERIALES: '+matGlobal.map(function(m){var nomSeg=(m.nombre||'').replace(/,(\d)/g,'.$1');return m.qty+(m.un||'u')+' '+nomSeg+(m.marca?' '+m.marca:'');}).join(', ');
     res=res+(res?' || ':'')+matsStr;
   }
   // Componentes y Modificadores por intervención
@@ -5828,7 +5828,7 @@ function renderHist(regs){
     var cod=r.Codigo||r.codigo||r.ID||r.id||('REG-#'+(idx+1));
     var lugar=r.Edificio||r.edificio||'Sin lugar';
     var fecha=r.Fecha||r.fecha||'';
-    var lH=function(v){if(!v)return'';if(v.indexOf('T')!==-1){var t=v.split('T')[1];return t?t.slice(0,5):'';}return v.length>=5?v.slice(0,5):v;};
+    var lH=function(v){if(!v)return'';if(v.indexOf('T')!==-1){try{var d=new Date(v);if(!isNaN(d)){var h=d.getUTCHours()-3;var m=d.getUTCMinutes();if(h<0)h+=24;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}}catch(e){}var t=v.split('T')[1];return t?t.slice(0,5):'';}return v.length>=5?v.slice(0,5):v;};
     var hora=lH(r.Hora||r['Hora Inicio']||r.hora||'');
     var horafin=lH(r['Hora Fin']||r.hora_fin||'');
     var dur=r['Duración']||r.duracion||'';
