@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.23</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.24</span></div>
   </div>
 </div>
 
@@ -705,6 +705,7 @@ var preciosConf = [];
 var catalogoMats = [];
 var catalogoComp = [];
 var catalogoMods = [];
+var catsDinamicas = []; // Cargado desde Config_Categorias en el Sheet
 var tipoVisita = '';
 var ivCount = 0;
 var ivList = [];
@@ -873,12 +874,49 @@ async function loadRegs(){
 }
 
 
+async function loadCatsDinamicas(){
+  var cached=cGetTTL('cats_din');
+  if(cached&&Array.isArray(cached)&&cached.length){catsDinamicas=cached;return;}
+  try{
+    var r=await fetch(API+'?sheet=Config_Categorias&limit=500');
+    var j=await r.json();
+    if(Array.isArray(j)&&j.length){
+      catsDinamicas=j;
+      cSetTTL('cats_din',j);
+    }
+  }catch(e){catsDinamicas=[];}
+}
+
+// Construir objeto CATS desde catsDinamicas (mismo formato que CATS hardcodeado)
+function buildCATSdesdeDinamicas(){
+  if(!catsDinamicas.length)return null;
+  var cats={};
+  catsDinamicas.forEach(function(row){
+    var catk=(row.catk||'').trim();
+    var emoji=(row.emoji||'').trim();
+    var cat=(row.categoria||'').trim();
+    var sc=(row.subcategoria||'').trim();
+    var ev=(row.evento||'').trim();
+    var comp=(row.componente||'').trim();
+    if(!catk||!cat||!sc||!ev)return;
+    if(!cats[catk])cats[catk]={l:cat,e:emoji,sc:[],ev:{},co:{}};
+    if(cats[catk].sc.indexOf(sc)===-1)cats[catk].sc.push(sc);
+    if(!cats[catk].ev[sc])cats[catk].ev[sc]=[];
+    if(cats[catk].ev[sc].indexOf(ev)===-1)cats[catk].ev[sc].push(ev);
+    if(!cats[catk].co[sc])cats[catk].co[sc]=[];
+    if(comp&&comp!=='(cualquier componente)'&&cats[catk].co[sc].indexOf(comp)===-1){
+      cats[catk].co[sc].push(comp);
+    }
+  });
+  return cats;
+}
+
 async function actualizarDatos(){
   var btn=document.getElementById('btnRefresh');
   btn.textContent='⏳';btn.disabled=true;
   try{
     ['s_edif','s_pr','s_cat'].forEach(function(k){localStorage.removeItem('s_'+k);});
-    await loadEdif();await loadPrecios();await loadCat();await loadComp();await loadMods();mostrarAlertas();cargarObrasEnCurso().then(mostrarPillObras);
+    await loadEdif();await loadPrecios();await loadCat();await loadComp();await loadMods();await loadCatsDinamicas();mostrarAlertas();cargarObrasEnCurso().then(mostrarPillObras);
     showToast('✅ Datos actualizados');
   }catch(e){showToast('❌ Error al actualizar');}
   btn.textContent='🔄';btn.disabled=false;
@@ -2148,7 +2186,8 @@ function restaurarBorrador(b){
           var nn2=function(s){return(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();};
           // PASO 1: click categoría
           if(data.catk){
-            var catBtn=document.querySelector('#'+ivId+' [data-catk="'+data.catk+'"]');
+            var _CATS_B=(catsDinamicas.length?buildCATSdesdeDinamicas():null)||CATS;
+var catBtn=document.querySelector('#'+ivId+' [data-catk="'+data.catk+'"]');
             if(catBtn)catBtn.click();
           }
           setTimeout(function(){
@@ -2548,6 +2587,8 @@ window.onload=function(){
     await cargarOrdenes();
     await pausa(200);
     await loadCorreccionesMario();
+    await pausa(200);
+    await loadCatsDinamicas();
   }
   initCarga();
   initBloqueGlobal();
@@ -3089,7 +3130,8 @@ function buildIv(num,id){
   body.appendChild(cLabel);
 
   var catg=document.createElement('div');catg.className='catg';
-  Object.keys(CATS).forEach(function(k){
+  var CATS_USE=(catsDinamicas.length?buildCATSdesdeDinamicas():null)||CATS;
+  Object.keys(CATS_USE).forEach(function(k){
     var cb=document.createElement('div');cb.className='cb';
     cb.innerHTML='<span class="ce">'+CATS[k].e+'</span><span class="cn">'+CATS[k].l+'</span>';
     cb.addEventListener('click',function(){selCat(id,k,cb);});
@@ -3399,6 +3441,8 @@ function buildIv(num,id){
   fields.appendChild(ires);
 
   body.appendChild(fields);
+
+
   div.appendChild(body);
   return div;
 }
@@ -3481,7 +3525,8 @@ function selCat(id,catk,el){
   }
   var r2=document.getElementById(id+'-f')?document.getElementById(id+'-f').querySelector('.r2'):null;
   if(r2)r2.style.display='';
-  var cat=CATS[catk];
+  var CATS_USE2=(catsDinamicas.length?buildCATSdesdeDinamicas():null)||CATS;
+  var cat=CATS_USE2[catk];
   var scr=document.getElementById(id+'-sc');scr.innerHTML='';
   cat.sc.forEach(function(s){
     var btn=document.createElement('div');btn.className='subb';btn.textContent=s;
@@ -3505,7 +3550,8 @@ function selCat(id,catk,el){
 function selSC(id,catk,sc,el){
   el.closest('.subcr').querySelectorAll('.subb').forEach(function(b){b.classList.remove('on');});el.classList.add('on');
   var iv=ivList.filter(function(i){return i.id===id;})[0];if(iv)iv.data.sc=sc;
-  var cat=CATS[catk];
+  var CATS_USE2=(catsDinamicas.length?buildCATSdesdeDinamicas():null)||CATS;
+  var cat=CATS_USE2[catk];
   var catNombre=cat.l;
   // Bombas: cuando sc=Bombas usar UI especial; cuando sc=Tablero usar UI normal
   var existBomba=document.getElementById(id+'-bomba-wrap');
@@ -4848,7 +4894,12 @@ function calcCosto(id){
   var iv=ivList.filter(function(i){return i.id===id;})[0];if(!iv)return{total:0,dets:[],conds:[]};
   // Para edificios abonados: MO siempre cero
   var esAbonado=lSel&&lSel.abonado&&lSel.abonado.toLowerCase()!=='no'&&lSel.abonado!=='';
-  if(esAbonado)return{total:0,dets:[],conds:[]};
+  if(esAbonado){
+    // Mostrar fields y nota libre aunque no se haya seleccionado categoría
+    var fEl=document.getElementById(id+'-f');if(fEl)fEl.classList.add('on');
+    var bnEl=document.getElementById(id+'-bn');if(bnEl)bnEl.style.display='';
+    return{total:0,dets:[],conds:[]};
+  }
   var catk=iv.data.catk||'',sc=iv.data.sc||'';
   var evEl=document.getElementById(id+'-ev'),coEl=document.getElementById(id+'-co');
   var ev=evEl?evEl.value:'',comp=coEl?coEl.value:'';
