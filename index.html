@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.21</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.22</span></div>
   </div>
 </div>
 
@@ -2825,10 +2825,10 @@ function selL(e){
   document.getElementById('detw').style.display='block';
   // Mostrar/ocultar chip Preventivo/Abono según si el edificio es abonado
   var chipPrev=document.querySelector('.chip[data-tipo="Preventivo/Abono"]');
-  if(chipPrev){
-    var esAbon=e.abonado&&e.abonado.toLowerCase()!=='no'&&e.abonado.toLowerCase()!=='';
-    chipPrev.style.display=esAbon?'':'none';
-  }
+  var chipService=document.querySelector('.chip[data-tipo="Service"]');
+  var esAbon=e.abonado&&e.abonado.toLowerCase()!=='no'&&e.abonado.toLowerCase()!=='';
+  if(chipPrev) chipPrev.style.display=esAbon?'':'none';
+  if(chipService) chipService.style.display=esAbon?'none':'';
 }
 
 function selLfree(txt){
@@ -3084,11 +3084,11 @@ function buildIv(num,id){
 
   // Categorías
   var cLabel=document.createElement('div');
-  cLabel.style.cssText='font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:9px;';
+  cLabel.style.cssText='font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:9px;display:none;';
   cLabel.textContent='Categoría';
   body.appendChild(cLabel);
 
-  var catg=document.createElement('div');catg.className='catg';
+  var catg=document.createElement('div');catg.className='catg';catg.style.display='none';
   Object.keys(CATS).forEach(function(k){
     var cb=document.createElement('div');cb.className='cb';
     cb.innerHTML='<span class="ce">'+CATS[k].e+'</span><span class="cn">'+CATS[k].l+'</span>';
@@ -3135,10 +3135,13 @@ function buildIv(num,id){
   cbVT.style.display=(tipoVisita&&tipoVisita.toLowerCase().indexOf('urgencia')!==-1)?'':'none';
   body.appendChild(catg);
 
+  // AUTO-SELECCIONAR primera categoría para que el evento esté disponible de entrada
+  setTimeout(function(){var firstCb=catg.querySelector('.cb');if(firstCb)firstCb.click();},50);
+
   // Fields (hidden until cat selected)
   var fields=document.createElement('div');fields.className='ivf';fields.id=id+'-f';
 
-  var subcr=document.createElement('div');subcr.className='subcr';subcr.id=id+'-sc';
+  var subcr=document.createElement('div');subcr.className='subcr';subcr.id=id+'-sc';subcr.style.display='none';
   fields.appendChild(subcr);
 
   var dvd=document.createElement('div');dvd.className='dvd';fields.appendChild(dvd);
@@ -3215,16 +3218,16 @@ function buildIv(num,id){
         row.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--borde);';
         var nom=document.createElement('span');nom.style.cssText='flex:1;font-size:14px;font-weight:700;color:var(--t);';nom.textContent=u.nombre;
         var bminus=document.createElement('button');bminus.type='button';bminus.textContent='←';
-        bminus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;display:none;';
+        bminus.style.cssText='display:none;';
         var qtyEl=document.createElement('span');
-        qtyEl.style.cssText='font-size:16px;font-weight:900;min-width:28px;text-align:center;color:var(--am);cursor:pointer;padding:2px;display:none;';
-        qtyEl.textContent=u.qty||1;
+        qtyEl.style.cssText='display:none;';
+        qtyEl.textContent=1;
         var bplus=document.createElement('button');bplus.type='button';bplus.textContent='→';
-        bplus.style.cssText='background:var(--s3);border:1px solid var(--borde);border-radius:8px;width:34px;height:34px;font-size:16px;font-weight:800;color:var(--t);cursor:pointer;flex-shrink:0;';
+        bplus.style.cssText='display:none;';
         var coActivo=document.getElementById(id+'-co');
         var coVal=coActivo?coActivo.value:'';
         var esMetroComp=['Tira de LED x mt','Perfil p/tira de LED x mt','Barral riel p/luces x mt','Liston p/tubo simple o doble'].indexOf(coVal)!==-1;
-        var unEl=document.createElement('span');unEl.textContent=esMetroComp?'m':'u';unEl.style.cssText='font-size:11px;color:var(--t3);flex-shrink:0;';
+        var unEl=document.createElement('span');unEl.textContent='';unEl.style.cssText='display:none;';
         var bx=document.createElement('button');bx.type='button';bx.textContent='✕';
         bx.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;flex-shrink:0;';
         (function(i2,ub,qEl){
@@ -4846,6 +4849,9 @@ function calcularMORef(ivData){
 // ---------- COSTOS ----------
 function calcCosto(id){
   var iv=ivList.filter(function(i){return i.id===id;})[0];if(!iv)return{total:0,dets:[],conds:[]};
+  // Para edificios abonados: MO siempre cero
+  var esAbonado=lSel&&lSel.abonado&&lSel.abonado.toLowerCase()!=='no'&&lSel.abonado!=='';
+  if(esAbonado)return{total:0,dets:[],conds:[]};
   var catk=iv.data.catk||'',sc=iv.data.sc||'';
   var evEl=document.getElementById(id+'-ev'),coEl=document.getElementById(id+'-co');
   var ev=evEl?evEl.value:'',comp=coEl?coEl.value:'';
@@ -5043,10 +5049,11 @@ function updR(id){
     // Solo usar si tiene datos reales (bombaNum no vacío)
     if(bombaStr&&bombaData[id]&&bombaData[id].bombaNum)ev=bombaStr;
   }
-  var lin=[sc2,ev,comp,ub2?'· '+ub2:''].filter(Boolean).join(' · ');
+  // Lin sin categoría/subcategoría — solo Evento · Componente · Ubicación · Nota
+  var lin=[ev,comp,ub2?'· '+ub2:''].filter(Boolean).join(' · ');
   if(modsTxt&&modsTxt.length)lin+=' · '+modsTxt.join(', ');
   if(cst.conds.length)lin+=' ⚠️ '+cst.conds.join(', ');
-  if(nota)lin+=' · "'+nota.slice(0,300)+'"';
+  if(nota)lin+=' · '+nota.slice(0,300);
   iv.data=Object.assign(iv.data,{ev:ev,comp:comp,ub:ub,nota:nota,total:cst.total,lin:lin,mtxt:mtxt});
   if(s){s.textContent=(lin+mtxt).slice(0,72)+((lin+mtxt).length>72?'…':'');s.classList.add('ok');}
   if(re){
