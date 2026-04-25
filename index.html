@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.30</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.31</span></div>
   </div>
 </div>
 
@@ -3046,22 +3046,8 @@ function aplicarTipo(tipo){
 }
 
 // ---------- CATEGORÍAS ----------
-var CATS={
-  lu:{l:'Tomas y Luces',e:'💡🔌',sc:['Tomas e Iluminación','Control de Luz','Luces de Emergencia'],
-    ev:{'Tomas e Iluminación':['Reemplazo','Reparación','Instalación nueva','Revisión'],'Control de Luz':['Reemplazo','Programación/Ajuste','Instalación nueva','Reparación'],'Luces de Emergencia':['Reemplazo','Prueba de autonomía','Instalación nueva','Reparación']},
-    co:{'Tomas e Iluminación':['Lampara','Tortuga de LED','Panel o Plafon hasta 24w','Panel o Plafon de 24 a 60w','Tira de LED x mt','Proyector hasta 50w','Proyector mayor a 50w','Llave armada','Modulo electrico','Receptaculo / Portalampara','Colgante Liviano','Colgante Pesado','Aplique simple','Aplique unidireccional / bidireccional','Spot de aplicar o embutir simple o doble','Spot de aplicar o embutir triple o cuadruple','Perfil p/tira de LED x mt','Liston p/tubo simple o doble','Barral riel p/luces x mt','Tacho / Cabezal','Estaca de Jardin','Ventilador de techo','Otro'],'Control de Luz':['Sensor de movimiento','Fotocélula','Automatico de pasillo','Temporizador horario','Pulsador luminoso','Variador de intensidad','Automatico de luces riel din','Otro'],'Luces de Emergencia':['Luz de emergencia','Batería de emergencia','Toma corriente','Otro']}},
-  en:{l:'Energía',e:'⚡',sc:['Tableros y Montantes','Canalización'],
-    ev:{'Tableros y Montantes':['Reemplazo','Instalación nueva','Revisión/Ajuste','Reparación','Ampliación'],'Canalización':['Instalación nueva','Reparación','Ampliación']},
-    co:{'Tableros y Montantes':['Térmica bipolar','Disyuntor diferencial bipolar','Disyuntor diferencial tetrapolar','Fusible NH','Contactor','Tablero seccional hasta 8 polos','Otro'],'Canalización':['Caño a la vista (por boca)','Cañería en mampostería (por boca)','Otro']}},
-  bo:{l:'Bombas',e:'💧',sc:['Bombas','Tablero'],
-    ev:{'Bombas':['Rotación de bomba','Reemplazo','Reparación','Revisión','Ajuste presostato'],
-        'Tablero':['Reemplazo','Reparación','Revisión','Instalación nueva']},
-    co:{'Bombas':['Presostato','Indicador luminoso','Automatico de tanque / cisterna','Guardamotor','Flotante/Nivel','Capacitor','Otro'],
-        'Tablero':['Tablero bombas','Guardamotor','Relé térmico','Contactor','Fusible NH','Otro']}},
-  se:{l:'Seguridad y Com.',e:'📹',sc:['Portero Eléctrico','Antena Comunitaria','Cámaras'],
-    ev:{'Portero Eléctrico':['Reemplazo','Reparación','Programación','Instalación nueva'],'Antena Comunitaria':['Reemplazo','Reparación','Revisión','Instalación nueva'],'Cámaras':['Reemplazo','Configuración','Instalación nueva','Reparación']},
-    co:{'Portero Eléctrico':['Teléfono de departamento','Frente de calle','Placa microfono / parlante','Amplificador','Pulsador timbre','Apertura eléctrica','Otro'],'Antena Comunitaria':['Antena','Amplificador','Cable Coaxil','Filtro Balum','Mezclador UHF / VHF','Divisor','Ficha de Compresion','Otro'],'Cámaras':['Cámara analogica','Camara IP','Balun','DVR','Fuente DVR','Cable UTP','Caja de pase','Monitor','Fuente cámaras','Otro']}}
-};
+// Categorías — se cargan dinámicamente desde Config_Categorias en el Sheet
+var CATS={};
 
 function getPrecio(catk,sc,ev,comp){
   if(!preciosConf.length)return 5000;
