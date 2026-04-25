@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.25</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.27</span></div>
   </div>
 </div>
 
@@ -2550,6 +2550,8 @@ function cargarRegistroParaEditar(reg){
 var _enviarOriginal = null; // se guarda después del onload
 
 window.onload=function(){
+  // Limpiar caché viejo de categorías para forzar recarga del Sheet
+  try{localStorage.removeItem('cats_din');}catch(e){}
   // Registrar Service Worker para PWA
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/solec-mario/sw.js').catch(function(){});
@@ -3133,6 +3135,26 @@ function buildIv(num,id){
   body.appendChild(cLabel);
 
   var catg=document.createElement('div');catg.className='catg';
+  // Si catsDinamicas no está listo, esperar y reintentar
+  if(!catsDinamicas.length){
+    var catgTmp=document.createElement('div');
+    catgTmp.style.cssText='padding:12px;color:var(--t3);font-size:13px;text-align:center;';
+    catgTmp.textContent='⏳ Cargando categorías...';
+    body.appendChild(catgTmp);
+    setTimeout(function(){
+      catgTmp.remove();
+      var CATS_USE2=(catsDinamicas.length?buildCATSdesdeDinamicas():null)||CATS;
+      var catg2=document.createElement('div');catg2.className='catg';
+      Object.keys(CATS_USE2).forEach(function(k){
+        var cb=document.createElement('button');cb.className='cb';cb.dataset.catk=k;
+        cb.innerHTML='<span class="cb-em">'+CATS_USE2[k].e+'</span><span class="cb-l">'+CATS_USE2[k].l+'</span>';
+        cb.addEventListener('click',function(){selCat(cb,id);});
+        catg2.appendChild(cb);
+      });
+      body.appendChild(catg2);
+    },1500);
+    return div;
+  }
   var CATS_USE=(catsDinamicas.length?buildCATSdesdeDinamicas():null)||CATS;
   Object.keys(CATS_USE).forEach(function(k){
     var cb=document.createElement('div');cb.className='cb';
