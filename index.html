@@ -433,7 +433,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.43</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.44</span></div>
   </div>
 </div>
 
@@ -6984,22 +6984,7 @@ async function _interpretarTrabajo(texto,eventos,componentes){
   var loadDiv=document.createElement('div');loadDiv.style.cssText='text-align:center;padding:16px;color:var(--azul);font-size:14px;font-weight:700;';
   loadDiv.textContent='✨ Interpretando...';box.appendChild(loadDiv);
 
-  var promptIA=
-    'Sos asistente técnico de SOLEC (electricidad/seguridad Argentina).
-'+
-    'El técnico está trabajando en: '+_asist.catk+' > '+_asist.sc+'
-'+
-    'Describió: "'+texto+'"
-
-'+
-    'Eventos disponibles: '+eventos.join(', ')+'
-'+
-    'Componentes disponibles: '+componentes.join(', ')+'
-
-'+
-    'Extraé el evento y componente más adecuado. Respondé SOLO JSON sin markdown:
-'+
-    '{"evento":"...","componente":"...","cantidad":1,"nota":"explicación breve si fue ambiguo o vacío si fue claro"}';
+  var promptIA='Sos asistente tecnico de SOLEC Argentina. El tecnico esta trabajando en: '+_asist.catk+' subcategoria '+_asist.sc+'. Describio: '+texto+'. Eventos disponibles: '+eventos.join(', ')+'. Componentes disponibles: '+componentes.join(', ')+'. Extrae el evento y componente mas adecuado. Responde SOLO JSON sin markdown: {"evento":"...","componente":"...","cantidad":1,"nota":""}';
 
   try{
     var resp=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},
