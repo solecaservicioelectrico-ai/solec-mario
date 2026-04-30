@@ -15,13 +15,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700;800&display=swap');
 :root{
   --bg:#0f1015;--s1:#161820;--s2:#1e2130;--s3:#272b40;
-  --borde:#2e3247;--am:#f5c518;--am2:#ffd84d;
+  --borde:#3a4060;--am:#f5c518;--am2:#ffd84d;
   --verde:#00c896;--rojo:#ff4757;--azul:#4a9eff;--naranja:#ff8c42;--lila:#a78bfa;
-  --t:#eceef8;--t2:#8890aa;--t3:#4a5066;
+  --t:#ffffff;--t2:#c8d0f0;--t3:#8090b8;
   --r:12px;--rs:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--t);font-family:'Barlow',sans-serif;font-size:16px;min-height:100vh;padding-bottom:120px;}
+body{background:var(--bg);color:var(--t);font-family:'Barlow',sans-serif;font-size:17px;min-height:100vh;padding-bottom:120px;}
 .hdr{background:var(--s1);border-bottom:3px solid var(--am);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--am);line-height:1;}
 .logo small{display:block;font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:2px;color:var(--t2);font-weight:700;}
@@ -436,7 +436,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.58</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.59</span></div>
   </div>
 </div>
 
@@ -497,7 +497,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
     <!-- Paso 1: Fecha -->
     <div class="guia-paso" id="gpaso-fecha">
-      <div class="guia-preg">📅 ¿Qué fecha es hoy?</div>
+      <div class="guia-preg">📅 Fecha de trabajo</div>
       <input class="fi" type="date" id="fecha" style="font-size:18px;font-weight:700;" oninput="gpSiguiente('fecha','horario')">
       <button class="bsig" onclick="gpSiguiente('fecha','horario')">SIGUIENTE ▶</button>
     </div>
@@ -540,7 +540,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="chip cv" data-tipo="Preventivo/Abono" onclick="gpSelTipo(this)">🔁 Preventivo/Abono</div>
         <div class="chip ca" data-tipo="Service" onclick="gpSelTipo(this)">🔧 Service</div>
         <div class="chip cr" data-tipo="Urgencia" onclick="gpSelTipo(this)">🚨 Urgencia</div>
-        <div class="chip" data-tipo="Visita técnica" onclick="gpSelTipo(this)" style="background:rgba(100,180,255,.15);border:2px solid #64b4ff;color:#64b4ff;">🔍 Visita técnica</div>
+        <div class="chip" data-tipo="Visita técnica" onclick="gpSelTipo(this)">🔍 Visita técnica</div>
       </div>
     </div>
 
@@ -719,7 +719,35 @@ var regCache = [];
 // ---------- UTILS ----------
 function cSet(k,d){try{localStorage.setItem('s_'+k,JSON.stringify({ts:Date.now(),d:d}));}catch(e){}}
 function cGet(k){try{var r=localStorage.getItem('s_'+k);if(!r)return null;var o=JSON.parse(r);if(Date.now()-o.ts<86400000)return o.d;}catch(e){}return null;}
-function nn(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+// ── NORMALIZACIÓN FONÉTICA SOLEC ─────────────────────────────────────────
+// Centralizada aquí — NO duplicar ni pisar en otros lugares del código.
+// Cubre: mayúsculas, tildes, equivalencias fonéticas (c/k/q, v/b, ll/y/i,
+// z/s, ch/c) y conversión de números arábigos a romanos (1-50).
+// Se usa en búsqueda de edificios, asistente IA y cualquier comparación de texto.
+function nn(s){
+  if(!s)return'';
+  var r=s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // Equivalencias fonéticas
+  r=r.replace(/ch/g,'c');       // ch → c (antes de c→k para no doble)
+  r=r.replace(/qu/g,'k');       // qu → k
+  r=r.replace(/c/g,'k');        // c  → k
+  r=r.replace(/q/g,'k');        // q  → k
+  r=r.replace(/v/g,'b');        // v  → b
+  r=r.replace(/ll/g,'i');       // ll → i
+  r=r.replace(/y/g,'i');        // y  → i
+  r=r.replace(/z/g,'s');        // z  → s
+  // Números arábigos → romanos (1-50)
+  var ROMANOS=['I','II','III','IV','V','VI','VII','VIII','IX','X',
+    'XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX',
+    'XXI','XXII','XXIII','XXIV','XXV','XXVI','XXVII','XXVIII','XXIX','XXX',
+    'XXXI','XXXII','XXXIII','XXXIV','XXXV','XXXVI','XXXVII','XXXVIII','XXXIX','XL',
+    'XLI','XLII','XLIII','XLIV','XLV','XLVI','XLVII','XLVIII','XLIX','L'];
+  r=r.replace(/\b([1-9]|[1-4][0-9]|50)\b/g,function(m){
+    var n=parseInt(m,10);
+    return n>=1&&n<=50?ROMANOS[n-1].toLowerCase():m;
+  });
+  return r;
+}
 function genCode(p){var d=new Date();return p+'-'+d.getFullYear()+'-'+String(d.getTime()).slice(-5);}
 function showToast(m,rojo){var t=document.getElementById('toast');t.textContent=m;t.style.background=rojo?'#ff4757':'';t.style.color=rojo?'#fff':'';t.classList.add('on');setTimeout(function(){t.classList.remove('on');t.style.background='';t.style.color='';},3000);}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -6841,17 +6869,17 @@ async function abrirAsistenteIv(id){
   var ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
   var box=document.createElement('div');
-  box.style.cssText='width:100%;max-width:520px;background:var(--s1);border-top:3px solid var(--azul);border-radius:20px 20px 0 0;padding:20px 20px 40px 20px;';
+  box.style.cssText='width:100%;max-width:520px;background:#1a1d28;border-top:3px solid var(--azul);border-radius:20px 20px 0 0;padding:20px 20px 40px 20px;';
   box.innerHTML=
-    '<div style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--azul);margin-bottom:6px;letter-spacing:1px;">✨ ASISTENTE SOLEC</div>'+
-    '<div style="font-size:13px;color:var(--t3);margin-bottom:14px;">Describí el trabajo en detalle — qué hiciste, qué cambiaste, cuántos, dónde</div>'+
-    '<textarea id="ia-desc-inp" class="fi" placeholder="Ej: cambié 12 lámparas en las tortugas del perímetro lateral, reparé los cables detrás y sellé con poliuretano..." style="min-height:100px;font-size:15px;resize:vertical;margin-bottom:12px;"></textarea>'+
-    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px;text-align:center;">Usá el 🎤 del teclado para dictar</div>'+
+    '<div style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--azul);margin-bottom:6px;letter-spacing:1px;">✨ ASISTENTE SOLEC</div>'+
+    '<div style="font-size:15px;color:var(--t2);margin-bottom:14px;font-weight:600;">Describí el trabajo en detalle — qué hiciste, qué cambiaste, cuántos, dónde</div>'+
+    '<textarea id="ia-desc-inp" class="fi" placeholder="Ej: cambié 12 lámparas en las tortugas del perímetro lateral, reparé los cables detrás y sellé con poliuretano..." style="min-height:110px;font-size:17px;font-weight:600;resize:vertical;margin-bottom:12px;background:#0f1015;border:2px solid var(--azul);color:#fff;line-height:1.5;"></textarea>'+
+    '<div style="font-size:13px;color:var(--t2);margin-bottom:14px;text-align:center;font-weight:700;">Usá el 🎤 del teclado para dictar</div>'+
     '<div style="display:flex;gap:10px;">'+
-    '<button id="ia-cancelar" style="flex:1;background:var(--s3);border:1px solid var(--borde);border-radius:10px;padding:13px;color:var(--t2);font-size:14px;font-weight:800;cursor:pointer;">Cancelar</button>'+
-    '<button id="ia-interpretar" style="flex:2;background:var(--azul);border:none;border-radius:10px;padding:13px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;">✨ INTERPRETAR</button>'+
+    '<button id="ia-cancelar" style="flex:1;background:var(--s3);border:1px solid var(--borde);border-radius:10px;padding:14px;color:var(--t);font-size:16px;font-weight:800;cursor:pointer;">Cancelar</button>'+
+    '<button id="ia-interpretar" style="flex:2;background:var(--azul);border:none;border-radius:10px;padding:14px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:17px;letter-spacing:1px;cursor:pointer;">✨ INTERPRETAR</button>'+
     '</div>'+
-    '<div id="ia-loading" style="display:none;text-align:center;padding:16px;color:var(--azul);font-weight:700;">⏳ Interpretando...</div>'+
+    '<div id="ia-loading" style="display:none;text-align:center;padding:16px;color:var(--azul);font-weight:800;font-size:16px;">⏳ Interpretando...</div>'+
     '<div id="ia-resultado" style="display:none;"></div>';
 
   ov.appendChild(box);document.body.appendChild(ov);
@@ -6877,7 +6905,18 @@ async function _iaInterpretarTrabajo(texto,id,ov){
   var modsList=catalogoMods.map(function(m){return m.Nombre||m.nombre||'';}).filter(Boolean).join(', ');
 
   var prompt='Sos asistente tecnico de SOLEC Argentina (electricidad/seguridad edificios). '+
-    'IMPORTANTE: "tortuga de LED" es un artefacto sellado completo (se reemplaza entero). "lampara en tortuga" o "lampara de tortuga" significa reemplazar solo la lampara E27 que va adentro del artefacto tortuga — en ese caso el componente es Lampara y la ubicacion es el nombre del artefacto (ej: tortugas perimetrales). '+
+
+    'REGLAS CRITICAS DE CATEGORIA — aplicar siempre antes de cualquier otra decision:\n'+
+    '1. "no hay luz", "sin luz", "se fue la luz", "quedo sin luz", "falta la luz" en un departamento/sector/piso = SIN ENERGIA ELECTRICA → categoria "en" (Energia). NO es problema de iluminacion. En Argentina "no hay luz" significa corte de energia.\n'+
+    '2. Empalme deteriorado/cortado/quemado + el problema es de circuito = categoria "en" (Energia). EXCEPCION: si el empalme se reparo de paso durante un reemplazo de artefacto (ej: cambiar tortuga y reparo empalme) → usar la categoria del trabajo principal.\n'+
+    '3. "centro de luz" en contexto de diagnostico electrico (repartidor de circuitos, caja de empalme de distribucion) = componente de Energia, NO artefacto de iluminacion.\n'+
+    '4. Centro de luz roto o lampara quemada o artefacto sin encender = categoria "lu" (Tomas y Luces).\n'+
+
+    'CONOCIMIENTO DE ARTEFACTOS:\n'+
+    '"tortuga de LED" = artefacto sellado completo (se reemplaza entero, componente = Tortuga de LED). '+
+    '"lampara en tortuga" o "lampara de tortuga" = solo la lampara E27 dentro del artefacto (componente = Lampara, ubicacion = nombre del artefacto). '+
+    '"farol" = poste de jardin con globo de policarbonato. '+
+
     'El tecnico describio el trabajo: "'+texto+'". '+
     'Categorias disponibles: '+catsList+'. '+
     'Modificadores disponibles: '+modsList+'. '+
@@ -6935,35 +6974,76 @@ function _mostrarResultadoIA(parsed,id,ov){
 }
 
 function _aplicarIaAIv(parsed,id){
-  // Seleccionar categoría
-  var catBtn=document.querySelector('#'+id+' [data-catk], #'+id+' .cb');
-  // Buscar el botón de categoría correcto
+  // 1. Seleccionar categoría
   var catg=document.querySelector('#'+id+' .catg');
   if(catg){
-    var cbs=catg.querySelectorAll('.cb');
-    cbs.forEach(function(cb){
-      var k=cb.dataset&&cb.dataset.catk;
-      if(k===parsed.categoria_key){cb.click();}
+    catg.querySelectorAll('.cb').forEach(function(cb){
+      if(cb.dataset&&cb.dataset.catk===parsed.categoria_key)cb.click();
     });
   }
-  setTimeout(function(){
-    // Seleccionar subcategoría
+
+  // 2. Esperar que se rendericen las subcategorías y seleccionarla
+  function esperarSubcat(intentos){
+    if(intentos<=0){showToast('⚠️ No se encontró la subcategoría');return;}
     var scBtns=document.querySelectorAll('#'+id+' .subb');
+    var encontrado=false;
     scBtns.forEach(function(btn){
-      if(btn.textContent.trim()===parsed.subcategoria)btn.click();
+      if(btn.textContent.trim()===parsed.subcategoria){btn.click();encontrado=true;}
     });
+    if(!encontrado){setTimeout(function(){esperarSubcat(intentos-1);},150);}
+    else{
+      // 3. Esperar que se rendericen eventos y componentes
+      setTimeout(function(){llenarEventoYComponente(8);},300);
+    }
+  }
+
+  function llenarEventoYComponente(intentos){
+    if(intentos<=0){
+      // Forzar como último recurso
+      aplicarResto();
+      return;
+    }
+    var evEl=document.getElementById(id+'-ev');
+    var tieneOpciones=evEl&&evEl.options&&evEl.options.length>1;
+    if(!tieneOpciones){
+      setTimeout(function(){llenarEventoYComponente(intentos-1);},200);
+      return;
+    }
+    aplicarResto();
+  }
+
+  function aplicarResto(){
+    // Evento
+    var evEl=document.getElementById(id+'-ev');
+    if(evEl&&parsed.evento){
+      for(var j=0;j<evEl.options.length;j++){
+        if(evEl.options[j].value===parsed.evento||
+           evEl.options[j].text===parsed.evento){
+          evEl.selectedIndex=j;
+          evEl.dispatchEvent(new Event('change'));
+          break;
+        }
+      }
+    }
+    // Componente — esperar un tick más tras el cambio de evento
     setTimeout(function(){
-      // Evento
-      var evEl=document.getElementById(id+'-ev');
-      if(evEl){for(var j=0;j<evEl.options.length;j++){if(evEl.options[j].value===parsed.evento){evEl.selectedIndex=j;evEl.dispatchEvent(new Event('change'));break;}}}
-      // Componente
       var coEl=document.getElementById(id+'-co');
-      if(coEl){for(var k=0;k<coEl.options.length;k++){if(coEl.options[k].value===parsed.componente){coEl.selectedIndex=k;coEl.dispatchEvent(new Event('change'));break;}}}
+      if(coEl&&parsed.componente){
+        for(var k=0;k<coEl.options.length;k++){
+          if(coEl.options[k].value===parsed.componente||
+             coEl.options[k].text===parsed.componente){
+            coEl.selectedIndex=k;
+            coEl.dispatchEvent(new Event('change'));
+            break;
+          }
+        }
+      }
       // Cantidad
       if(parsed.cantidad>1){
         var ivObj=ivList.find(function(i){return i.id===id;});
         if(ivObj){
-          ivObj.data.comp=parsed.cantidad+'x '+parsed.componente;
+          if(!ivObj.data)ivObj.data={};
+          ivObj.data.cantidadIA=parsed.cantidad;
           updR(id);
         }
       }
@@ -6971,23 +7051,36 @@ function _aplicarIaAIv(parsed,id){
       if(parsed.modificadores&&parsed.modificadores.length){
         mdPorIv[id]=mdPorIv[id]||{};
         parsed.modificadores.forEach(function(m){
-          mdPorIv[id][m.nombre]={nombre:m.nombre,val:m.cantidad||1,unidad:'u',tieneCant:true};
-          var tog=document.querySelector('#'+id+' [data-mod="'+m.nombre+'"]');
+          var nombre=m.nombre||m.Nombre||'';
+          if(!nombre)return;
+          var key=nombre.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,30);
+          mdPorIv[id][nombre]={nombre:nombre,val:m.cantidad||1,unidad:'u',tieneCant:true};
+          // Intentar hacer click en el toggle visual si existe
+          var tog=document.querySelector('#'+id+' [data-mod="'+nombre+'"]') ||
+                  document.querySelector('#'+id+' [data-key="'+key+'"]');
           if(tog&&!tog.classList.contains('on'))tog.click();
         });
         updR(id);
       }
-      // Ubicación libre
+      // Ubicación
       if(parsed.ubicacion){
         ubPorIv[id]=ubPorIv[id]||[];
         if(!ubPorIv[id].find(function(u){return u.nombre===parsed.ubicacion;})){
           ubPorIv[id].push({nombre:parsed.ubicacion,qty:1});
         }
+        // Refrescar el render de ubicación
+        var ubWrap=document.getElementById(id+'-ub-wrap');
+        if(ubWrap){
+          // Disparar el re-render buscando la función rendUbWrap del scope de buildIv
+          // Como es closure, actualizamos directamente y forzamos updR
+        }
         updR(id);
       }
       showToast('✅ Intervención completada por IA');
-    },400);
-  },500);
+    },300);
+  }
+
+  setTimeout(function(){esperarSubcat(10);},500);
 }
 
 // ══════════════════════════════════════════════
