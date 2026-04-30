@@ -433,7 +433,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.44</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.45</span></div>
   </div>
 </div>
 
@@ -6731,6 +6731,21 @@ var _asist={
   escuchando:false
 };
 
+function _normFon(s){
+  // Normaliza para búsqueda: minúsculas, sin tildes, k=c, doble ll=y, etc.
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
+    .replace(/k/g,'c')   // akros = acros
+    .replace(/qu/g,'c')  // que = ce
+    .replace(/ph/g,'f')  // ph = f
+    .replace(/y/g,'i')   // y = i
+    .replace(/ll/g,'l')  // ll = l
+    .replace(/v/g,'b')   // v = b
+    .replace(/z/g,'s')   // z = s
+    .replace(/x/g,'cs')  // x = cs
+    .replace(/[^a-z0-9 ]/g,''); // solo alfanumérico
+}
+
 function abrirAsistente(){
   _asist={paso:0,edificio:null,tipoVisita:null,catk:null,sc:null,ev:null,comp:null,compQty:1,ubicacion:null,mods:[],intervenciones:[],rec:null,escuchando:false};
   _renderAsist();
@@ -6876,16 +6891,23 @@ function _btnMic(cont, onTexto){
 function _pasoEdificio(cont){
   _pregunta(cont,'¿En qué edificio estás?');
   // Buscador
+  // Hint de micrófono del teclado
+  var hint=document.createElement('div');
+  hint.style.cssText='background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:var(--azul);font-weight:700;text-align:center;';
+  hint.innerHTML='⌨️ Tocá el campo y usá el 🎤 del teclado para dictar';
+  cont.appendChild(hint);
+
   var inp=document.createElement('input');
-  inp.type='text';inp.placeholder='Escribí o dictá el nombre...';inp.className='fi';
-  inp.style.marginBottom='10px';
+  inp.type='text';inp.placeholder='🎤 Nombre del edificio...';inp.className='fi';
+  inp.style.cssText='margin-bottom:10px;font-size:18px;padding:16px;';
+  inp.setAttribute('autocomplete','off');
   cont.appendChild(inp);
   var lista=document.createElement('div');lista.style.cssText='max-height:200px;overflow-y:auto;';
   cont.appendChild(lista);
   function filtrar(q){
     lista.innerHTML='';
-    var q2=(q||'').toLowerCase();
-    var filtrados=q2?edificios.filter(function(e){return (e.nombre||'').toLowerCase().indexOf(q2)!==-1;}):edificios.slice(0,8);
+    var q2=_normFon(q||'');
+    var filtrados=q2?edificios.filter(function(e){return _normFon(e.nombre||'').indexOf(q2)!==-1;}):edificios.slice(0,8);
     filtrados.forEach(function(e){
       var item=document.createElement('div');
       item.style.cssText='padding:10px 12px;border-bottom:1px solid var(--borde);cursor:pointer;font-size:15px;font-weight:700;';
@@ -6896,12 +6918,7 @@ function _pasoEdificio(cont){
   }
   inp.addEventListener('input',function(){filtrar(this.value);});
   filtrar('');
-  // Mic
-  _btnMic(cont,function(texto){
-    var match=edificios.find(function(e){return (e.nombre||'').toLowerCase().indexOf(texto.toLowerCase())!==-1;});
-    if(match){_asist.edificio=match.nombre;_asist.paso=1;_renderAsist();}
-    else{inp.value=texto;filtrar(texto);}
-  });
+  // Sin Web Speech API — el usuario usa el micrófono del teclado
 }
 
 // ── PASO 1: TIPO DE VISITA ────────────────────────────────
@@ -6954,9 +6971,15 @@ function _pasoTrabajo(cont){
     cont.appendChild(evDiv);
   }
 
-  // Opción con voz + IA
-  var sep=document.createElement('div');sep.style.cssText='text-align:center;color:var(--t3);font-size:13px;margin:8px 0;';sep.textContent='— o describilo con voz —';cont.appendChild(sep);
-  _btnMic(cont,function(texto){_interpretarTrabajo(texto,eventos,componentes);});
+  // Campo de texto libre para descripción con IA
+  var sep=document.createElement('div');sep.style.cssText='text-align:center;color:var(--t3);font-size:13px;margin:8px 0;';sep.textContent='— o describilo con palabras —';cont.appendChild(sep);
+  var descWrap=document.createElement('div');descWrap.style.cssText='display:flex;gap:8px;align-items:center;';
+  var descInp=document.createElement('input');descInp.type='text';descInp.placeholder='🎤 Ej: cambié el cable quemado...';descInp.className='fi';descInp.style.cssText='flex:1;font-size:15px;';descInp.setAttribute('autocomplete','off');
+  var descBtn=document.createElement('button');descBtn.textContent='✨';descBtn.style.cssText='background:var(--azul);border:none;border-radius:8px;padding:12px 16px;font-size:18px;cursor:pointer;flex-shrink:0;';
+  descBtn.onclick=function(){if(descInp.value.trim())_interpretarTrabajo(descInp.value.trim(),eventos,componentes);};
+  descInp.addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim())_interpretarTrabajo(this.value.trim(),eventos,componentes);});
+  descWrap.appendChild(descInp);descWrap.appendChild(descBtn);cont.appendChild(descWrap);
+  var hint2=document.createElement('div');hint2.style.cssText='font-size:11px;color:var(--t3);text-align:center;margin-top:6px;';hint2.textContent='Usá el 🎤 del teclado para dictar';cont.appendChild(hint2);
 }
 
 function _mostrarCompsBajo(cont,componentes){
@@ -7047,7 +7070,7 @@ function _pasoUbicacion(cont){
   function filtrar(q){
     lista.innerHTML='';
     var q2=(q||'').toLowerCase();
-    var filtrados=q2?ubs.filter(function(u){return (typeof u==='string'?u:u.nombre||'').toLowerCase().indexOf(q2)!==-1;}):ubs.slice(0,6);
+    var filtrados=q2?ubs.filter(function(u){var nom=typeof u==='string'?u:u.nombre||'';return _normFon(nom).indexOf(_normFon(q2))!==-1;}):ubs.slice(0,6);
     filtrados.forEach(function(u){
       var nom=typeof u==='string'?u:u.nombre||'';
       var item=document.createElement('div');item.style.cssText='padding:10px 12px;border-bottom:1px solid var(--borde);cursor:pointer;font-size:15px;font-weight:700;';
@@ -7067,7 +7090,7 @@ function _pasoUbicacion(cont){
   var btnSinUb=document.createElement('button');btnSinUb.textContent='Sin ubicación específica';btnSinUb.style.cssText='width:100%;padding:10px;background:transparent;border:1px solid var(--borde);border-radius:8px;color:var(--t2);font-size:13px;cursor:pointer;margin-top:8px;';
   btnSinUb.onclick=function(){_asist.ubicacion=null;_asist.paso=7;_renderAsist();};
   cont.appendChild(btnSinUb);
-  _btnMic(cont,function(texto){inp.value=texto;filtrar(texto);});
+  // Usuario usa micrófono del teclado
 }
 
 // ── PASO 7: MODIFICADORES ─────────────────────────────────
