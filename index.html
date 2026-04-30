@@ -433,7 +433,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.51</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.52</span></div>
   </div>
 </div>
 
@@ -7194,51 +7194,67 @@ function _pasoFinal(cont){
 
 async function _aplicarAlFormulario(){
   _cerrarAsistente();
-  // Llenar edificio
+
+  // 1. Llenar edificio
   var lsearch=document.getElementById('lsearch');
   var lnom=document.getElementById('lnom');
   if(lsearch)lsearch.value=_asist.edificio||'';
   if(lnom)lnom.value=_asist.edificio||'';
-  // Tipo de visita
+
+  // Buscar CUIT del edificio
+  var edifObj=edificios.find(function(e){return e.nombre===_asist.edificio;});
+  var lcuit=document.getElementById('lcuit');
+  if(lcuit&&edifObj)lcuit.textContent=edifObj.cuit||'';
+
+  // 2. Tipo de visita
   if(_asist.tipoVisita)aplicarTipo(_asist.tipoVisita);
-  // Esperar que se construya el formulario
-  await new Promise(function(r){setTimeout(r,600);});
-  // Agregar intervenciones
+  await new Promise(function(r){setTimeout(r,400);});
+
+  // 3. Limpiar intervenciones existentes
+  ivList=[];ubPorIv={};mdPorIv={};
+  var secIv=document.getElementById('secIv');
+  if(secIv){secIv.innerHTML='';secIv.classList.add('on');}
+
+  // 4. Agregar cada intervención
+  var cats=buildCATSdesdeDinamicas()||{};
   for(var i=0;i<_asist.intervenciones.length;i++){
     var iv=_asist.intervenciones[i];
-    if(i>0)nuevaIv();
-    await new Promise(function(r){setTimeout(r,400);});
-    var ids=ivList.map(function(x){return x.id;});
-    var id=ids[ids.length-1];
+    // Crear nueva intervención via nuevaIv() que construye la UI correctamente
+    nuevaIv();
+    await new Promise(function(r){setTimeout(r,300);});
+    var id=ivList[ivList.length-1]?ivList[ivList.length-1].id:null;
     if(!id)continue;
-    // Seleccionar categoría
-    var catBtns=document.querySelectorAll('[data-catk]');
-    catBtns.forEach(function(btn){if(btn.dataset.catk===iv.catk)btn.click();});
-    await new Promise(function(r){setTimeout(r,300);});
-    // Seleccionar subcategoría
-    var scBtns=document.querySelectorAll('[data-sc]');
-    scBtns.forEach(function(btn){if(btn.dataset.sc===iv.sc)btn.click();});
-    await new Promise(function(r){setTimeout(r,300);});
-    // Evento
-    var evEl=document.getElementById(id+'-ev');
-    if(evEl){for(var j=0;j<evEl.options.length;j++){if(evEl.options[j].value===iv.ev){evEl.selectedIndex=j;evEl.dispatchEvent(new Event('change'));break;}}}
-    await new Promise(function(r){setTimeout(r,200);});
-    // Componente
-    var coEl=document.getElementById(id+'-co');
-    var compNombre=iv.comp.replace(/^\d+x\s*/,'');
-    if(coEl){for(var k=0;k<coEl.options.length;k++){if(coEl.options[k].value===compNombre){coEl.selectedIndex=k;coEl.dispatchEvent(new Event('change'));break;}}}
-    // Cantidad
-    if(iv.compQty>1){
-      var qEl=document.querySelector('[data-id="'+id+'"] .qty-comp');
-      if(qEl)qEl.textContent=iv.compQty;
-    }
+
+    var catObj=cats[iv.catk]||{};
+    var lin=(catObj.l||iv.catk)+' · '+(iv.sc||'')+' · '+(iv.ev||'')+' · '+iv.comp+(iv.ubicacion?' · '+iv.ubicacion:'');
+
+    // Inyectar datos directamente en ivList
+    ivList[ivList.length-1].data={
+      catk:iv.catk, sc:iv.sc, ev:iv.ev,
+      comp:(iv.compQty>1?iv.compQty+'x ':'')+iv.comp,
+      lin:lin, ledMetros:null
+    };
+
     // Ubicación
-    if(iv.ubicacion){
-      var ubBtn=document.querySelector('#'+id+' .ub-btn');
-      if(!ubBtn){var ubWrap=document.getElementById(id+'-ubwrap');if(ubWrap){var btns=ubWrap.querySelectorAll('button');if(btns.length)ubBtn=btns[0];}}
+    ubPorIv[id]=iv.ubicacion?[{nombre:iv.ubicacion,qty:1}]:[];
+
+    // Modificadores
+    mdPorIv[id]={};
+    if(iv.mods&&iv.mods.length){
+      iv.mods.forEach(function(m){
+        mdPorIv[id][m.nombre]={nombre:m.nombre,val:m.val||1,unidad:m.unidad||'u',tieneCant:true};
+      });
     }
+
+    // Re-renderizar esta intervención
+    updR(id);
   }
-  showToast('✅ '+_asist.intervenciones.length+' intervención'+((_asist.intervenciones.length!==1)?'es':'')+' volcadas al formulario');
+
+  // Scroll al formulario
+  var fv=document.getElementById('formView');
+  if(fv)fv.scrollIntoView({behavior:'smooth',block:'start'});
+
+  showToast('✅ '+_asist.intervenciones.length+' intervención'+((_asist.intervenciones.length!==1)?'es':'')+' cargadas');
 }
 
 </script>
