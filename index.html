@@ -433,7 +433,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.54</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.55</span></div>
   </div>
 </div>
 
@@ -7195,95 +7195,138 @@ function _pasoFinal(cont){
 async function _aplicarAlFormulario(){
   _cerrarAsistente();
 
-  // 1. Resetear formulario limpio
+  // Reset limpio
   resetForm();
-  await new Promise(function(r){setTimeout(r,200);});
+  await new Promise(function(r){setTimeout(r,300);});
 
-  // 2. Abrir todas las secciones
+  // Abrir secciones
   ['b1','b2','b3'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el)el.style.display='block';
+    var el=document.getElementById(id);if(el)el.style.display='block';
   });
   ['a1','a2','a3'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el)el.style.transform='rotate(90deg)';
+    var el=document.getElementById(id);if(el)el.style.transform='rotate(90deg)';
   });
 
-  // 3. Llenar edificio
+  // Llenar edificio
   var lsearch=document.getElementById('lsearch');
-  if(lsearch){
-    lsearch.value=_asist.edificio||'';
-    lsearch.dispatchEvent(new Event('input'));
-    await new Promise(function(r){setTimeout(r,300);});
-  }
   var lnom=document.getElementById('lnom');
+  if(lsearch)lsearch.value=_asist.edificio||'';
   if(lnom)lnom.value=_asist.edificio||'';
-  // Buscar y setear el edificio en la lista
   var edifObj=edificios.find(function(e){return e.nombre===_asist.edificio;});
   if(edifObj){
-    var edid=document.getElementById('edid');
-    var ldir=document.getElementById('ldir');
-    if(edid)edid.value=edifObj.id||'';
-    if(ldir)ldir.value=edifObj.dir||'';
-    // Setear CUIT visible
-    var cuitEl=document.getElementById('lcuit')||document.querySelector('.lcuit');
-    if(cuitEl)cuitEl.textContent=edifObj.cuit||'';
+    var edid=document.getElementById('edid');if(edid)edid.value=edifObj.id||'';
+    var ldir=document.getElementById('ldir');if(ldir)ldir.value=edifObj.dir||'';
   }
 
-  // 4. Tipo de visita
+  // Tipo de visita
   if(_asist.tipoVisita){
-    aplicarTipo(_asist.tipoVisita);
-    // Marcar chip visualmente
-    document.querySelectorAll('.chip[data-tipo]').forEach(function(chip){
-      chip.classList.toggle('on', chip.dataset.tipo===_asist.tipoVisita);
-    });
+    var chip=document.querySelector('.chip[data-tipo="'+_asist.tipoVisita+'"]');
+    if(chip)chip.click();
+    await new Promise(function(r){setTimeout(r,600);});
   }
-  await new Promise(function(r){setTimeout(r,500);});
 
-  // 5. Intervenciones — limpiar y agregar una por una
+  // Intervenciones — simular clicks reales
   ivList=[];ubPorIv={};mdPorIv={};
-  var secIv=document.getElementById('secIv');
-  var cats=buildCATSdesdeDinamicas()||{};
+  var ivListEl=document.getElementById('ivList');
+  if(ivListEl)ivListEl.innerHTML='';
+  ivCount=0;
 
   for(var i=0;i<_asist.intervenciones.length;i++){
     var iv=_asist.intervenciones[i];
+
+    // Crear intervención
     nuevaIv();
-    await new Promise(function(r){setTimeout(r,400);});
+    await new Promise(function(r){setTimeout(r,900);});
 
     var ivObj=ivList[ivList.length-1];
     if(!ivObj)continue;
     var id=ivObj.id;
 
-    var catObj=cats[iv.catk]||{};
-    var catNom=catObj.l||iv.catk||'';
-    var compConQty=(iv.compQty>1?iv.compQty+'x ':'')+iv.comp;
-    var lin=catNom+(iv.sc?' · '+iv.sc:'')+(iv.ev?' · '+iv.ev:'')+(iv.comp?' · '+compConQty:'')+(iv.ubicacion?' · '+iv.ubicacion:'');
+    // Abrir la intervención
+    var ivb=document.getElementById(id+'-b');
+    if(ivb)ivb.style.display='block';
+    var ivar=document.getElementById(id+'-ar');
+    if(ivar)ivar.style.transform='rotate(90deg)';
 
-    // Inyectar en la intervención
-    ivObj.data={catk:iv.catk,sc:iv.sc,ev:iv.ev,comp:compConQty,lin:lin,ledMetros:null};
-    ubPorIv[id]=iv.ubicacion?[{nombre:iv.ubicacion,qty:1}]:[];
-    mdPorIv[id]={};
-    (iv.mods||[]).forEach(function(m){
-      mdPorIv[id][m.nombre]={nombre:m.nombre,val:m.val||1,unidad:m.unidad||'u',tieneCant:true};
-    });
+    // Click en categoría
+    var catBtn=document.querySelector('#'+id+' [data-catk="'+iv.catk+'"]');
+    if(catBtn){catBtn.click();await new Promise(function(r){setTimeout(r,600);});}
 
-    // Actualizar el resumen visual de la intervención
+    // Click en subcategoría
+    var scBtns=document.querySelectorAll('#'+id+' .subb');
+    for(var s=0;s<scBtns.length;s++){
+      if(scBtns[s].textContent.trim()===iv.sc){
+        scBtns[s].click();
+        await new Promise(function(r){setTimeout(r,500);});
+        break;
+      }
+    }
+
+    // Seleccionar evento
+    var evEl=document.getElementById(id+'-ev');
+    if(evEl){
+      for(var j=0;j<evEl.options.length;j++){
+        if(evEl.options[j].value===iv.ev){evEl.selectedIndex=j;evEl.dispatchEvent(new Event('change'));break;}
+      }
+      await new Promise(function(r){setTimeout(r,300);});
+    }
+
+    // Seleccionar componente
+    var coEl=document.getElementById(id+'-co');
+    var compNom=iv.comp.replace(/^\d+x\s*/,'');
+    if(coEl){
+      for(var k=0;k<coEl.options.length;k++){
+        if(coEl.options[k].value===compNom){coEl.selectedIndex=k;coEl.dispatchEvent(new Event('change'));break;}
+      }
+      await new Promise(function(r){setTimeout(r,200);});
+    }
+
+    // Cantidad si >1
+    if(iv.compQty>1){
+      // Buscar el campo de cantidad del componente
+      var compItems=document.getElementById(id+'-compItems');
+      if(compItems){
+        var qInp=compItems.querySelector('input[type="number"]');
+        if(qInp){qInp.value=iv.compQty;qInp.dispatchEvent(new Event('input'));}
+      }
+    }
+
+    // Ubicación
+    if(iv.ubicacion){
+      ubPorIv[id]=[{nombre:iv.ubicacion,qty:1}];
+      // Mostrar en UI de ubicaciones
+      var ubWrap=document.getElementById(id+'-ubwrap');
+      if(ubWrap){
+        var ubDiv=document.createElement('div');
+        ubDiv.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--borde);';
+        var ubNom=document.createElement('span');ubNom.style.cssText='flex:1;font-size:14px;font-weight:700;color:var(--t);';
+        ubNom.textContent=iv.ubicacion;
+        var ubX=document.createElement('button');ubX.type='button';ubX.textContent='✕';
+        ubX.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;';
+        (function(uid){ubX.onclick=function(){ubPorIv[uid]=[];ubDiv.remove();updR(uid);};})(id);
+        ubDiv.appendChild(ubNom);ubDiv.appendChild(ubX);
+        ubWrap.appendChild(ubDiv);
+      }
+    }
+
+    // Modificadores
+    if(iv.mods&&iv.mods.length){
+      mdPorIv[id]={};
+      iv.mods.forEach(function(m){
+        mdPorIv[id][m.nombre]={nombre:m.nombre,val:m.val||1,unidad:m.unidad||'u',tieneCant:true};
+        // Marcar visualmente el toggle del modificador
+        var modToggle=document.querySelector('#'+id+' .stog[data-mod="'+m.nombre+'"]');
+        if(modToggle&&!modToggle.classList.contains('on'))modToggle.click();
+      });
+    }
+
     updR(id);
-
-    // Mostrar el resumen de la intervención en el DOM
-    var ivWrap=document.getElementById(id+'-f');
-    if(ivWrap)ivWrap.style.display='block';
-
-    // Mostrar línea de resumen
-    var linEl=document.getElementById(id+'-lin');
-    if(linEl)linEl.textContent=lin;
+    await new Promise(function(r){setTimeout(r,200);});
   }
 
-  // 6. Scroll al inicio del formulario
-  var fv=document.getElementById('formView');
-  if(fv)window.scrollTo(0,fv.offsetTop-10);
-
-  showToast('✅ Formulario cargado — revisá y enviá cuando estés listo');
+  // Scroll arriba
+  window.scrollTo(0,0);
+  showToast('✅ Formulario cargado — revisá y enviá');
 }
 
 </script>
