@@ -433,7 +433,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.50</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.51</span></div>
   </div>
 </div>
 
@@ -7076,7 +7076,7 @@ function _pasoCantidad(cont){
 // ── PASO 6: UBICACIÓN ─────────────────────────────────────
 function _pasoUbicacion(cont){
   _pregunta(cont,'¿En qué ubicación?');
-  var ubs=ubicacionesData||[];
+  var ubs=getUbicaciones()||[];
   var inp=document.createElement('input');inp.type='text';inp.placeholder='Buscar o escribir...';inp.className='fi';inp.style.marginBottom='8px';
   cont.appendChild(inp);
   var lista=document.createElement('div');lista.style.cssText='max-height:160px;overflow-y:auto;margin-bottom:8px;';
