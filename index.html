@@ -56,7 +56,7 @@ body{background:var(--bg);color:var(--t);font-family:'Barlow',sans-serif;font-si
 .f label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:7px;}
 .fi{width:100%;background:var(--s2);border:1px solid var(--borde);border-radius:var(--rs);padding:12px 14px;color:var(--t);font-family:'Barlow',sans-serif;font-size:16px;font-weight:600;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none;}
 .fi:focus{border-color:var(--am);}
-textarea.fi{resize:none;height:70px;}
+textarea.fi{resize:vertical;min-height:70px;}
 select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238890aa' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 /* CHIPS */
@@ -432,7 +432,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.40</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.41</span></div>
   </div>
 </div>
 
@@ -3408,7 +3408,8 @@ function buildIv(num,id){
   var bnota=document.createElement('button');bnota.className='bnota';bnota.id=id+'-bn';bnota.textContent='✏️ Agregar nota libre';
   bnota.addEventListener('click',function(){togNota(id);});
   var notaWrap=document.createElement('div');notaWrap.id=id+'-nw';notaWrap.style.display='none';
-  var notaTA=document.createElement('textarea');notaTA.className='fi';notaTA.id=id+'-nota';notaTA.placeholder='Descripción adicional...';notaTA.style.marginTop='8px';
+  var notaTA=document.createElement('textarea');notaTA.className='fi';notaTA.id=id+'-nota';notaTA.placeholder='Descripción adicional...';notaTA.style.marginTop='8px';notaTA.style.height='70px';notaTA.style.resize='vertical';
+  notaTA.addEventListener('input',function(){this.style.height='auto';this.style.height=(this.scrollHeight+4)+'px';});
   notaTA.addEventListener('input',function(){updR(id);});
   notaWrap.appendChild(notaTA);
   fields.appendChild(bnota);fields.appendChild(notaWrap);
@@ -5927,7 +5928,24 @@ function renderHist(regs){
       var noiv=document.createElement('div');noiv.style.cssText='color:var(--t3);font-size:14px;padding:8px 0;';noiv.textContent='Sin intervenciones registradas';body.appendChild(noiv);
     }
 
-    if(obs){var obDiv=document.createElement('div');obDiv.style.cssText='margin-top:12px;background:var(--s3);border-radius:8px;padding:10px 13px;font-size:14px;color:var(--t2);';obDiv.innerHTML='💬 <strong style="color:var(--t)">Observaciones:</strong> '+esc(obs);body.appendChild(obDiv);}
+    if(obs){
+      var obDiv=document.createElement('div');obDiv.style.cssText='margin-top:12px;background:var(--s3);border-radius:8px;padding:10px 13px;font-size:14px;color:var(--t2);';
+      if(obs.length>300){
+        var obShort=obs.slice(0,300)+'...';
+        var expandido=false;
+        obDiv.innerHTML='💬 <strong style="color:var(--t)">Observaciones:</strong> <span id="ob-txt-'+idx+'">'+esc(obShort)+'</span><span id="ob-btn-'+idx+'" style="color:var(--am);cursor:pointer;font-weight:700;font-size:13px;"> Ver más</span>';
+        (function(i,full,short){
+          setTimeout(function(){
+            var btn=document.getElementById('ob-btn-'+i);
+            var txt=document.getElementById('ob-txt-'+i);
+            if(btn&&txt){var exp=false;btn.onclick=function(){exp=!exp;txt.textContent=exp?full:short;btn.textContent=exp?' Ver menos':' Ver más';};}
+          },0);
+        })(idx,obs,obShort);
+      } else {
+        obDiv.innerHTML='💬 <strong style="color:var(--t)">Observaciones:</strong> '+esc(obs);
+      }
+      body.appendChild(obDiv);
+    }
 
     // Botón ver archivos
     var fotosStr=r['Fotos Drive']||r['Fotos_Drive']||'';
