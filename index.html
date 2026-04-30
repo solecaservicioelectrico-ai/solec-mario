@@ -195,6 +195,10 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .rb-part{background:rgba(255,140,66,.15);color:var(--naranja);}
 .rb-obra{background:rgba(167,139,250,.15);color:var(--lila);}
 .reg-body{padding:14px;display:none;}
+.guia-paso{padding:16px 0 8px 0;border-bottom:1px solid var(--borde);margin-bottom:12px;}
+.guia-preg{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--am);margin-bottom:14px;line-height:1.2;}
+.guia-resumen{background:var(--s2);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:14px;color:var(--t2);}
+.guia-resumen strong{color:var(--t);font-size:15px;}
 .reg-iv-item{padding:9px 0;border-bottom:1px solid var(--borde);}
 .reg-iv-item:last-child{border-bottom:none;}
 .reg-iv-main{font-size:15px;font-weight:700;color:var(--t);}
@@ -431,9 +435,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="logo">SOLEC<small>Registro de visita</small></div>
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
-    <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.55</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.56</span></div>
   </div>
 </div>
 
@@ -480,78 +483,74 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   </button>
   <div id="nuevoRegContent" style="display:none;">
 
-  <!-- PASO 1 -->
-  <div class="sc" id="p1">
-    <div class="sl" onclick="abrirPaso(1)">
-      <div class="sn">1</div><div class="st">Fecha y Hora</div>
-      <span class="sa" id="a1" style="transform:rotate(90deg)">▶</span>
-    </div>
-    <div class="sb" id="b1">
-      <div class="r2">
-        <div class="f"><label>Fecha</label><input class="fi" type="date" id="fecha"></div>
-        <div class="f"><label>Hora llegada</label><button type="button" class="fi" id="horaBtn" onclick="abrirRuedaHora('hora')" style="text-align:left;cursor:pointer;font-size:16px;font-weight:700;color:var(--am);">—:—</button><input type="hidden" id="hora" oninput="calcDur()"></div>
-      </div>
-      <div class="r2" style="margin-top:8px">
-        <div class="f"><label>Hora salida</label><button type="button" class="fi" id="hfinBtn" onclick="abrirRuedaHora('hfin')" style="text-align:left;cursor:pointer;font-size:16px;font-weight:700;color:var(--t2);">—:—</button><input type="hidden" id="hfin" oninput="calcDur()"></div>
-        <div class="f"><label>Duración</label><div id="dur" class="fi" style="color:var(--t2)">—</div></div>
-      </div>
-      <button class="bsig" onclick="abrirSiguiente(2)">SIGUIENTE ▶</button>
-    </div>
-  </div>
+  <!-- FLUJO GUIADO -->
+  <div id="flujoGuiado" style="padding:0;">
 
-  <!-- PASO 2 -->
-  <div class="sc" id="p2">
-    <div class="sl" onclick="abrirPaso(2)">
-      <div class="sn">2</div><div class="st">Lugar de Trabajo</div>
-      <span class="sa" id="a2">▶</span>
+    <!-- Campos hidden necesarios para compatibilidad -->
+    <input type="hidden" id="edid">
+    <input type="hidden" id="lnom">
+    <input type="hidden" id="ldir">
+    <input type="hidden" id="hora" oninput="calcDur()">
+    <input type="hidden" id="hfin" oninput="calcDur()">
+    <div style="display:none;"><div class="urg-wrap" id="urgWrap"></div></div>
+    <div class="obra-info" id="obraInfo" style="display:none;"></div>
+
+    <!-- Paso 1: Fecha -->
+    <div class="guia-paso" id="gpaso-fecha">
+      <div class="guia-preg">📅 ¿Qué fecha es hoy?</div>
+      <input class="fi" type="date" id="fecha" style="font-size:18px;font-weight:700;" oninput="gpSiguiente('fecha','horario')">
+      <button class="bsig" onclick="gpSiguiente('fecha','horario')">SIGUIENTE ▶</button>
     </div>
-    <div class="sb" id="b2" style="display:none">
-      <div class="f">
-        <label>Edificio, domicilio, comercio u obra</label>
-        <div style="position:relative">
-          <input class="fi msearch" id="lsearch" type="text" placeholder="Escribí para buscar o lugar nuevo..." autocomplete="off">
-          <div class="fdrop" id="ldd" style="display:none"></div>
+
+    <!-- Paso 2: Horario -->
+    <div class="guia-paso" id="gpaso-horario" style="display:none;">
+      <div class="guia-preg">⏰ ¿De qué hora a qué hora trabajaste?</div>
+      <div class="r2">
+        <div class="f">
+          <label>Hora llegada</label>
+          <button type="button" class="fi" id="horaBtn" onclick="abrirRuedaHora('hora')" style="text-align:left;cursor:pointer;font-size:16px;font-weight:700;color:var(--am);">—:—</button>
         </div>
+        <div class="f">
+          <label>Hora salida</label>
+          <button type="button" class="fi" id="hfinBtn" onclick="abrirRuedaHora('hfin')" style="text-align:left;cursor:pointer;font-size:16px;font-weight:700;color:var(--t2);">—:—</button>
+        </div>
+      </div>
+      <div id="dur" style="color:var(--t2);font-size:13px;margin:6px 0 10px 0;">—</div>
+      <button class="bsig" onclick="gpSiguiente('horario','lugar')">SIGUIENTE ▶</button>
+    </div>
+
+    <!-- Paso 3: Lugar -->
+    <div class="guia-paso" id="gpaso-lugar" style="display:none;">
+      <div class="guia-preg">🏢 ¿En qué lugar trabajaste?</div>
+      <div style="position:relative">
+        <input class="fi msearch" id="lsearch" type="text" placeholder="🎤 Nombre del edificio..." autocomplete="off" style="font-size:17px;">
+        <div class="fdrop" id="ldd" style="display:none"></div>
       </div>
       <button id="btnMaps" style="display:none;width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:var(--rs);padding:11px 14px;color:var(--t2);font-size:14px;font-weight:700;text-align:left;cursor:pointer;margin-top:8px;" onclick="abrirMaps()"><span id="linfo-icon">📍</span> <span id="linfo"></span> <span style="float:right;color:var(--azul)">🗺️ Maps</span></button>
       <div id="detw" style="display:none;margin-top:10px">
-        <div class="f" style="margin-bottom:0">
-          <label>Detalle / Ubicación específica</label>
-          <input class="fi" id="detalle" type="text" placeholder="Ej: Dpto 10E, Local 3...">
-        </div>
+        <input class="fi" id="detalle" type="text" placeholder="Ej: Dpto 10E, Local 3...">
       </div>
-      <input type="hidden" id="edid">
-      <input type="hidden" id="lnom">
-      <input type="hidden" id="ldir">
-      <button class="bsig" onclick="abrirSiguiente(3)">SIGUIENTE ▶</button>
+      <button class="bsig" id="btnSigLugar" onclick="gpSiguiente('lugar','tipo')" style="display:none;">SIGUIENTE ▶</button>
     </div>
-  </div>
 
-  <!-- PASO 3 -->
-  <div class="sc" id="p3">
-    <div class="sl" onclick="abrirPaso(3)">
-      <div class="sn">3</div><div class="st">Tipo de Visita</div>
-      <span class="sa" id="a3">▶</span>
-    </div>
-    <div class="sb" id="b3" style="display:none">
-      <div class="chips">
-        <div class="chip cv" data-tipo="Preventivo/Abono" onclick="selTipo(this)">🔁 Preventivo/Abono</div>
-        <div class="chip ca" data-tipo="Service" onclick="selTipo(this)">🔧 Service</div>
-        <div class="chip cr" data-tipo="Urgencia" onclick="selTipo(this)">🚨 Urgencia</div>
-        <div class="chip" data-tipo="Visita técnica" onclick="selTipo(this)" style="background:rgba(100,180,255,.15);border:2px solid #64b4ff;color:#64b4ff;">🔍 Visita técnica</div>
+    <!-- Paso 4: Tipo de visita -->
+    <div class="guia-paso" id="gpaso-tipo" style="display:none;">
+      <div class="guia-preg">🔧 ¿Qué tipo de visita es?</div>
+      <div class="chips" style="gap:10px;">
+        <div class="chip cv" data-tipo="Preventivo/Abono" onclick="gpSelTipo(this)">🔁 Preventivo/Abono</div>
+        <div class="chip ca" data-tipo="Service" onclick="gpSelTipo(this)">🔧 Service</div>
+        <div class="chip cr" data-tipo="Urgencia" onclick="gpSelTipo(this)">🚨 Urgencia</div>
+        <div class="chip" data-tipo="Visita técnica" onclick="gpSelTipo(this)" style="background:rgba(100,180,255,.15);border:2px solid #64b4ff;color:#64b4ff;">🔍 Visita técnica</div>
       </div>
-      <div class="urg-wrap" id="urgWrap">
-        <div class="dvd"></div>
-        <div class="f">
-          <label>Horario</label>
-          <div class="chips">
-            <div class="chip" onclick="selChip(this)">⏰ Dentro de horario</div>
-            <div class="chip" onclick="selChip(this)">🌙 Fuera de horario</div>
-          </div>
-        </div>
-      </div>
-      <div class="obra-info" id="obraInfo"></div>
     </div>
+
+  </div><!-- /flujoGuiado -->
+
+  <!-- Campos compatibilidad -->
+  <div style="display:none">
+    <div class="sc" id="p1"><div class="sb" id="b1"></div></div>
+    <div class="sc" id="p2"><div class="sb" id="b2"></div></div>
+    <div class="sc" id="p3"><div class="sb" id="b3"></div></div>
   </div>
 
   </div><!-- /nuevoRegContent -->
@@ -2771,8 +2770,8 @@ function toggleNuevoReg(){
     content.style.display='block';
     arrow.style.transform='rotate(180deg)';
     btn.style.borderColor='var(--am)';
-    // Abrir paso 1 automáticamente
-    abrirSiguiente(1);
+    // Iniciar flujo guiado
+    iniciarFlujoGuiado();
   }
 }
 
@@ -2829,7 +2828,7 @@ function selL(e){
   document.getElementById('linfo').textContent=txt;
   document.getElementById('btnMaps').style.display=e.dir?'block':'none';
   document.getElementById('detw').style.display='block';
-  // Mostrar/ocultar chip Preventivo/Abono según si el edificio es abonado
+  gpMostrarSigLugar(); // Flujo guiado: mostrar botón siguiente
   var chipPrev=document.querySelector('.chip[data-tipo="Preventivo/Abono"]');
   var chipService=document.querySelector('.chip[data-tipo="Service"]');
   var esAbon=e.abonado&&e.abonado.toLowerCase()!=='no'&&e.abonado.toLowerCase()!=='';
@@ -2848,6 +2847,7 @@ function selLfree(txt){
   document.getElementById('linfo').textContent='Lugar no registrado';
   document.getElementById('btnMaps').style.display='none';
   document.getElementById('detw').style.display='block';
+  gpMostrarSigLugar();
 }
 
 function abrirMaps(){
@@ -6712,621 +6712,111 @@ function parsearLinksArchivos(fotosStr){
   }).filter(function(x){return x.link;});
 }
 
-// ══════════════════════════════════════════════════════════
-// ASISTENTE BIDIRECCIONAL SOLEC v2
-// ══════════════════════════════════════════════════════════
-var _asist={
-  paso:0,
-  edificio:null,
-  tipoVisita:null,
-  catk:null,
-  sc:null,
-  ev:null,
-  comp:null,
-  compQty:1,
-  ubicacion:null,
-  mods:[],
-  intervenciones:[],
-  rec:null,
-  escuchando:false
-};
 
-function _normFon(s){
-  // Normaliza para búsqueda: minúsculas, sin tildes, k=c, números arábigos=romanos
-  var r=(s||'').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/k/g,'c').replace(/qu/g,'c').replace(/ph/g,'f')
-    .replace(/y/g,'i').replace(/ll/g,'l').replace(/v/g,'b')
-    .replace(/z/g,'s').replace(/[^a-z0-9 ]/g,'');
-  // Convertir números arábigos a romanos para comparar
-  var romanos={1:'i',2:'ii',3:'iii',4:'iv',5:'v',6:'vi',7:'vii',8:'viii',9:'ix',10:'x',
-    11:'xi',12:'xii',13:'xiii',14:'xiv',15:'xv',16:'xvi',17:'xvii',18:'xviii',19:'xix',20:'xx',
-    21:'xxi',22:'xxii',23:'xxiii',24:'xxiv',25:'xxv',26:'xxvi',27:'xxvii',28:'xxviii',29:'xxix',30:'xxx',
-    31:'xxxi',32:'xxxii',33:'xxxiii',34:'xxxiv',35:'xxxv',36:'xxxvi',37:'xxxvii',38:'xxxviii',39:'xxxix',40:'xl',
-    41:'xli',42:'xlii',43:'xliii',44:'xliv',45:'xlv',46:'xlvi',47:'xlvii',48:'xlviii',49:'xlix',50:'l'};
-  r=r.replace(/\b(\d+)\b/g,function(m,n){return romanos[parseInt(n)]||m;});
-  return r;
-}
 
-function abrirAsistente(){
-  _asist={paso:0,edificio:null,tipoVisita:null,catk:null,sc:null,ev:null,comp:null,compQty:1,ubicacion:null,mods:[],intervenciones:[],rec:null,escuchando:false};
-  _renderAsist();
-}
+// ══════════════════════════════════════════════
+// FLUJO GUIADO
+// ══════════════════════════════════════════════
 
-function _renderAsist(){
-  var ov=document.getElementById('asist-ov');
-  if(ov)ov.parentNode.removeChild(ov);
-  ov=document.createElement('div');
-  ov.id='asist-ov';
-  ov.style.cssText='position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;';
-
-  var box=document.createElement('div');
-  box.style.cssText='width:100%;max-width:520px;margin:0 auto;background:var(--bg);min-height:100vh;padding:20px 20px 100px 20px;border-left:3px solid var(--azul);border-right:3px solid var(--azul);';
-
-  // Header
-  var hdr=document.createElement('div');
-  hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;';
-  hdr.innerHTML='<div style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--azul);letter-spacing:2px;">🎤 ASISTENTE SOLEC</div>'+
-    '<button onclick="_cerrarAsistente()" style="background:transparent;border:1px solid var(--borde);border-radius:8px;padding:6px 12px;color:var(--t2);font-size:13px;cursor:pointer;">✕ Cerrar</button>';
-  box.appendChild(hdr);
-
-  // Progreso
-  var pasos=['Edificio','Tipo','Categoría','Subcategoría','Trabajo','Cantidad','Ubicación','Modificadores'];
-  var progDiv=document.createElement('div');
-  progDiv.style.cssText='display:flex;gap:4px;margin-bottom:16px;';
-  pasos.forEach(function(p,i){
-    var dot=document.createElement('div');
-    dot.style.cssText='flex:1;height:4px;border-radius:2px;background:'+(i<_asist.paso?'var(--azul)':i===_asist.paso?'var(--am)':'var(--borde)');
-    progDiv.appendChild(dot);
-  });
-  box.appendChild(progDiv);
-
-  // Resumen de intervenciones anteriores
-  if(_asist.intervenciones.length){
-    var resDiv=document.createElement('div');
-    resDiv.style.cssText='background:var(--s2);border-radius:10px;padding:10px 12px;margin-bottom:14px;';
-    resDiv.innerHTML='<div style="font-size:11px;font-weight:800;color:var(--t3);letter-spacing:1px;margin-bottom:6px;">INTERVENCIONES REGISTRADAS</div>';
-    _asist.intervenciones.forEach(function(iv,i){
-      var d=document.createElement('div');
-      d.style.cssText='font-size:13px;color:var(--verde);padding:3px 0;';
-      d.textContent='✅ '+(i+1)+'. '+iv.lin;
-      resDiv.appendChild(d);
-    });
-    box.appendChild(resDiv);
+function gpSiguiente(actual, siguiente){
+  // Validar paso actual
+  if(actual==='fecha'){
+    var f=document.getElementById('fecha').value;
+    if(!f){showToast('⚠️ Elegí la fecha');return;}
+  }
+  if(actual==='horario'){
+    var h=document.getElementById('hora').value;
+    if(!h){showToast('⚠️ Ponés al menos la hora de llegada');return;}
+  }
+  if(actual==='lugar'){
+    var ln=document.getElementById('lnom').value||document.getElementById('lsearch').value;
+    if(!ln){showToast('⚠️ Elegí el lugar de trabajo');return;}
   }
 
-  // Contenido del paso actual
-  var contenido=document.createElement('div');
-  _buildPaso(contenido);
-  box.appendChild(contenido);
+  // Ocultar actual, mostrar siguiente
+  var pasoActual=document.getElementById('gpaso-'+actual);
+  var pasoSig=document.getElementById('gpaso-'+siguiente);
 
-  ov.appendChild(box);
-  document.body.appendChild(ov);
-}
-
-function _cerrarAsistente(){
-  if(_asist.rec){try{_asist.rec.stop();}catch(e){}}
-  var ov=document.getElementById('asist-ov');
-  if(ov)ov.parentNode.removeChild(ov);
-}
-
-function _buildPaso(cont){
-  switch(_asist.paso){
-    case 0: _pasoEdificio(cont); break;
-    case 1: _pasoTipo(cont); break;
-    case 2: _pasoCategoria(cont); break;
-    case 3: _pasoSubcat(cont); break;
-    case 4: _pasoTrabajo(cont); break;
-    case 5: _pasoCantidad(cont); break;
-    case 6: _pasoUbicacion(cont); break;
-    case 7: _pasoMods(cont); break;
-    case 8: _pasoConfirmarIv(cont); break;
-    case 99: _pasoFinal(cont); break;
-  }
-}
-
-function _pregunta(cont, texto){
-  var p=document.createElement('div');
-  p.style.cssText='font-size:17px;font-weight:800;color:var(--t);margin-bottom:14px;line-height:1.4;';
-  p.textContent=texto;
-  cont.appendChild(p);
-}
-
-function _btnOpciones(cont, opciones, onSelect){
-  var wrap=document.createElement('div');
-  wrap.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;';
-  opciones.forEach(function(op){
-    var btn=document.createElement('button');
-    btn.style.cssText='background:var(--s2);border:1.5px solid var(--borde);border-radius:10px;padding:10px 16px;color:var(--t);font-size:15px;font-weight:700;cursor:pointer;';
-    btn.textContent=typeof op==='string'?op:op.label;
-    btn.onclick=function(){onSelect(typeof op==='string'?op:op.val);};
-    wrap.appendChild(btn);
-  });
-  cont.appendChild(wrap);
-}
-
-function _btnMic(cont, onTexto){
-  var micDiv=document.createElement('div');
-  micDiv.style.cssText='display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0;';
-
-  var txtDiv=document.createElement('div');
-  txtDiv.style.cssText='width:100%;min-height:50px;background:var(--s2);border:1px solid var(--borde);border-radius:10px;padding:12px;font-size:15px;color:var(--t2);line-height:1.5;';
-  txtDiv.textContent='Tocá el micrófono y hablá...';
-
-  var btnMic=document.createElement('button');
-  btnMic.style.cssText='width:64px;height:64px;border-radius:50%;border:3px solid var(--azul);background:var(--s2);font-size:28px;cursor:pointer;';
-  btnMic.textContent='🎤';
-
-  var btnEnv=document.createElement('button');
-  btnEnv.style.cssText='display:none;width:100%;padding:12px;background:var(--azul);border:none;border-radius:10px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;';
-  btnEnv.textContent='✨ INTERPRETAR';
-
-  var _texto='';
-  btnMic.onclick=function(){
-    if(_asist.escuchando){
-      _asist.escuchando=false;
-      if(_asist.rec)try{_asist.rec.stop();}catch(e){}
-      btnMic.style.borderColor='var(--azul)';btnMic.textContent='🎤';
-      if(_texto.trim())btnEnv.style.display='block';
-      return;
+  if(pasoActual){
+    // Agregar resumen del paso completado
+    var resDiv=pasoActual.querySelector('.guia-resumen');
+    if(resDiv)resDiv.parentNode.removeChild(resDiv);
+    var res=document.createElement('div');res.className='guia-resumen';
+    if(actual==='fecha')res.innerHTML='<strong>📅 '+document.getElementById('fecha').value+'</strong>';
+    if(actual==='horario'){
+      var h=document.getElementById('hora').value;
+      var hf=document.getElementById('hfin').value;
+      res.innerHTML='<strong>⏰ '+h+(hf?' → '+hf:'')+'</strong>';
     }
-    if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('Usá Chrome para reconocimiento de voz');return;}
-    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    var rec=new SR();rec.lang='es-AR';rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=1;
-    var _final='';var _interim='';
-    rec.onaudiostart=function(){btnMic.style.borderColor='var(--rojo)';btnMic.textContent='⏹️';txtDiv.style.color='var(--am)';txtDiv.textContent='🔴 Escuchando...';};
-    rec.onresult=function(e){_interim='';for(var i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){_final+=e.results[i][0].transcript+' ';}else{_interim=e.results[i][0].transcript;}}
-      _texto=_final.trim();txtDiv.textContent=(_final+' '+_interim).trim()||'🔴 Escuchando...';txtDiv.style.color='var(--t)';};
-    rec.onerror=function(e){if(e.error!=='no-speech'&&e.error!=='aborted')console.warn(e.error);};
-    rec.onend=function(){if(!_asist.escuchando)return;try{rec.start();}catch(ex){}};
-    _asist.rec=rec;_asist.escuchando=true;
-    try{rec.start();}catch(e){alert('Error al iniciar micrófono: '+e.message);}
-  };
-
-  btnEnv.onclick=function(){if(_texto.trim())onTexto(_texto.trim());};
-
-  micDiv.appendChild(txtDiv);micDiv.appendChild(btnMic);micDiv.appendChild(btnEnv);
-  cont.appendChild(micDiv);
-}
-
-// ── PASO 0: EDIFICIO ─────────────────────────────────────
-function _pasoEdificio(cont){
-  _pregunta(cont,'¿En qué edificio estás?');
-  // Buscador
-  // Hint de micrófono del teclado
-  var hint=document.createElement('div');
-  hint.style.cssText='background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:var(--azul);font-weight:700;text-align:center;';
-  hint.innerHTML='⌨️ Tocá el campo y usá el 🎤 del teclado para dictar';
-  cont.appendChild(hint);
-
-  var lista=document.createElement('div');
-  lista.style.cssText='max-height:220px;overflow-y:auto;border:1px solid var(--borde);border-radius:10px;margin-bottom:10px;background:var(--s2);';
-  cont.appendChild(lista);
-  var inp=document.createElement('input');
-  inp.type='text';inp.placeholder='🎤 Nombre del edificio...';inp.className='fi';
-  inp.style.cssText='margin-bottom:8px;font-size:18px;padding:16px;';
-  inp.setAttribute('autocomplete','off');
-  cont.appendChild(inp);
-  function filtrar(q){
-    lista.innerHTML='';
-    var q2=_normFon(q||'');
-    var filtrados=q2?edificios.filter(function(e){return _normFon(e.nombre||'').indexOf(q2)!==-1;}):edificios.slice(0,8);
-    filtrados.forEach(function(e){
-      var item=document.createElement('div');
-      item.style.cssText='padding:10px 12px;border-bottom:1px solid var(--borde);cursor:pointer;font-size:15px;font-weight:700;';
-      item.textContent=e.nombre;
-      item.onclick=function(){_asist.edificio=e.nombre;_asist.paso=1;_renderAsist();};
-      lista.appendChild(item);
-    });
-  }
-  inp.addEventListener('input',function(){filtrar(this.value);});
-  filtrar('');
-  // Sin Web Speech API — el usuario usa el micrófono del teclado
-}
-
-// ── PASO 1: TIPO DE VISITA ────────────────────────────────
-function _pasoTipo(cont){
-  _pregunta(cont,'¿Qué tipo de visita es?');
-  var tipos=['Service','Preventivo/Abono','Urgencia - Dentro de horario','Urgencia - Fuera de horario','Visita técnica'];
-  _btnOpciones(cont,tipos,function(t){_asist.tipoVisita=t;_asist.paso=2;_renderAsist();});
-}
-
-// ── PASO 2: CATEGORÍA ─────────────────────────────────────
-function _pasoCategoria(cont){
-  _pregunta(cont,'¿Qué categoría de trabajo?');
-  var cats=buildCATSdesdeDinamicas()||{};
-  if(!Object.keys(cats).length){
-    // Cargar y reintentar
-    var loadMsg=document.createElement('div');loadMsg.style.cssText='color:var(--t3);font-size:14px;padding:10px;';loadMsg.textContent='⏳ Cargando categorías...';cont.appendChild(loadMsg);
-    loadCatsDinamicas().then(function(){
-      loadMsg.parentNode&&loadMsg.parentNode.removeChild(loadMsg);
-      var cats2=buildCATSdesdeDinamicas()||{};
-      var opts=Object.keys(cats2).map(function(k){return {label:cats2[k].e+' '+cats2[k].l,val:k};});
-      _btnOpciones(cont,opts,function(catk){_asist.catk=catk;_asist.paso=3;_renderAsist();});
-    });
-    return;
-  }
-  var opts=Object.keys(cats).map(function(k){return {label:cats[k].e+' '+cats[k].l,val:k};});
-  _btnOpciones(cont,opts,function(catk){_asist.catk=catk;_asist.paso=3;_renderAsist();});
-}
-
-// ── PASO 3: SUBCATEGORÍA ──────────────────────────────────
-function _pasoSubcat(cont){
-  var cats=buildCATSdesdeDinamicas()||{};
-  var cat=cats[_asist.catk];
-  if(!cat){_asist.paso=2;_renderAsist();return;}
-  _pregunta(cont,'¿Qué subcategoría?');
-  _btnOpciones(cont,cat.sc||[],function(sc){_asist.sc=sc;_asist.paso=4;_renderAsist();});
-}
-
-// ── PASO 4: QUÉ SE HIZO (con IA) ─────────────────────────
-function _pasoTrabajo(cont){
-  var cats=buildCATSdesdeDinamicas()||{};
-  var cat=cats[_asist.catk];
-  var eventos=cat&&cat.ev&&cat.ev[_asist.sc]?cat.ev[_asist.sc]:[];
-  var componentes=cat&&cat.co&&cat.co[_asist.sc]?cat.co[_asist.sc]:[];
-
-  _pregunta(cont,'¿Qué se hizo? Elegí o describí con voz');
-
-  // Opciones directas de eventos
-  if(eventos.length){
-    var evDiv=document.createElement('div');
-    evDiv.style.cssText='margin-bottom:10px;';
-    evDiv.innerHTML='<div style="font-size:11px;font-weight:800;color:var(--t3);letter-spacing:1px;margin-bottom:8px;">EVENTO</div>';
-    var evWrap=document.createElement('div');evWrap.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;';
-    eventos.forEach(function(ev){
-      var btn=document.createElement('button');
-      btn.style.cssText='background:var(--s2);border:1.5px solid var(--borde);border-radius:8px;padding:8px 14px;color:var(--t);font-size:14px;font-weight:700;cursor:pointer;';
-      btn.textContent=ev;
-      btn.onclick=function(){_asist.ev=ev;_mostrarCompsBajo(cont,componentes);};
-      evWrap.appendChild(btn);
-    });
-    evDiv.appendChild(evWrap);
-    cont.appendChild(evDiv);
-  }
-
-  // Campo de texto libre para descripción con IA
-  var sep=document.createElement('div');sep.style.cssText='text-align:center;color:var(--t3);font-size:13px;margin:8px 0;';sep.textContent='— o describilo con palabras —';cont.appendChild(sep);
-  var descWrap=document.createElement('div');descWrap.style.cssText='display:flex;gap:8px;align-items:center;';
-  var descInp=document.createElement('input');descInp.type='text';descInp.placeholder='🎤 Ej: cambié el cable quemado...';descInp.className='fi';descInp.style.cssText='flex:1;font-size:15px;';descInp.setAttribute('autocomplete','off');
-  var descBtn=document.createElement('button');descBtn.textContent='✨';descBtn.style.cssText='background:var(--azul);border:none;border-radius:8px;padding:12px 16px;font-size:18px;cursor:pointer;flex-shrink:0;';
-  descBtn.onclick=function(){if(descInp.value.trim())_interpretarTrabajo(descInp.value.trim(),eventos,componentes);};
-  descInp.addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim())_interpretarTrabajo(this.value.trim(),eventos,componentes);});
-  descWrap.appendChild(descInp);descWrap.appendChild(descBtn);cont.appendChild(descWrap);
-  var hint2=document.createElement('div');hint2.style.cssText='font-size:11px;color:var(--t3);text-align:center;margin-top:6px;';hint2.textContent='Usá el 🎤 del teclado para dictar';cont.appendChild(hint2);
-}
-
-function _mostrarCompsBajo(cont,componentes){
-  var existing=document.getElementById('asist-comps-wrap');
-  if(existing)existing.parentNode.removeChild(existing);
-  var wrap=document.createElement('div');wrap.id='asist-comps-wrap';
-  wrap.style.cssText='margin-top:4px;';
-  wrap.innerHTML='<div style="font-size:11px;font-weight:800;color:var(--t3);letter-spacing:1px;margin-bottom:8px;">COMPONENTE</div>';
-  var btnWrap=document.createElement('div');btnWrap.style.cssText='display:flex;flex-wrap:wrap;gap:6px;';
-  componentes.forEach(function(co){
-    var btn=document.createElement('button');
-    btn.style.cssText='background:var(--s2);border:1.5px solid var(--borde);border-radius:8px;padding:8px 14px;color:var(--t);font-size:14px;font-weight:700;cursor:pointer;';
-    btn.textContent=co;
-    btn.onclick=function(){_asist.comp=co;_asist.paso=5;_renderAsist();};
-    btnWrap.appendChild(btn);
-  });
-  wrap.appendChild(btnWrap);
-  // Agregar al box principal
-  var box=document.getElementById('asist-ov').querySelector('div');
-  box.appendChild(wrap);
-}
-
-async function _interpretarTrabajo(texto,eventos,componentes){
-  var box=document.getElementById('asist-ov').querySelector('div');
-  var loadDiv=document.createElement('div');loadDiv.style.cssText='text-align:center;padding:16px;color:var(--azul);font-size:14px;font-weight:700;';
-  loadDiv.textContent='✨ Interpretando...';box.appendChild(loadDiv);
-
-  var promptIA='Sos asistente tecnico de SOLEC Argentina. El tecnico esta trabajando en: '+_asist.catk+' subcategoria '+_asist.sc+'. Describio: '+texto+'. Eventos disponibles: '+eventos.join(', ')+'. Componentes disponibles: '+componentes.join(', ')+'. Extrae el evento y componente mas adecuado. Responde SOLO JSON sin markdown: {"evento":"...","componente":"...","cantidad":1,"nota":""}';
-
-  try{
-    var resp=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({_method:'CLAUDE_PROXY',messages:[{role:'user',content:promptIA}]})});
-    var data=await resp.json();
-    var raw=(data.content&&data.content[0]?data.content[0].text:'').replace(/```json|```/g,'').trim();
-    var parsed=JSON.parse(raw);
-    loadDiv.parentNode.removeChild(loadDiv);
-    // Mostrar sugerencia para confirmar
-    _mostrarSugerenciaTrabajo(parsed,eventos,componentes);
-  }catch(e){
-    loadDiv.textContent='❌ Error: '+e.message;
-    setTimeout(function(){if(loadDiv.parentNode)loadDiv.parentNode.removeChild(loadDiv);},3000);
-  }
-}
-
-function _mostrarSugerenciaTrabajo(parsed,eventos,componentes){
-  var box=document.getElementById('asist-ov').querySelector('div');
-  var sug=document.createElement('div');
-  sug.style.cssText='background:rgba(74,158,255,.1);border:1.5px solid var(--azul);border-radius:12px;padding:14px;margin-top:10px;';
-  sug.innerHTML='<div style="font-size:12px;color:var(--azul);font-weight:800;letter-spacing:1px;margin-bottom:8px;">SUGERENCIA DEL ASISTENTE</div>'+
-    '<div style="font-size:16px;font-weight:800;color:var(--t);margin-bottom:4px;">'+esc(parsed.evento||'')+'</div>'+
-    '<div style="font-size:14px;color:var(--t2);margin-bottom:'+(parsed.nota?'8px':'12px')+';">'+esc(parsed.componente||'')+'</div>'+
-    (parsed.nota?'<div style="font-size:12px;color:var(--am);margin-bottom:12px;">💡 '+esc(parsed.nota)+'</div>':'')+
-    '<div style="display:flex;gap:8px;">'+
-    '<button id="asist-sug-si" style="flex:2;background:var(--azul);border:none;border-radius:8px;padding:10px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;">✅ CORRECTO</button>'+
-    '<button id="asist-sug-no" style="flex:1;background:var(--s3);border:1px solid var(--borde);border-radius:8px;padding:10px;color:var(--t2);font-size:13px;cursor:pointer;">✏️ Cambiar</button>'+
-    '</div>';
-  box.appendChild(sug);
-  document.getElementById('asist-sug-si').onclick=function(){
-    _asist.ev=parsed.evento;_asist.comp=parsed.componente;_asist.compQty=parsed.cantidad||1;
-    _asist.paso=5;_renderAsist();
-  };
-  document.getElementById('asist-sug-no').onclick=function(){
-    sug.parentNode.removeChild(sug);
-    _mostrarCompsBajo(document.getElementById('asist-ov').querySelector('div'),componentes);
-  };
-}
-
-// ── PASO 5: CANTIDAD ──────────────────────────────────────
-function _pasoCantidad(cont){
-  _pregunta(cont,'¿Cuántas unidades? ('+esc(_asist.comp)+')');
-  var nums=[1,2,3,4,5,6,8,10,12,15,20];
-  _btnOpciones(cont,nums.map(function(n){return {label:String(n),val:n};}),function(n){_asist.compQty=n;_asist.paso=6;_renderAsist();});
-  // También entrada manual
-  var inp=document.createElement('input');inp.type='number';inp.placeholder='Otro número...';inp.className='fi';inp.style.marginTop='8px';
-  var btnOk=document.createElement('button');btnOk.textContent='OK';btnOk.style.cssText='margin-top:8px;width:100%;background:var(--s3);border:1px solid var(--borde);border-radius:8px;padding:10px;color:var(--t);font-size:14px;font-weight:700;cursor:pointer;';
-  btnOk.onclick=function(){var v=parseInt(inp.value)||1;_asist.compQty=v;_asist.paso=6;_renderAsist();};
-  cont.appendChild(inp);cont.appendChild(btnOk);
-}
-
-// ── PASO 6: UBICACIÓN ─────────────────────────────────────
-function _pasoUbicacion(cont){
-  _pregunta(cont,'¿En qué ubicación?');
-  var ubs=getUbicaciones()||[];
-  var inp=document.createElement('input');inp.type='text';inp.placeholder='Buscar o escribir...';inp.className='fi';inp.style.marginBottom='8px';
-  cont.appendChild(inp);
-  var lista=document.createElement('div');lista.style.cssText='max-height:160px;overflow-y:auto;margin-bottom:8px;';
-  cont.appendChild(lista);
-  function filtrar(q){
-    lista.innerHTML='';
-    var q2=(q||'').toLowerCase();
-    var filtrados=q2?ubs.filter(function(u){var nom=typeof u==='string'?u:u.nombre||'';return _normFon(nom).indexOf(_normFon(q2))!==-1;}):ubs.slice(0,6);
-    filtrados.forEach(function(u){
-      var nom=typeof u==='string'?u:u.nombre||'';
-      var item=document.createElement('div');item.style.cssText='padding:10px 12px;border-bottom:1px solid var(--borde);cursor:pointer;font-size:15px;font-weight:700;';
-      item.textContent=nom;
-      item.onclick=function(){_asist.ubicacion=nom;_asist.paso=7;_renderAsist();};
-      lista.appendChild(item);
-    });
-    if(q&&filtrados.length===0){
-      var libre=document.createElement('div');libre.style.cssText='padding:10px 12px;cursor:pointer;font-size:14px;color:var(--am);font-weight:700;';
-      libre.textContent='+ Agregar "'+q+'" como ubicación';
-      libre.onclick=function(){_asist.ubicacion=q;_asist.paso=7;_renderAsist();};
-      lista.appendChild(libre);
+    if(actual==='lugar'){
+      var ls=document.getElementById('lsearch').value;
+      res.innerHTML='<strong>🏢 '+esc(ls)+'</strong>';
     }
-  }
-  inp.addEventListener('input',function(){filtrar(this.value);});
-  filtrar('');
-  var btnSinUb=document.createElement('button');btnSinUb.textContent='Sin ubicación específica';btnSinUb.style.cssText='width:100%;padding:10px;background:transparent;border:1px solid var(--borde);border-radius:8px;color:var(--t2);font-size:13px;cursor:pointer;margin-top:8px;';
-  btnSinUb.onclick=function(){_asist.ubicacion=null;_asist.paso=7;_renderAsist();};
-  cont.appendChild(btnSinUb);
-  // Usuario usa micrófono del teclado
-}
-
-// ── PASO 7: MODIFICADORES ─────────────────────────────────
-function _pasoMods(cont){
-  _pregunta(cont,'¿Hay modificadores?');
-  var mods=catalogoMods||[];
-  if(!mods.length){_asist.paso=8;_renderAsist();return;}
-
-  var seleccionados=_asist.mods.map(function(m){return m.nombre;});
-  var wrap=document.createElement('div');wrap.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;';
-  mods.forEach(function(m){
-    var nom=m.Nombre||m.nombre||'';
-    var btn=document.createElement('button');
-    var activo=seleccionados.indexOf(nom)!==-1;
-    btn.style.cssText='background:'+(activo?'var(--azul)':'var(--s2)')+';border:1.5px solid '+(activo?'var(--azul)':'var(--borde)')+';border-radius:8px;padding:10px 16px;color:'+(activo?'#fff':'var(--t)')+';font-size:14px;font-weight:700;cursor:pointer;';
-    btn.textContent=nom;
-    btn.onclick=function(){
-      var idx=_asist.mods.findIndex(function(x){return x.nombre===nom;});
-      if(idx===-1){_asist.mods.push({nombre:nom,val:1,unidad:m.Unidad||m.unidad||'u'});}
-      else{_asist.mods.splice(idx,1);}
-      _renderAsist();
-    };
-    wrap.appendChild(btn);
-  });
-  cont.appendChild(wrap);
-
-  var btnSig=document.createElement('button');
-  btnSig.style.cssText='width:100%;padding:13px;background:var(--am);border:none;border-radius:10px;color:var(--bg);font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;';
-  btnSig.textContent=_asist.mods.length?'CONFIRMAR MODIFICADORES ('+_asist.mods.length+')':'SIN MODIFICADORES →';
-  btnSig.onclick=function(){_asist.paso=8;_renderAsist();};
-  cont.appendChild(btnSig);
-}
-
-// ── PASO 8: CONFIRMAR INTERVENCIÓN ────────────────────────
-function _pasoConfirmarIv(cont){
-  var cats=buildCATSdesdeDinamicas()||{};
-  var cat=cats[_asist.catk];
-  var catNom=cat?cat.l:_asist.catk;
-  var lin=catNom+' · '+_asist.sc+' · '+_asist.ev+' · '+(_asist.compQty>1?_asist.compQty+'x ':'')+_asist.comp+(_asist.ubicacion?' · '+_asist.ubicacion:'');
-  if(_asist.mods.length)lin+=' ['+_asist.mods.map(function(m){return m.nombre;}).join(', ')+']';
-
-  _pregunta(cont,'¿Esta intervención está bien?');
-  var resDiv=document.createElement('div');
-  resDiv.style.cssText='background:rgba(74,158,255,.1);border:1.5px solid var(--azul);border-radius:12px;padding:14px;margin-bottom:14px;font-size:15px;font-weight:700;color:var(--t);';
-  resDiv.textContent=lin;
-  cont.appendChild(resDiv);
-
-  var btnSi=document.createElement('button');
-  btnSi.style.cssText='width:100%;padding:13px;background:var(--verde);border:none;border-radius:10px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:8px;';
-  btnSi.textContent='✅ CONFIRMAR INTERVENCIÓN';
-  btnSi.onclick=function(){
-    _asist.intervenciones.push({
-      catk:_asist.catk,sc:_asist.sc,ev:_asist.ev,
-      comp:(_asist.compQty>1?_asist.compQty+'x ':'')+_asist.comp,
-      compQty:_asist.compQty,ubicacion:_asist.ubicacion,
-      mods:_asist.mods.slice(),lin:lin
-    });
-    // Reset para siguiente intervención
-    _asist.catk=null;_asist.sc=null;_asist.ev=null;_asist.comp=null;_asist.compQty=1;_asist.ubicacion=null;_asist.mods=[];
-    _asist.paso=99;_renderAsist();
-  };
-
-  var btnNo=document.createElement('button');
-  btnNo.style.cssText='width:100%;padding:10px;background:transparent;border:1px solid var(--borde);border-radius:10px;color:var(--t2);font-size:14px;cursor:pointer;';
-  btnNo.textContent='✏️ Corregir desde el principio';
-  btnNo.onclick=function(){_asist.catk=null;_asist.sc=null;_asist.ev=null;_asist.comp=null;_asist.compQty=1;_asist.ubicacion=null;_asist.mods=[];_asist.paso=2;_renderAsist();};
-
-  cont.appendChild(btnSi);cont.appendChild(btnNo);
-}
-
-// ── PASO 99: ¿OTRA INTERVENCIÓN O APLICAR AL FORMULARIO? ──
-function _pasoFinal(cont){
-  _pregunta(cont,'¿Qué hacemos ahora?');
-
-  var btnOtra=document.createElement('button');
-  btnOtra.style.cssText='width:100%;padding:13px;background:var(--s2);border:2px solid var(--am);border-radius:10px;color:var(--am);font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:8px;';
-  btnOtra.textContent='➕ AGREGAR OTRA INTERVENCIÓN';
-  btnOtra.onclick=function(){_asist.paso=2;_renderAsist();};
-
-  var btnAplicar=document.createElement('button');
-  btnAplicar.style.cssText='width:100%;padding:13px;background:var(--am);border:none;border-radius:10px;color:var(--bg);font-family:Bebas Neue,sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:8px;';
-  btnAplicar.textContent='⚡ VOLCAR AL FORMULARIO';
-  btnAplicar.onclick=function(){_aplicarAlFormulario();};
-
-  cont.appendChild(btnOtra);cont.appendChild(btnAplicar);
-}
-
-async function _aplicarAlFormulario(){
-  _cerrarAsistente();
-
-  // Reset limpio
-  resetForm();
-  await new Promise(function(r){setTimeout(r,300);});
-
-  // Abrir secciones
-  ['b1','b2','b3'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.style.display='block';
-  });
-  ['a1','a2','a3'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.style.transform='rotate(90deg)';
-  });
-
-  // Llenar edificio
-  var lsearch=document.getElementById('lsearch');
-  var lnom=document.getElementById('lnom');
-  if(lsearch)lsearch.value=_asist.edificio||'';
-  if(lnom)lnom.value=_asist.edificio||'';
-  var edifObj=edificios.find(function(e){return e.nombre===_asist.edificio;});
-  if(edifObj){
-    var edid=document.getElementById('edid');if(edid)edid.value=edifObj.id||'';
-    var ldir=document.getElementById('ldir');if(ldir)ldir.value=edifObj.dir||'';
+    pasoActual.appendChild(res);
+    // Colapsar
+    var btn=pasoActual.querySelector('.bsig');if(btn)btn.style.display='none';
+    var inp=pasoActual.querySelector('input:not([type=hidden]),button.fi,.r2');
+    if(inp)inp.style.display='none';
+    var r2=pasoActual.querySelector('.r2');if(r2)r2.style.display='none';
+    var dur=pasoActual.querySelector('#dur');if(dur)dur.style.display='none';
   }
 
-  // Tipo de visita
-  if(_asist.tipoVisita){
-    var chip=document.querySelector('.chip[data-tipo="'+_asist.tipoVisita+'"]');
-    if(chip)chip.click();
-    await new Promise(function(r){setTimeout(r,600);});
+  if(pasoSig){
+    pasoSig.style.display='block';
+    // Auto-completar fecha con hoy
+    if(siguiente==='fecha'){
+      var hoy=new Date();
+      var yyyy=hoy.getFullYear();
+      var mm=String(hoy.getMonth()+1).padStart(2,'0');
+      var dd=String(hoy.getDate()).padStart(2,'0');
+      var fechaEl=document.getElementById('fecha');
+      if(fechaEl&&!fechaEl.value)fechaEl.value=yyyy+'-'+mm+'-'+dd;
+    }
+    pasoSig.scrollIntoView({behavior:'smooth',block:'start'});
   }
+}
 
-  // Intervenciones — simular clicks reales
-  ivList=[];ubPorIv={};mdPorIv={};
-  var ivListEl=document.getElementById('ivList');
-  if(ivListEl)ivListEl.innerHTML='';
-  ivCount=0;
+function gpSelTipo(el){
+  // Marcar chip
+  el.closest('.chips').querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+  var tipo=el.dataset.tipo;
+  selTipo(el); // llamar función original para compatibilidad
+  // Avanzar automáticamente al paso de intervenciones
+  setTimeout(function(){gpIniciarIntervenciones();},300);
+}
 
-  for(var i=0;i<_asist.intervenciones.length;i++){
-    var iv=_asist.intervenciones[i];
+function gpIniciarIntervenciones(){
+  // Mostrar la sección de intervenciones
+  var secIv=document.getElementById('secIv');
+  if(secIv)secIv.style.display='block';
+  // Abrir primera intervención automáticamente
+  if(ivList.length===0)nuevaIv();
+  // Scroll a intervenciones
+  setTimeout(function(){
+    var ivSec=document.getElementById('secIv');
+    if(ivSec)ivSec.scrollIntoView({behavior:'smooth',block:'start'});
+  },200);
+}
 
-    // Crear intervención
-    nuevaIv();
-    await new Promise(function(r){setTimeout(r,900);});
+// Mostrar botón siguiente de lugar cuando se elige edificio
+function gpMostrarSigLugar(){
+  var btn=document.getElementById('btnSigLugar');
+  if(btn)btn.style.display='block';
+}
 
-    var ivObj=ivList[ivList.length-1];
-    if(!ivObj)continue;
-    var id=ivObj.id;
-
-    // Abrir la intervención
-    var ivb=document.getElementById(id+'-b');
-    if(ivb)ivb.style.display='block';
-    var ivar=document.getElementById(id+'-ar');
-    if(ivar)ivar.style.transform='rotate(90deg)';
-
-    // Click en categoría
-    var catBtn=document.querySelector('#'+id+' [data-catk="'+iv.catk+'"]');
-    if(catBtn){catBtn.click();await new Promise(function(r){setTimeout(r,600);});}
-
-    // Click en subcategoría
-    var scBtns=document.querySelectorAll('#'+id+' .subb');
-    for(var s=0;s<scBtns.length;s++){
-      if(scBtns[s].textContent.trim()===iv.sc){
-        scBtns[s].click();
-        await new Promise(function(r){setTimeout(r,500);});
-        break;
-      }
-    }
-
-    // Seleccionar evento
-    var evEl=document.getElementById(id+'-ev');
-    if(evEl){
-      for(var j=0;j<evEl.options.length;j++){
-        if(evEl.options[j].value===iv.ev){evEl.selectedIndex=j;evEl.dispatchEvent(new Event('change'));break;}
-      }
-      await new Promise(function(r){setTimeout(r,300);});
-    }
-
-    // Seleccionar componente
-    var coEl=document.getElementById(id+'-co');
-    var compNom=iv.comp.replace(/^\d+x\s*/,'');
-    if(coEl){
-      for(var k=0;k<coEl.options.length;k++){
-        if(coEl.options[k].value===compNom){coEl.selectedIndex=k;coEl.dispatchEvent(new Event('change'));break;}
-      }
-      await new Promise(function(r){setTimeout(r,200);});
-    }
-
-    // Cantidad si >1
-    if(iv.compQty>1){
-      // Buscar el campo de cantidad del componente
-      var compItems=document.getElementById(id+'-compItems');
-      if(compItems){
-        var qInp=compItems.querySelector('input[type="number"]');
-        if(qInp){qInp.value=iv.compQty;qInp.dispatchEvent(new Event('input'));}
-      }
-    }
-
-    // Ubicación
-    if(iv.ubicacion){
-      ubPorIv[id]=[{nombre:iv.ubicacion,qty:1}];
-      // Mostrar en UI de ubicaciones
-      var ubWrap=document.getElementById(id+'-ubwrap');
-      if(ubWrap){
-        var ubDiv=document.createElement('div');
-        ubDiv.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--borde);';
-        var ubNom=document.createElement('span');ubNom.style.cssText='flex:1;font-size:14px;font-weight:700;color:var(--t);';
-        ubNom.textContent=iv.ubicacion;
-        var ubX=document.createElement('button');ubX.type='button';ubX.textContent='✕';
-        ubX.style.cssText='background:#c0392b;border:none;border-radius:50%;width:28px;height:28px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;';
-        (function(uid){ubX.onclick=function(){ubPorIv[uid]=[];ubDiv.remove();updR(uid);};})(id);
-        ubDiv.appendChild(ubNom);ubDiv.appendChild(ubX);
-        ubWrap.appendChild(ubDiv);
-      }
-    }
-
-    // Modificadores
-    if(iv.mods&&iv.mods.length){
-      mdPorIv[id]={};
-      iv.mods.forEach(function(m){
-        mdPorIv[id][m.nombre]={nombre:m.nombre,val:m.val||1,unidad:m.unidad||'u',tieneCant:true};
-        // Marcar visualmente el toggle del modificador
-        var modToggle=document.querySelector('#'+id+' .stog[data-mod="'+m.nombre+'"]');
-        if(modToggle&&!modToggle.classList.contains('on'))modToggle.click();
-      });
-    }
-
-    updR(id);
-    await new Promise(function(r){setTimeout(r,200);});
-  }
-
-  // Scroll arriba
-  window.scrollTo(0,0);
-  showToast('✅ Formulario cargado — revisá y enviá');
+// Inicializar flujo al abrir nuevo registro
+function iniciarFlujoGuiado(){
+  // Auto-setear fecha de hoy
+  var hoy=new Date();
+  var yyyy=hoy.getFullYear();
+  var mm=String(hoy.getMonth()+1).padStart(2,'0');
+  var dd=String(hoy.getDate()).padStart(2,'0');
+  var fechaEl=document.getElementById('fecha');
+  if(fechaEl)fechaEl.value=yyyy+'-'+mm+'-'+dd;
+  // Mostrar primer paso
+  var p=document.getElementById('gpaso-fecha');
+  if(p)p.style.display='block';
 }
 
 </script>
