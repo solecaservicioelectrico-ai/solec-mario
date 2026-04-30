@@ -436,7 +436,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.56</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.58</span></div>
   </div>
 </div>
 
@@ -3190,6 +3190,15 @@ function buildIv(num,id){
   cbVT.style.display=(tipoVisita&&tipoVisita.toLowerCase().indexOf('urgencia')!==-1)?'':'none';
   body.appendChild(catg);
 
+  // Botón asistente IA
+  var btnIA=document.createElement('button');
+  btnIA.type='button';
+  btnIA.style.cssText='width:100%;margin-top:10px;background:rgba(74,158,255,.1);border:1.5px solid var(--azul);border-radius:10px;padding:12px;color:var(--azul);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;';
+  btnIA.innerHTML='✨ No sé qué categoría — describí el trabajo';
+  btnIA.addEventListener('click',function(){abrirAsistenteIv(id);});
+  body.appendChild(btnIA);
+
+
   // Fields (hidden until cat selected)
   var fields=document.createElement('div');fields.className='ivf';fields.id=id+'-f';
 
@@ -5087,6 +5096,9 @@ async function enviar(finalizar){
   var lnom=document.getElementById('lnom').value||document.getElementById('lsearch').value||'';
   var det=document.getElementById('detalle').value||'';
   var obs=document.getElementById('obsgen').value||'';
+  // Generar resumen IA en segundo plano
+  var obsIA='';
+  if(obs.length>20){try{var _rIA=await generarResumenIANota(obs,null);if(_rIA)obsIA=_rIA;}catch(e){}}
   var vtDesc=document.getElementById('visitaTecnicaDesc');
   if(vtDesc&&vtDesc.value)obs=(obs?obs+' | ':'')+'[Visita técnica] '+vtDesc.value;
   if(!fecha||!hora)return showToast('⚠️ Completá fecha y hora');
@@ -5159,7 +5171,7 @@ async function enviar(finalizar){
   var datosReg={
     Codigo:regCode,'Codigo Obra':obraCode,Fecha:fecha,Hora:hora,'Hora Fin':hfin,
     'Duración':dur,Edificio:lnom,'Detalle Ubicación':det,'Tipo de Visita':tipoVisita,
-    Intervenciones:res,Observaciones:obs,Estado:estado,
+    Intervenciones:res,Observaciones:obs,Obs_IA:obsIA,Estado:estado,
     Timestamp:new Date().toISOString(),Componente:compTexto,
     Modificadores:modsTexto,MO_Data:JSON.stringify(moData)
   };
@@ -6817,6 +6829,182 @@ function iniciarFlujoGuiado(){
   // Mostrar primer paso
   var p=document.getElementById('gpaso-fecha');
   if(p)p.style.display='block';
+}
+
+
+// ══════════════════════════════════════════════
+// ASISTENTE IA POR INTERVENCIÓN
+// ══════════════════════════════════════════════
+
+async function abrirAsistenteIv(id){
+  // Modal para que Mario describa el trabajo
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  var box=document.createElement('div');
+  box.style.cssText='width:100%;max-width:520px;background:var(--s1);border-top:3px solid var(--azul);border-radius:20px 20px 0 0;padding:20px 20px 40px 20px;';
+  box.innerHTML=
+    '<div style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--azul);margin-bottom:6px;letter-spacing:1px;">✨ ASISTENTE SOLEC</div>'+
+    '<div style="font-size:13px;color:var(--t3);margin-bottom:14px;">Describí el trabajo en detalle — qué hiciste, qué cambiaste, cuántos, dónde</div>'+
+    '<textarea id="ia-desc-inp" class="fi" placeholder="Ej: cambié 12 lámparas en las tortugas del perímetro lateral, reparé los cables detrás y sellé con poliuretano..." style="min-height:100px;font-size:15px;resize:vertical;margin-bottom:12px;"></textarea>'+
+    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px;text-align:center;">Usá el 🎤 del teclado para dictar</div>'+
+    '<div style="display:flex;gap:10px;">'+
+    '<button id="ia-cancelar" style="flex:1;background:var(--s3);border:1px solid var(--borde);border-radius:10px;padding:13px;color:var(--t2);font-size:14px;font-weight:800;cursor:pointer;">Cancelar</button>'+
+    '<button id="ia-interpretar" style="flex:2;background:var(--azul);border:none;border-radius:10px;padding:13px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;">✨ INTERPRETAR</button>'+
+    '</div>'+
+    '<div id="ia-loading" style="display:none;text-align:center;padding:16px;color:var(--azul);font-weight:700;">⏳ Interpretando...</div>'+
+    '<div id="ia-resultado" style="display:none;"></div>';
+
+  ov.appendChild(box);document.body.appendChild(ov);
+  document.getElementById('ia-cancelar').onclick=function(){document.body.removeChild(ov);};
+  document.getElementById('ia-interpretar').onclick=async function(){
+    var texto=document.getElementById('ia-desc-inp').value.trim();
+    if(!texto){showToast('⚠️ Describí el trabajo primero');return;}
+    await _iaInterpretarTrabajo(texto,id,ov);
+  };
+}
+
+async function _iaInterpretarTrabajo(texto,id,ov){
+  var loading=document.getElementById('ia-loading');
+  var res=document.getElementById('ia-resultado');
+  var btnInt=document.getElementById('ia-interpretar');
+  loading.style.display='block';btnInt.disabled=true;
+
+  // Armar contexto dinámico del Sheet
+  var cats=buildCATSdesdeDinamicas()||{};
+  var catsList=Object.keys(cats).map(function(k){
+    return cats[k].l+': subcategorias=['+cats[k].sc.join(', ')+']';
+  }).join(' | ');
+  var modsList=catalogoMods.map(function(m){return m.Nombre||m.nombre||'';}).filter(Boolean).join(', ');
+
+  var prompt='Sos asistente tecnico de SOLEC Argentina (electricidad/seguridad edificios). '+
+    'IMPORTANTE: "tortuga de LED" es un artefacto sellado completo (se reemplaza entero). "lampara en tortuga" o "lampara de tortuga" significa reemplazar solo la lampara E27 que va adentro del artefacto tortuga — en ese caso el componente es Lampara y la ubicacion es el nombre del artefacto (ej: tortugas perimetrales). '+
+    'El tecnico describio el trabajo: "'+texto+'". '+
+    'Categorias disponibles: '+catsList+'. '+
+    'Modificadores disponibles: '+modsList+'. '+
+    'Interpreta el trabajo y devuelve SOLO JSON sin markdown: '+
+    '{"categoria_key":"lu|en|bo|se","subcategoria":"...","evento":"Reemplazo|Reparacion|Instalacion nueva|Revision","componente":"...","cantidad":1,"modificadores":[{"nombre":"...","cantidad":1}],"ubicacion":"...","nota":"explicacion si fue ambiguo"}';
+
+  try{
+    var resp=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({_method:'CLAUDE_PROXY',messages:[{role:'user',content:prompt}]})});
+    var data=await resp.json();
+    var raw=(data.content&&data.content[0]?data.content[0].text:'').replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(raw);
+    loading.style.display='none';
+    _mostrarResultadoIA(parsed,id,ov);
+  }catch(e){
+    loading.style.display='none';
+    res.style.display='block';
+    res.innerHTML='<div style="color:var(--rojo);padding:10px;">❌ Error: '+esc(e.message)+'</div>';
+    btnInt.disabled=false;
+  }
+}
+
+function _mostrarResultadoIA(parsed,id,ov){
+  var res=document.getElementById('ia-resultado');
+  res.style.display='block';
+
+  var cats=buildCATSdesdeDinamicas()||{};
+  var catObj=cats[parsed.categoria_key]||{};
+  var modsStr=(parsed.modificadores||[]).map(function(m){return m.nombre+(m.cantidad>1?' x'+m.cantidad:'');}).join(', ');
+
+  res.innerHTML=
+    '<div style="background:rgba(74,158,255,.1);border:1.5px solid var(--azul);border-radius:12px;padding:14px;margin-top:14px;">'+
+    '<div style="font-size:11px;color:var(--azul);font-weight:800;letter-spacing:1px;margin-bottom:10px;">SUGERENCIA DEL ASISTENTE</div>'+
+    '<div style="font-size:15px;font-weight:800;color:var(--t);margin-bottom:4px;">'+esc(catObj.l||parsed.categoria_key)+' → '+esc(parsed.subcategoria||'')+'</div>'+
+    '<div style="font-size:14px;color:var(--t2);margin-bottom:4px;">'+esc(parsed.evento||'')+' · '+esc(parsed.componente||'')+(parsed.cantidad>1?' × '+parsed.cantidad:'')+'</div>'+
+    (modsStr?'<div style="font-size:13px;color:var(--am);margin-bottom:4px;">Modificadores: '+esc(modsStr)+'</div>':'')+
+    (parsed.ubicacion?'<div style="font-size:13px;color:var(--t3);margin-bottom:8px;">📍 '+esc(parsed.ubicacion)+'</div>':'')+
+    (parsed.nota?'<div style="font-size:12px;color:var(--t3);margin-bottom:10px;">💡 '+esc(parsed.nota)+'</div>':'')+
+    '<div style="display:flex;gap:8px;margin-top:10px;">'+
+    '<button id="ia-confirmar" style="flex:2;background:var(--verde,#27ae60);border:none;border-radius:8px;padding:11px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1px;cursor:pointer;">✅ APLICAR AL FORMULARIO</button>'+
+    '<button id="ia-rechazar" style="flex:1;background:var(--s3);border:1px solid var(--borde);border-radius:8px;padding:11px;color:var(--t2);font-size:13px;cursor:pointer;">✏️ Cambiar</button>'+
+    '</div>'+
+    '</div>';
+
+  document.getElementById('ia-confirmar').onclick=function(){
+    _aplicarIaAIv(parsed,id);
+    document.body.removeChild(ov);
+  };
+  document.getElementById('ia-rechazar').onclick=function(){
+    res.style.display='none';
+    document.getElementById('ia-desc-inp').value='';
+    document.getElementById('ia-desc-inp').focus();
+    document.getElementById('ia-interpretar').disabled=false;
+  };
+}
+
+function _aplicarIaAIv(parsed,id){
+  // Seleccionar categoría
+  var catBtn=document.querySelector('#'+id+' [data-catk], #'+id+' .cb');
+  // Buscar el botón de categoría correcto
+  var catg=document.querySelector('#'+id+' .catg');
+  if(catg){
+    var cbs=catg.querySelectorAll('.cb');
+    cbs.forEach(function(cb){
+      var k=cb.dataset&&cb.dataset.catk;
+      if(k===parsed.categoria_key){cb.click();}
+    });
+  }
+  setTimeout(function(){
+    // Seleccionar subcategoría
+    var scBtns=document.querySelectorAll('#'+id+' .subb');
+    scBtns.forEach(function(btn){
+      if(btn.textContent.trim()===parsed.subcategoria)btn.click();
+    });
+    setTimeout(function(){
+      // Evento
+      var evEl=document.getElementById(id+'-ev');
+      if(evEl){for(var j=0;j<evEl.options.length;j++){if(evEl.options[j].value===parsed.evento){evEl.selectedIndex=j;evEl.dispatchEvent(new Event('change'));break;}}}
+      // Componente
+      var coEl=document.getElementById(id+'-co');
+      if(coEl){for(var k=0;k<coEl.options.length;k++){if(coEl.options[k].value===parsed.componente){coEl.selectedIndex=k;coEl.dispatchEvent(new Event('change'));break;}}}
+      // Cantidad
+      if(parsed.cantidad>1){
+        var ivObj=ivList.find(function(i){return i.id===id;});
+        if(ivObj){
+          ivObj.data.comp=parsed.cantidad+'x '+parsed.componente;
+          updR(id);
+        }
+      }
+      // Modificadores
+      if(parsed.modificadores&&parsed.modificadores.length){
+        mdPorIv[id]=mdPorIv[id]||{};
+        parsed.modificadores.forEach(function(m){
+          mdPorIv[id][m.nombre]={nombre:m.nombre,val:m.cantidad||1,unidad:'u',tieneCant:true};
+          var tog=document.querySelector('#'+id+' [data-mod="'+m.nombre+'"]');
+          if(tog&&!tog.classList.contains('on'))tog.click();
+        });
+        updR(id);
+      }
+      // Ubicación libre
+      if(parsed.ubicacion){
+        ubPorIv[id]=ubPorIv[id]||[];
+        if(!ubPorIv[id].find(function(u){return u.nombre===parsed.ubicacion;})){
+          ubPorIv[id].push({nombre:parsed.ubicacion,qty:1});
+        }
+        updR(id);
+      }
+      showToast('✅ Intervención completada por IA');
+    },400);
+  },500);
+}
+
+// ══════════════════════════════════════════════
+// NOTA LIBRE CON RESUMEN IA
+// ══════════════════════════════════════════════
+
+async function generarResumenIANota(textoMario, codigo){
+  if(!textoMario||textoMario.length<20)return null;
+  try{
+    var prompt='Sos asistente tecnico de SOLEC. El tecnico escribio esta nota de trabajo: "'+textoMario+'". '+
+      'Genera un resumen tecnico conciso (max 3 oraciones) en lenguaje profesional para incluir en una factura de servicio electrico. '+
+      'Responde SOLO el texto del resumen, sin comillas ni formato extra.';
+    var resp=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({_method:'CLAUDE_PROXY',messages:[{role:'user',content:prompt}]})});
+    var data=await resp.json();
+    return (data.content&&data.content[0]?data.content[0].text:'').trim();
+  }catch(e){return null;}
 }
 
 </script>
