@@ -433,7 +433,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.52</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.53</span></div>
   </div>
 </div>
 
@@ -7248,6 +7248,30 @@ async function _aplicarAlFormulario(){
 
     // Re-renderizar esta intervención
     updR(id);
+  }
+
+  // 5. Abrir y expandir todas las secciones
+  await new Promise(function(r){setTimeout(r,200);});
+
+  // Abrir paso 1 (fecha)
+  var b1=document.getElementById('b1'),a1=document.getElementById('a1');
+  if(b1){b1.style.display='block';}if(a1)a1.style.transform='rotate(90deg)';
+
+  // Abrir paso 2 (edificio) — mostrar el edificio seleccionado
+  var b2=document.getElementById('b2'),a2=document.getElementById('a2');
+  if(b2){b2.style.display='block';}if(a2)a2.style.transform='rotate(90deg)';
+  var lsearchEl=document.getElementById('lsearch');
+  if(lsearchEl&&_asist.edificio)lsearchEl.value=_asist.edificio;
+
+  // Abrir paso 3 (tipo de visita) — marcar el chip correcto
+  var b3=document.getElementById('b3'),a3=document.getElementById('a3');
+  if(b3){b3.style.display='block';}if(a3)a3.style.transform='rotate(90deg)';
+  if(_asist.tipoVisita){
+    document.querySelectorAll('.chip[data-tipo]').forEach(function(chip){
+      chip.classList.remove('on');
+      if(chip.dataset.tipo===_asist.tipoVisita||chip.dataset.tipo.toLowerCase().indexOf(_asist.tipoVisita.toLowerCase())!==-1)
+        chip.classList.add('on');
+    });
   }
 
   // Scroll al formulario
