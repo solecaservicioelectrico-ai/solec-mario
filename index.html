@@ -433,7 +433,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnAsist" onclick="abrirAsistente()" style="background:var(--azul);border-color:var(--azul);color:#fff;">🎤</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.47</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.49</span></div>
   </div>
 </div>
 
@@ -6732,18 +6732,20 @@ var _asist={
 };
 
 function _normFon(s){
-  // Normaliza para búsqueda: minúsculas, sin tildes, k=c, doble ll=y, etc.
-  return (s||'').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
-    .replace(/k/g,'c')   // akros = acros
-    .replace(/qu/g,'c')  // que = ce
-    .replace(/ph/g,'f')  // ph = f
-    .replace(/y/g,'i')   // y = i
-    .replace(/ll/g,'l')  // ll = l
-    .replace(/v/g,'b')   // v = b
-    .replace(/z/g,'s')   // z = s
-    .replace(/x/g,'cs')  // x = cs
-    .replace(/[^a-z0-9 ]/g,''); // solo alfanumérico
+  // Normaliza para búsqueda: minúsculas, sin tildes, k=c, números arábigos=romanos
+  var r=(s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/k/g,'c').replace(/qu/g,'c').replace(/ph/g,'f')
+    .replace(/y/g,'i').replace(/ll/g,'l').replace(/v/g,'b')
+    .replace(/z/g,'s').replace(/[^a-z0-9 ]/g,'');
+  // Convertir números arábigos a romanos para comparar
+  var romanos={1:'i',2:'ii',3:'iii',4:'iv',5:'v',6:'vi',7:'vii',8:'viii',9:'ix',10:'x',
+    11:'xi',12:'xii',13:'xiii',14:'xiv',15:'xv',16:'xvi',17:'xvii',18:'xviii',19:'xix',20:'xx',
+    21:'xxi',22:'xxii',23:'xxiii',24:'xxiv',25:'xxv',26:'xxvi',27:'xxvii',28:'xxviii',29:'xxix',30:'xxx',
+    31:'xxxi',32:'xxxii',33:'xxxiii',34:'xxxiv',35:'xxxv',36:'xxxvi',37:'xxxvii',38:'xxxviii',39:'xxxix',40:'xl',
+    41:'xli',42:'xlii',43:'xliii',44:'xliv',45:'xlv',46:'xlvi',47:'xlvii',48:'xlviii',49:'xlix',50:'l'};
+  r=r.replace(/\b(\d+)\b/g,function(m,n){return romanos[parseInt(n)]||m;});
+  return r;
 }
 
 function abrirAsistente(){
