@@ -401,7 +401,33 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .dbg-err{color:#ff4757;font-weight:bold;}
 .dbg-info{color:#ffd700;}
 #debugToggle{position:fixed;bottom:0;right:0;z-index:100000;background:#ff4757;color:#fff;font-size:10px;padding:4px 8px;border:none;border-radius:4px 0 0 0;font-weight:bold;}
-/* ── VISOR DE ARCHIVOS DRIVE ── */
+/* ── CLAUDIA FLOTANTE ── */
+#claudia-fab{position:fixed;z-index:8000;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:grab;user-select:none;touch-action:none;}
+#claudia-fab:active{cursor:grabbing;}
+#claudia-fab-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--am);text-shadow:0 1px 4px rgba(0,0,0,.8);white-space:nowrap;}
+#claudia-fab-btn{width:56px;height:56px;border-radius:50%;background:var(--am);border:none;box-shadow:0 4px 18px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+#claudia-fab-btn:active{transform:scale(.93);box-shadow:0 2px 8px rgba(0,0,0,.4);}
+#claudia-fab-badge{position:absolute;top:-2px;right:-2px;background:var(--rojo);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;display:none;}
+
+/* ── CLAUDIA CHAT PANEL ── */
+#claudia-panel{position:fixed;bottom:0;left:0;right:0;z-index:8100;background:#12151f;border-top:3px solid var(--am);border-radius:20px 20px 0 0;max-height:75vh;display:none;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,.7);}
+#claudia-panel.open{display:flex;}
+#claudia-panel-hdr{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.07);}
+#claudia-panel-titulo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--am);flex:1;}
+#claudia-panel-sub{font-size:11px;color:var(--t3);font-weight:700;letter-spacing:1px;}
+#claudia-cerrar{background:none;border:none;color:var(--t2);font-size:24px;cursor:pointer;padding:0 4px;line-height:1;}
+#claudia-msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.claudia-msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:15px;line-height:1.5;font-weight:600;}
+.claudia-msg.mario{background:var(--s3);color:var(--t);align-self:flex-end;border-bottom-right-radius:4px;}
+.claudia-msg.claudia{background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.25);color:var(--t);align-self:flex-start;border-bottom-left-radius:4px;}
+.claudia-msg.claudia strong{color:var(--am);}
+.claudia-typing{align-self:flex-start;padding:10px 14px;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.15);border-radius:14px;border-bottom-left-radius:4px;color:var(--am);font-size:14px;font-weight:700;display:none;}
+#claudia-input-wrap{display:flex;gap:8px;padding:10px 14px 20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.07);}
+#claudia-inp{flex:1;background:var(--s2);border:1.5px solid var(--borde);border-radius:12px;padding:12px 14px;color:#fff;font-family:'Barlow',sans-serif;font-size:16px;font-weight:600;outline:none;resize:none;min-height:46px;max-height:120px;line-height:1.4;}
+#claudia-inp:focus{border-color:var(--am);}
+#claudia-send{background:var(--am);border:none;border-radius:12px;width:46px;height:46px;font-size:22px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+#claudia-send:active{transform:scale(.93);}
+
 .visor-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;overflow:hidden;}
 .visor-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;}
 .visor-titulo{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--am);letter-spacing:1px;}
@@ -436,7 +462,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.59</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.60</span></div>
   </div>
 </div>
 
@@ -692,7 +718,40 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 </div>
 </div>
 
+<!-- CLAUDIA FLOTANTE -->
+<div id="claudia-fab" style="bottom:80px;right:18px;">
+  <div id="claudia-fab-label">Claudia</div>
+  <button id="claudia-fab-btn" onclick="claudiaToggle()">✨</button>
+  <div id="claudia-fab-badge">1</div>
+</div>
+
+<!-- CLAUDIA PANEL CHAT -->
+<div id="claudia-panel">
+  <div id="claudia-panel-hdr">
+    <div>
+      <div id="claudia-panel-titulo">✨ CLAUDIA</div>
+      <div id="claudia-panel-sub">Asistente SOLEC · Preguntame lo que quieras</div>
+    </div>
+    <button id="claudia-cerrar" onclick="claudiaToggle()">✕</button>
+  </div>
+  <div id="claudia-msgs">
+    <div class="claudia-msg claudia" id="claudia-bienvenida">
+      ¡Hola Mario! 👋 Soy Claudia, tu asistente SOLEC.<br><br>
+      Describime el trabajo que hiciste y te ayudo a encontrar la categoría, evento, componente y modificadores correctos.<br><br>
+      También podés preguntarme cualquier duda sobre cómo registrar algo, o decirme <strong>"anotá esto"</strong> si encontrás algún error en el panel.
+    </div>
+    <div class="claudia-typing" id="claudia-typing">Claudia está escribiendo...</div>
+  </div>
+  <div id="claudia-input-wrap">
+    <textarea id="claudia-inp" placeholder="Describí el trabajo o hacé una pregunta... (🎤 para dictar)" rows="1"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();claudiaEnviar();}"></textarea>
+    <button id="claudia-send" onclick="claudiaEnviar()">➤</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
+
 
 <script>
 var SHEETDB = 'https://sheetdb.io/api/v1/pqo4oljkpi6dj'; // LEGACY
@@ -3218,15 +3277,6 @@ function buildIv(num,id){
   cbVT.style.display=(tipoVisita&&tipoVisita.toLowerCase().indexOf('urgencia')!==-1)?'':'none';
   body.appendChild(catg);
 
-  // Botón asistente IA
-  var btnIA=document.createElement('button');
-  btnIA.type='button';
-  btnIA.style.cssText='width:100%;margin-top:10px;background:rgba(74,158,255,.1);border:1.5px solid var(--azul);border-radius:10px;padding:12px;color:var(--azul);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;';
-  btnIA.innerHTML='✨ No sé qué categoría — describí el trabajo';
-  btnIA.addEventListener('click',function(){abrirAsistenteIv(id);});
-  body.appendChild(btnIA);
-
-
   // Fields (hidden until cat selected)
   var fields=document.createElement('div');fields.className='ivf';fields.id=id+'-f';
 
@@ -5277,6 +5327,7 @@ async function enviar(finalizar){
     if(r.ok){
       showToast('✅ '+regCode+' guardado'+(Object.keys(driveLinks).length>0?' con archivos':''));
       btn.disabled=false;btn.textContent='⚡ ENVIAR REGISTRO';
+      claudiaReiniciar();
       setTimeout(function(){
         // Recarga limpia — más confiable que resetear manualmente
         _enviando=true;
@@ -7083,9 +7134,208 @@ function _aplicarIaAIv(parsed,id){
   setTimeout(function(){esperarSubcat(10);},500);
 }
 
+
 // ══════════════════════════════════════════════
-// NOTA LIBRE CON RESUMEN IA
+// CLAUDIA — ASISTENTE IA FLOTANTE
 // ══════════════════════════════════════════════
+
+var claudiaHistorial = []; // [{role:'user'|'assistant', content:'...'}]
+var claudiaPanelAbierto = false;
+
+// ── Arrastrable ──
+(function(){
+  var fab=document.getElementById('claudia-fab');
+  if(!fab)return;
+  var dragging=false,startX,startY,origX,origY;
+  var pos={x:window.innerWidth-74, y:window.innerHeight-160};
+  function applyPos(){fab.style.right='auto';fab.style.bottom='auto';fab.style.left=pos.x+'px';fab.style.top=pos.y+'px';}
+  applyPos();
+  function onStart(cx,cy){dragging=true;startX=cx;startY=cy;origX=pos.x;origY=pos.y;}
+  function onMove(cx,cy){
+    if(!dragging)return;
+    pos.x=origX+(cx-startX);pos.y=origY+(cy-startY);
+    pos.x=Math.max(0,Math.min(window.innerWidth-60,pos.x));
+    pos.y=Math.max(0,Math.min(window.innerHeight-80,pos.y));
+    applyPos();
+  }
+  function onEnd(){dragging=false;}
+  fab.addEventListener('mousedown',function(e){if(e.target===document.getElementById('claudia-fab-btn'))return;onStart(e.clientX,e.clientY);e.preventDefault();});
+  document.addEventListener('mousemove',function(e){onMove(e.clientX,e.clientY);});
+  document.addEventListener('mouseup',onEnd);
+  fab.addEventListener('touchstart',function(e){var t=e.touches[0];onStart(t.clientX,t.clientY);},{passive:true});
+  document.addEventListener('touchmove',function(e){if(!dragging)return;var t=e.touches[0];onMove(t.clientX,t.clientY);e.preventDefault();},{passive:false});
+  document.addEventListener('touchend',onEnd);
+})();
+
+function claudiaToggle(){
+  var panel=document.getElementById('claudia-panel');
+  claudiaPanelAbierto=!claudiaPanelAbierto;
+  panel.classList.toggle('open',claudiaPanelAbierto);
+  if(claudiaPanelAbierto){
+    document.getElementById('claudia-fab-badge').style.display='none';
+    setTimeout(function(){
+      var inp=document.getElementById('claudia-inp');
+      if(inp)inp.focus();
+      claudiaScrollBottom();
+    },200);
+  }
+}
+
+function claudiaScrollBottom(){
+  var msgs=document.getElementById('claudia-msgs');
+  if(msgs)msgs.scrollTop=msgs.scrollHeight;
+}
+
+function claudiaAgregarMensaje(rol, texto){
+  var msgs=document.getElementById('claudia-msgs');
+  var typing=document.getElementById('claudia-typing');
+  // Sacar typing
+  if(typing)typing.style.display='none';
+  var div=document.createElement('div');
+  div.className='claudia-msg '+(rol==='user'?'mario':'claudia');
+  // Convertir saltos de línea y negritas simples
+  div.innerHTML=texto.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  msgs.insertBefore(div, typing);
+  claudiaScrollBottom();
+}
+
+async function claudiaEnviar(){
+  var inp=document.getElementById('claudia-inp');
+  var texto=(inp.value||'').trim();
+  if(!texto)return;
+  inp.value='';inp.style.height='auto';
+
+  // Mostrar mensaje de Mario
+  claudiaAgregarMensaje('user', texto);
+
+  // Agregar al historial
+  claudiaHistorial.push({role:'user',content:texto});
+
+  // Mostrar typing
+  var typing=document.getElementById('claudia-typing');
+  if(typing)typing.style.display='block';
+  claudiaScrollBottom();
+
+  // Armar contexto SOLEC dinámico
+  var cats=buildCATSdesdeDinamicas()||{};
+  var catsList=Object.keys(cats).map(function(k){
+    var c=cats[k];
+    return '- '+c.l+' (key: "'+k+'"): subcategorías = '+c.sc.join(', ');
+  }).join('\n');
+  var modsList=catalogoMods.map(function(m){return (m.Nombre||m.nombre||'')+(m.Unidad?' ('+m.Unidad+')':'');}).filter(Boolean).join(', ');
+  var edificioActual=document.getElementById('lsearch')?document.getElementById('lsearch').value:'';
+
+  var systemPrompt=
+    'Sos Claudia, asistente técnica de SOLEC (empresa de electricidad y seguridad en edificios, Mar del Plata, Argentina). '+
+    'Estás ayudando a Mario, el técnico de campo, a completar el formulario de registro de trabajo en su celular.\n\n'+
+
+    'TU ROL: Ayudarlo a identificar categoría, subcategoría, evento, componente, cantidad, modificadores y ubicación. '+
+    'Hacé preguntas si necesitás más info. Sé directo y claro. Usá lenguaje simple, no técnico en exceso.\n\n'+
+
+    'CATEGORÍAS DISPONIBLES:\n'+catsList+'\n\n'+
+
+    'MODIFICADORES DISPONIBLES: '+modsList+'\n\n'+
+
+    'REGLAS CRÍTICAS:\n'+
+    '1. "no hay luz / sin luz / se fue la luz" en un sector = SIN ENERGÍA → categoría "en" (Energía). NO es iluminación.\n'+
+    '2. Empalme deteriorado en circuito de distribución = Energía. Si fue de paso en reemplazo de artefacto = categoría del trabajo principal.\n'+
+    '3. "Centro de luz" en diagnóstico eléctrico = punto de derivación de circuito (Energía), no artefacto de iluminación.\n'+
+    '4. "Tortuga de LED" = artefacto sellado completo. "Lámpara en tortuga" = solo la lámpara E27 adentro.\n'+
+    '5. Si el trabajo tiene varias acciones distintas, identificá la principal y mencioná las secundarias como modificadores o nota.\n\n'+
+
+    'FORMATO DE RESPUESTA: Cuando tengas suficiente info, terminá siempre con un resumen así:\n'+
+    '📋 **SUGERENCIA:**\n'+
+    '• Categoría: [nombre]\n'+
+    '• Subcategoría: [nombre]\n'+
+    '• Evento: [Reemplazo / Reparación / Instalación nueva / Revisión]\n'+
+    '• Componente: [nombre] × [cantidad]\n'+
+    '• Modificadores: [lista]\n'+
+    '• Ubicación: [descripción]\n\n'+
+
+    'Si Mario dice "anotá esto" o reporta un error/falla del sistema, respondé confirmando que lo anotás y terminá el mensaje con la etiqueta: [NOTA_MARIO: descripción exacta de lo que hay que anotar]\n\n'+
+
+    (edificioActual?'Edificio actual: '+edificioActual+'\n':'');
+
+  try{
+    // Construir mensajes con system prompt como contexto inicial
+    // compatible con el proxy existente del Apps Script
+    var mensajesConCtx=claudiaHistorial.slice(); // copia
+    var resp=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        _method:'CLAUDE_PROXY',
+        system: systemPrompt,
+        messages: mensajesConCtx
+      })
+    });
+    var data=await resp.json();
+    var respText=(data.content&&data.content[0]?data.content[0].text:'').trim();
+    if(!respText)throw new Error('Sin respuesta');
+
+    // Agregar respuesta al historial
+    claudiaHistorial.push({role:'assistant',content:respText});
+
+    // Mostrar en chat
+    claudiaAgregarMensaje('assistant', respText);
+
+    // Detectar si hay nota para guardar
+    var notaMatch=respText.match(/\[NOTA_MARIO:\s*(.+?)\]/);
+    if(notaMatch){
+      claudiaGuardarEnSheet('nota', notaMatch[1]);
+    } else {
+      // Guardar conversación normal en Sheet (silencioso)
+      claudiaGuardarEnSheet('chat', texto+'|||'+respText);
+    }
+
+    // Badge si panel cerrado
+    if(!claudiaPanelAbierto){
+      var badge=document.getElementById('claudia-fab-badge');
+      if(badge)badge.style.display='block';
+    }
+
+  }catch(e){
+    claudiaAgregarMensaje('assistant','❌ No pude conectarme ahora. Revisá la señal e intentá de nuevo.');
+  }
+}
+
+async function claudiaGuardarEnSheet(tipo, contenido){
+  // Guarda silenciosamente en Chat_Asistente
+  // Si el Apps Script no tiene la función todavía, simplemente falla sin romper nada
+  try{
+    var edificio=document.getElementById('lsearch')?document.getElementById('lsearch').value:'';
+    var fecha=document.getElementById('fecha')?document.getElementById('fecha').value:'';
+    var ahora=new Date();
+    var hora=ahora.getHours()+':'+String(ahora.getMinutes()).padStart(2,'0');
+    await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        action:'appendRow',
+        sheet:'Chat_Asistente',
+        data:{
+          Fecha: fecha||ahora.toISOString().slice(0,10),
+          Hora: hora,
+          Edificio: edificio,
+          Tipo: tipo,
+          Contenido: contenido.slice(0,2000)
+        }
+      })
+    });
+  }catch(e){/* silencioso */}
+}
+
+function claudiaReiniciar(){
+  // Se llama al enviar o cancelar registro
+  claudiaHistorial=[];
+  var msgs=document.getElementById('claudia-msgs');
+  if(!msgs)return;
+  // Dejar solo el mensaje de bienvenida
+  var hijos=Array.from(msgs.children);
+  hijos.forEach(function(h){
+    if(h.id!=='claudia-bienvenida'&&h.id!=='claudia-typing')h.remove();
+  });
+  var typing=document.getElementById('claudia-typing');
+  if(typing)typing.style.display='none';
+}
+
+
 
 async function generarResumenIANota(textoMario, codigo){
   if(!textoMario||textoMario.length<20)return null;
