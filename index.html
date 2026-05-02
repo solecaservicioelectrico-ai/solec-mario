@@ -462,7 +462,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.60</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.61</span></div>
   </div>
 </div>
 
@@ -5771,7 +5771,7 @@ async function guardarParcial(){
 
   // Armar o actualizar parcial
   var id_parcial;
-  if(parcialActivo&&parcialActivo.edificio===lnom){
+  if(parcialActivo&&nn(parcialActivo.edificio)===nn(lnom)){
     // Continúa un parcial existente
     id_parcial=parcialActivo.id;
     parcialActivo.jornadas.push(jornada);
@@ -5793,7 +5793,7 @@ async function guardarParcial(){
       data:{
         ID_Parcial:id_parcial,
         Edificio:lnom,
-        CUIT:cuit,
+        Cuit:cuit,
         Tipo:tipoVisita,
         Estado:'Parcial',
         Jornadas:JSON.stringify(parcialActivo.jornadas),
