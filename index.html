@@ -3631,7 +3631,7 @@ function updCnt(){
   document.getElementById('ivCnt').textContent=n+(n===1?' intervención':' intervenciones');
 }
 
-
+function selCat(id,catk,el){
   el.closest('.catg').querySelectorAll('.cb').forEach(function(b){b.classList.remove('on');});el.classList.add('on');
   // Ocultar visita técnica por intervención si estaba abierta
   var vtIvWrap=document.getElementById(id+'-vt-wrap');if(vtIvWrap)vtIvWrap.style.display='none';
