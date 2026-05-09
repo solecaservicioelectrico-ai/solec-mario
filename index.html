@@ -93,7 +93,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .iv-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--am);}
 .iv-cnt{background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:800;color:var(--am);}
 /* INTERV CARD */
-.ivc{background:var(--s1);border:1px solid var(--borde);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.ivc{background:var(--s2);border:1.5px solid var(--borde);border-radius:var(--r);margin-bottom:10px;padding:14px;}
 .iv-top{background:var(--s2);padding:12px 15px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--borde);cursor:pointer;}
 .iv-num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--am);min-width:28px;line-height:1;}
 .iv-sum{flex:1;font-size:14px;color:var(--t2);font-weight:600;}
@@ -462,7 +462,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.65</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.68</span></div>
   </div>
 </div>
 
@@ -3218,7 +3218,6 @@ function getCond(t){var d={sucio:.15,acceso:.20,extra:.25};return d[t]||0;}
 function buildIv(num,id){
   var div=document.createElement('div');
   div.className='ivc';div.id=id;
-  div.style.cssText='background:var(--s2);border:1.5px solid var(--borde);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;';
 
   // TARJETA — igual al prototipo
   var top=document.createElement('div');
@@ -3553,7 +3552,15 @@ function buildIv(num,id){
   fields.appendChild(ires);
 
   body.appendChild(fields);
-  div.appendChild(body);
+  // El body NO va dentro de la tarjeta — va en contenedor oculto separado
+  var hiddenStore=document.getElementById('iv-bodies-store');
+  if(!hiddenStore){
+    hiddenStore=document.createElement('div');
+    hiddenStore.id='iv-bodies-store';
+    hiddenStore.style.display='none';
+    document.body.appendChild(hiddenStore);
+  }
+  hiddenStore.appendChild(body);
   return div;
 }
 
@@ -3570,8 +3577,6 @@ function nuevaIv(){
   ivCount++;var id='iv'+ivCount;
   ivList.push({id:id,data:{}});
   var div=buildIv(ivCount,id);
-  // Guardar referencia pero NO agregar al ivList DOM todavía
-  div.style.display='none';
   document.getElementById('ivList').appendChild(div);
   updCnt();
   abrirIvScreen(id,'NUEVA INTERVENCIÓN');
@@ -3630,22 +3635,22 @@ function cerrarIvScreen(){
   var id=_ivScreenActual;
   if(!id)return;
   var screen=document.getElementById('iv-screen');
-  var body=document.getElementById('iv-screen-body');
+  var bodyEl=document.getElementById('iv-screen-body');
 
-  // Devolver el body de la intervención a su lugar original
-  var ivDiv=document.getElementById(id);
+  // Devolver el body al store oculto
   var ivBody=document.getElementById(id+'-b');
-  if(ivDiv&&ivBody){
-    ivDiv.appendChild(ivBody);
+  var hiddenStore=document.getElementById('iv-bodies-store');
+  if(ivBody&&hiddenStore){
+    hiddenStore.appendChild(ivBody);
     ivBody.style.display='none';
   }
 
-  // Actualizar la tarjeta resumen en el formulario principal
+  // Actualizar la tarjeta resumen
   updR(id);
   updRTotal();
 
-  screen.style.display='none';
-  body.innerHTML='';
+  screen.style.cssText='display:none;';
+  if(bodyEl)bodyEl.innerHTML='';
   document.body.style.overflow='';
   _ivScreenActual=null;
 }
