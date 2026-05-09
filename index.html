@@ -462,7 +462,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="hdr-r">
     <button class="btn-hist" id="btnHist" onclick="togVista()">📋 Historial</button>
     <button class="btn-hist" id="btnRefresh" onclick="actualizarDatos()" title="Actualizar datos">🔄</button>
-    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.64</span></div>
+    <div class="htime"><span class="hh" id="reloj">--:--</span><span id="fhdr">--</span><span style="font-size:10px;color:var(--t3);margin-left:4px;">v3.65</span></div>
   </div>
 </div>
 
@@ -3218,24 +3218,50 @@ function getCond(t){var d={sucio:.15,acceso:.20,extra:.25};return d[t]||0;}
 function buildIv(num,id){
   var div=document.createElement('div');
   div.className='ivc';div.id=id;
+  div.style.cssText='background:var(--s2);border:1.5px solid var(--borde);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;';
 
-  // TOP — tarjeta resumen tocable
+  // TARJETA — igual al prototipo
   var top=document.createElement('div');
-  top.className='iv-top';
-  top.style.cssText='cursor:pointer;';
-  top.innerHTML=
-    '<div class="iv-num">'+num+'</div>'+
-    '<div style="flex:1;">'+
-      '<div class="iv-sum" id="'+id+'-s" style="font-size:15px;font-weight:700;">Tocar para completar...</div>'+
-      '<div id="'+id+'-det" style="font-size:12px;color:var(--t3);margin-top:2px;font-weight:600;"></div>'+
-    '</div>'+
-    '<span style="font-size:13px;color:var(--azul);font-weight:800;white-space:nowrap;">✏️ EDITAR</span>';
-  var brem=document.createElement('button');
-  brem.className='brem';brem.textContent='✕';
-  brem.style.cssText='margin-left:10px;';
-  brem.addEventListener('click',function(e){e.stopPropagation();remIv(id);});
-  top.addEventListener('click',function(){togIv(id);});
-  top.appendChild(brem);
+  top.id=id+'-top';
+
+  // Categoría label
+  var catLabel=document.createElement('div');
+  catLabel.id=id+'-cat-label';
+  catLabel.style.cssText='font-family:"Bebas Neue",sans-serif;font-size:13px;letter-spacing:2px;color:var(--am);margin-bottom:4px;';
+  catLabel.textContent='⚡ NUEVA INTERVENCIÓN';
+  top.appendChild(catLabel);
+
+  // Resumen principal
+  var sumEl=document.createElement('div');
+  sumEl.className='iv-sum';
+  sumEl.id=id+'-s';
+  sumEl.style.cssText='font-size:15px;font-weight:700;color:var(--t);margin-bottom:4px;';
+  sumEl.textContent='Tocar EDITAR para completar...';
+  top.appendChild(sumEl);
+
+  // Detalle (ubicación, modificadores)
+  var detEl=document.createElement('div');
+  detEl.id=id+'-det';
+  detEl.style.cssText='font-size:13px;color:var(--t3);font-weight:600;';
+  top.appendChild(detEl);
+
+  // Botones Editar / Eliminar
+  var actions=document.createElement('div');
+  actions.style.cssText='display:flex;gap:8px;margin-top:10px;';
+
+  var btnEdit=document.createElement('button');
+  btnEdit.style.cssText='flex:1;padding:10px;border-radius:8px;border:1px solid var(--borde);background:var(--s3);color:var(--t2);font-size:14px;font-weight:700;cursor:pointer;';
+  btnEdit.innerHTML='✏️ Editar';
+  btnEdit.addEventListener('click',function(e){e.stopPropagation();togIv(id);});
+
+  var btnDel=document.createElement('button');
+  btnDel.style.cssText='flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,71,87,.3);background:var(--s3);color:var(--rojo);font-size:14px;font-weight:700;cursor:pointer;';
+  btnDel.innerHTML='🗑️ Eliminar';
+  btnDel.addEventListener('click',function(e){e.stopPropagation();remIv(id);});
+
+  actions.appendChild(btnEdit);
+  actions.appendChild(btnDel);
+  top.appendChild(actions);
   div.appendChild(top);
 
   // BODY
@@ -5216,6 +5242,14 @@ function updR(id){
   if(nota)lin+=' · "'+nota.slice(0,300)+'"';
   iv.data=Object.assign(iv.data,{ev:ev,comp:comp,ub:ub,nota:nota,total:cst.total,lin:lin,mtxt:mtxt});
   if(s){s.textContent=(lin+mtxt).slice(0,72)+((lin+mtxt).length>72?'…':'');s.classList.add('ok');}
+  // Actualizar cat-label con categoría real
+  var catLabelEl=document.getElementById(id+'-cat-label');
+  if(catLabelEl&&iv&&iv.data&&iv.data.catk){
+    var CATS_UPD=(catsDinamicas.length?buildCATSdesdeDinamicas():null)||CATS;
+    var catNomUpd=CATS_UPD[iv.data.catk]?CATS_UPD[iv.data.catk].l:'';
+    var catEmoji=CATS_UPD[iv.data.catk]?CATS_UPD[iv.data.catk].e:'⚡';
+    catLabelEl.textContent=catEmoji+' '+catNomUpd.toUpperCase()+(iv.data.sc?' → '+iv.data.sc.toUpperCase():'');
+  }
   // Actualizar detalle de ubicación y modificadores en la tarjeta
   var detEl=document.getElementById(id+'-det');
   if(detEl){
